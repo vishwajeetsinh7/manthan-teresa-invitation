@@ -58,6 +58,60 @@ export function CornerVine() {
   );
 }
 
+/**
+ * Vine for the bottom-right drape: runs just outside its free edge, follows
+ * the tail under the fold and ends tucked into the right edge (no cut).
+ * Same 178-wide box as the drape ("br" shape); y = 214 is the screen bottom.
+ */
+export function TailVine() {
+  const stems = [
+    "M170 -6 C156 24 134 52 108 76 C72 110 20 146 -2 190 C-18 222 18 266 90 292 C126 304 156 308 178 312",
+    "M108 76 C112 64 124 60 130 66 C134 71 129 77 124 74",
+    "M44 128 C36 120 26 124 26 132 C26 138 33 140 36 135",
+    "M-6 236 C-16 240 -18 252 -10 254 C-4 256 -1 249 -5 246",
+    "M58 282 C56 294 64 302 72 298",
+    "M140 40 C150 34 158 40 154 48",
+  ];
+  const leaves: [number, number, number, number][] = [
+    [152, 26, -150, 0.85],
+    [128, 54, -40, 0.75],
+    [92, 92, -160, 1],
+    [66, 110, -60, 0.85],
+    [30, 144, -170, 0.9],
+    [10, 172, -70, 0.8],
+    [-8, 212, 175, 0.9],
+    [-4, 242, 80, 0.8],
+    [30, 274, 150, 0.95],
+    [64, 288, 50, 0.8],
+    [112, 302, 160, 0.85],
+    [146, 308, 70, 0.75],
+  ];
+  const dots: [number, number][] = [
+    [124, 74],
+    [36, 135],
+    [-5, 246],
+    [72, 298],
+    [154, 48],
+  ];
+  return (
+    <svg viewBox="0 0 178 312" aria-hidden>
+      <g fill="none" stroke={GOLD} strokeLinecap="round">
+        {stems.map((d, i) => (
+          <path key={i} className="draw" d={d} strokeWidth={i === 0 ? 1.5 : 1.05} />
+        ))}
+      </g>
+      {leaves.map(([x, y, r, s], i) => (
+        <g key={i} transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`}>
+          <path className="pop" d={LEAF} fill={GOLD_LIGHT} fillOpacity="0.55" stroke={GOLD} strokeWidth="0.9" />
+        </g>
+      ))}
+      {dots.map(([x, y], i) => (
+        <circle key={i} className="pop" cx={x} cy={y} r="2" fill={GOLD} />
+      ))}
+    </svg>
+  );
+}
+
 /** Divider with a centre diamond; both lines draw outward from the centre. */
 export function Divider({ className = "divider" }: { className?: string }) {
   return (

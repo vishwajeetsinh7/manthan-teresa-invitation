@@ -6,18 +6,19 @@ import { invitation as C } from "@/src/content/invitation";
 import { timing } from "@/src/config/timing";
 import { assets } from "@/src/config/assets";
 import { AssetImage } from "./AssetImage";
+import { VelvetDefs, VelvetDrape } from "./art/VelvetDrape";
 import {
-  VelvetDrape,
   SealPlaceholder,
   FlowerBudPlaceholder,
   FlowerOpenPlaceholder,
   LeafPlaceholder,
 } from "./art/Placeholders";
-import { CornerVine, Divider, Flourish, Chevron } from "./art/LineArt";
+import { CornerVine, TailVine, Divider, Flourish, Chevron } from "./art/LineArt";
 import { Petals } from "./Petals";
 import { GoldDust } from "./GoldDust";
 
 const u = (n: number) => `calc(var(--u) * ${n})`;
+const V = timing.velvet;
 /** leaf image frame is 420 × 800 (stem at bottom-centre) */
 const LEAF_RATIO = 420 / 800;
 /** how far leaves reach out from under their flower (1 = lengths as listed) */
@@ -137,6 +138,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         gsap.set(q(".seal-shadow"), { opacity: 1 });
         gsap.set(q(".flower-leaf"), { xPercent: -50, rotation: rotOf });
         gsap.set(q(".flower-bloom, .rosebud"), { rotation: rotOf });
+        gsap.set(q(".date-gem"), { rotation: 45 });
         gsap.set(q(".wipe"), { "--wipe": "0%" });
         gsap.set(q(".scroll-hint"), { opacity: 1 });
         gsap.fromTo(root, { opacity: 0 }, { opacity: 1, duration: R.reducedFade });
@@ -176,6 +178,12 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       gsap.set(q(".fade-up"), { opacity: 0, y: 12, filter: "blur(4px)" });
       gsap.set(q(".joiner-word"), { opacity: 0, y: 6 });
       gsap.set(q(".scroll-hint"), { opacity: 0, y: 8 });
+      gsap.set(q(".date-month"), { opacity: 0, y: 8 });
+      gsap.set(q(".date-rule"), { scaleX: 0 });
+      gsap.set(q(".date-num"), { yPercent: 110 });
+      gsap.set(q(".date-wk"), { opacity: 0, y: 4 });
+      gsap.set(q(".date-gem"), { scale: 0, rotation: 0 });
+      gsap.set(q(".venue"), { opacity: 0, y: 10, filter: "blur(4px)" });
 
       // "TOGETHER WITH OUR FAMILIES": tracking tightens 0.6em → 0.25em,
       // done with transforms on each letter (no layout during animation)
@@ -280,22 +288,19 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       drawDivider(".divider-2", R.divider2.at, R.divider2.dur);
       fadeUp(".invite", R.invite.at, R.invite.dur);
       write(".tagline-wipe", R.tagline.at, R.tagline.write);
-      fadeUp(".detail", R.details.at, R.details.dur, R.details.stagger);
+      // ~9s  date block: rules draw out from the month, numbers rise in one by one
+      const Dt = R.details;
+      tl.to(q(".date-month"), { opacity: 1, y: 0, duration: Dt.dur, ease: "power2.out" }, Dt.at);
+      tl.to(q(".date-rule"), { scaleX: 1, duration: Dt.dur, ease: "power3.out" }, Dt.at + 0.1);
+      tl.to(q(".date-num"), { yPercent: 0, duration: Dt.dur, ease: "power4.out", stagger: Dt.stagger }, Dt.at + 0.25);
+      tl.to(q(".date-wk"), { opacity: 1, y: 0, duration: 0.6, stagger: Dt.stagger }, Dt.at + 0.45);
+      tl.to(q(".date-gem"), { scale: 1, rotation: 45, duration: 0.5, ease: "back.out(3)", stagger: Dt.stagger }, Dt.at + 0.5);
+      tl.to(q(".venue"), { opacity: 1, y: 0, filter: "blur(0px)", duration: Dt.dur, ease: "power2.out" }, Dt.at + 0.75);
       tl.to(q(".scroll-hint"), { opacity: 1, y: 0, duration: R.scrollHint.dur }, R.scrollHint.at);
-      tl.set(q(".fade-up"), { clearProps: "filter" });
+      tl.set(q(".fade-up, .venue"), { clearProps: "filter" });
 
       /* ── Ambient loop ── */
       const cleanups: (() => void)[] = [];
-
-      const startSway = contextSafe!(() => {
-        q(".drape-sway").forEach((el, i) => {
-          const dir = i === 0 ? 1 : -1;
-          gsap
-            .timeline({ repeat: -1, yoyo: true, defaults: { ease: "sine.inOut" } })
-            .fromTo(el, { rotation: -R.drapes.swayDeg * dir }, { rotation: R.drapes.swayDeg * dir, duration: R.drapes.swayDur });
-        });
-      });
-      tl.call(startSway, undefined, R.drapes.at + R.drapes.dur);
 
       const startAmbient = contextSafe!(() => {
         setAmbient(true);
@@ -479,46 +484,38 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         {C.bride.name} &amp; {C.groom.name} — {C.dateLine}
       </h1>
 
-      {/* Paper */}
-      <div className="layer paper" data-depth="0.25" aria-hidden>
-        <div className="paper-inner">
-          <AssetImage src={assets.paper} alt="" sizes="430px" fit="cover" fallback={<div className="paper-fallback" />} />
+      {/* Paper: the same seamless sheet that continues under every section
+          below (no parallax, so the two always line up) */}
+      <div className="layer paper" aria-hidden>
+        <div className="paper-inner" />
+      </div>
+
+      {/* Velvet corners — fixed in place (no parallax); only the fabric
+          pattern flows inside them */}
+      <VelvetDefs />
+      <div className="layer drape drape-tl" aria-hidden>
+        <div className="drape-in">
+          <VelvetDrape variant="tl" tile={assets.velvetTile} tileU={V.tileU} flowSeconds={V.flowSeconds} sheenSeconds={V.sheenSeconds} />
+        </div>
+      </div>
+      <div className="layer drape drape-br" aria-hidden>
+        <div className="drape-in">
+          <VelvetDrape variant="br" tile={assets.velvetTile} tileU={V.tileU} flowSeconds={V.flowSeconds} sheenSeconds={V.sheenSeconds} />
         </div>
       </div>
 
-      {/* Velvet drapes — the envelope's own fabric */}
-      <div className="layer drape drape-tl" data-depth="1" aria-hidden>
-        <div className="drape-in">
-          <div className="drape-sway">
-            <AssetImage src={assets.drapeTopLeft} alt="" sizes="220px" fallback={<VelvetDrape texture={assets.velvetTexture} />} />
-          </div>
-        </div>
-      </div>
-      <div className="layer drape drape-br" data-depth="1" aria-hidden>
-        <div className="drape-in">
-          <div className="drape-sway">
-            <AssetImage
-              src={assets.drapeBottomRight}
-              alt=""
-              sizes="220px"
-              fallback={<VelvetDrape flip texture={assets.velvetTexture} />}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Gold vines */}
-      <div className="layer vine vine-tl" data-depth="0.7" aria-hidden>
+      {/* Gold vines (hug the drapes, so they stay fixed too) */}
+      <div className="layer vine vine-tl" aria-hidden>
         <CornerVine />
       </div>
-      <div className="layer vine vine-br" data-depth="0.7" aria-hidden>
-        <CornerVine />
+      <div className="layer vine vine-br" aria-hidden>
+        <TailVine />
       </div>
 
       {ambient && !reduced && <GoldDust count={timing.ambient.dustParticles} />}
 
       {/* Corner flowers */}
-      <div className="corner-cluster corner-bl layer" data-depth="0.85" aria-hidden>
+      <div className="corner-cluster corner-bl layer" aria-hidden>
         {CORNER_BUDS.map((b, i) => (
           <Bud key={`b${i}`} spec={b} />
         ))}
@@ -526,7 +523,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
           <Flower key={i} spec={f} />
         ))}
       </div>
-      <div className="corner-cluster corner-br layer" data-depth="0.85" aria-hidden>
+      <div className="corner-cluster corner-br layer" aria-hidden>
         {CORNER_BUDS_BR.map((b, i) => (
           <Bud key={`b${i}`} spec={b} />
         ))}
@@ -593,8 +590,36 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
 
         <span className="grow" />
         <div className="details">
-          <p className="date fade-up detail">{C.dateLine}</p>
-          <p className="venue fade-up detail">{C.venueLine}</p>
+          <p className="sr-only">{C.dateLine}</p>
+          <div className="date-block" aria-hidden>
+            <div className="date-head">
+              <span className="date-rule" />
+              <span className="date-month">
+                {C.dates.month} <span className="date-dot">·</span> {C.dates.year}
+              </span>
+              <span className="date-rule" />
+            </div>
+            <div className="date-days">
+              {C.dates.days.map((d, i) => (
+                <div key={d.day} className="date-day-wrap">
+                  {i > 0 && <span className="date-gem" />}
+                  <div className="date-day">
+                    <span className="date-wk">{d.weekday}</span>
+                    <span className="date-num-mask">
+                      <span className="date-num">{d.day}</span>
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <p className="venue">
+            <svg className="venue-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+              <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z" />
+              <circle cx="12" cy="9.5" r="2.4" />
+            </svg>
+            {C.venueLine}
+          </p>
         </div>
         <span className="grow" />
         <button type="button" className="scroll-hint" onClick={onScrollHint} aria-label="Scroll to event details">

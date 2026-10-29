@@ -188,6 +188,97 @@ async function plain(job, srcPath) {
   return { outPath, kb: res.size / 1024 };
 }
 
+/* ── Seamless tiles ────────────────────────────────────────────────────
+ * makeSeamless(): roll the image by half a tile (so its old edges meet in
+ * the middle, and its new edges are continuous), then paint the original —
+ * which is continuous in the middle — back over a feathered band along the
+ * middle lines. Result wraps with no seam and keeps the natural pattern
+ * (no mirroring).                                                        */
+function makeSeamless(src, w, h, c, { x = true, y = true, core = 8, feather = 70 }) {
+  const out = Buffer.alloc(src.length);
+  const smooth = (d) => {
+    if (d <= core) return 1;
+    if (d >= core + feather) return 0;
+    const t = 1 - (d - core) / feather;
+    return t * t * (3 - 2 * t);
+  };
+  const ox = x ? w >> 1 : 0;
+  const oy = y ? h >> 1 : 0;
+  for (let j = 0; j < h; j++) {
+    const my = y ? smooth(Math.abs(j - h / 2)) : 0;
+    const sj = (j + oy) % h;
+    for (let i = 0; i < w; i++) {
+      const m = Math.max(my, x ? smooth(Math.abs(i - w / 2)) : 0);
+      const si = (i + ox) % w;
+      const a = (j * w + i) * c; // original (continuous in the middle)
+      const b = (sj * w + si) * c; // rolled (continuous at the edges)
+      for (let k = 0; k < c; k++) out[a + k] = Math.round(src[b + k] * (1 - m) + src[a + k] * m);
+    }
+  }
+  return out;
+}
+
+/** Even out slow light falloff/vignette so a repeating tile shows no bands. */
+function flatten(src, blurred, n, c) {
+  let mean = [0, 0, 0];
+  for (let p = 0; p < n; p++) for (let k = 0; k < 3; k++) mean[k] += blurred[p * c + k];
+  mean = mean.map((m) => m / n);
+  const out = Buffer.alloc(src.length);
+  for (let p = 0; p < n; p++)
+    for (let k = 0; k < c; k++) {
+      const i = p * c + k;
+      out[i] = k < 3 ? Math.max(0, Math.min(255, Math.round((src[i] * mean[k]) / Math.max(1, blurred[i])))) : src[i];
+    }
+  return out;
+}
+
+async function rawOf(img) {
+  return img.removeAlpha().raw().toBuffer({ resolveWithObject: true });
+}
+
+/**
+ * Velvet tile that flows inside the corner drapes (square).
+ * Source: a raw image named "velvet…" if present, else the envelope's
+ * seam-free top flap from the video poster.
+ */
+async function velvetTile() {
+  const raw = find(/^velvet/i);
+  const S = 1024;
+  const base = raw
+    ? sharp(raw).resize(S, S, { fit: "cover", kernel: "lanczos3" })
+    : sharp("public/assets/video/envelope-poster.webp").extract({ left: 200, top: 0, width: 320, height: 320 }).resize(S, S);
+  const { data, info } = await rawOf(base);
+  const seamless = makeSeamless(data, info.width, info.height, info.channels, { core: 6, feather: 90 });
+  const out = join(OUT, "velvet/velvet-tile.webp");
+  mkdirSync(dirname(out), { recursive: true });
+  const res = await sharp(seamless, { raw: { width: info.width, height: info.height, channels: info.channels } })
+    .webp({ quality: 80 })
+    .toFile(out);
+  console.log(`${(raw ? clean(basename(raw)) : "envelope poster").padEnd(28)} → ${out}  ${S}×${S}  ${(res.size / 1024).toFixed(0)} KB (seamless)`);
+}
+
+/**
+ * Paper that repeats down the whole page with no seam and no banding:
+ * flatten its lighting, then make it seamless top-to-bottom.
+ */
+async function paperTile() {
+  const raw = find(/^paper/i);
+  const src = raw ?? "public/assets/bg/paper.webp";
+  const W = 1080;
+  const H = 1920;
+  const img = sharp(src).resize(W, H, { fit: "cover", kernel: "lanczos3" });
+  const { data, info } = await rawOf(img.clone());
+  const { data: blur } = await rawOf(sharp(data, { raw: { width: W, height: H, channels: info.channels } }).blur(90));
+  const flat = flatten(data, blur, W * H, info.channels);
+  const seamless = makeSeamless(flat, W, H, info.channels, { x: false, y: true, core: 10, feather: 160 });
+  const out = join(OUT, "bg/paper-tile.webp");
+  mkdirSync(dirname(out), { recursive: true });
+  const res = await sharp(seamless, { raw: { width: W, height: H, channels: info.channels } }).webp({ quality: 80 }).toFile(out);
+  console.log(`${(raw ? clean(basename(raw)) : "paper.webp").padEnd(28)} → ${out}  ${W}×${H}  ${(res.size / 1024).toFixed(0)} KB (seamless vertically)`);
+}
+
+await velvetTile();
+
 const done = [];
 for (const job of [...JOBS, ...PLAIN]) {
   const srcPath = find(job.src);
@@ -197,6 +288,7 @@ for (const job of [...JOBS, ...PLAIN]) {
   if (!PLAIN.includes(job)) done.push(outPath);
 }
 if (!done.length) console.log("No matching source files found.");
+await paperTile();
 
 if (PREVIEW && done.length) {
   // contact sheet on cream, to spot any remaining halo

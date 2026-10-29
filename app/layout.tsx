@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Pinyon_Script } from "next/font/google";
 import { invitation } from "@/src/content/invitation";
 import { assets } from "@/src/config/assets";
+import { defaultThemeColor } from "@/src/config/moods";
 import "./globals.css";
 
 const script = Pinyon_Script({
@@ -45,7 +46,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#4A0A12",
+  themeColor: defaultThemeColor,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

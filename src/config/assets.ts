@@ -12,11 +12,13 @@ export const assets = {
     poster: `${A}/video/envelope-poster.webp`,
   },
   paper: `${A}/bg/paper.webp`,
-  /** Optional ready-made drapes; otherwise drapes are cut from velvetTexture */
-  drapeTopLeft: `${A}/velvet/drape-top-left.png`,
-  drapeBottomRight: `${A}/velvet/drape-bottom-right.png`,
-  /** Seam-free crop of the envelope's own velvet (from the video poster) */
-  velvetTexture: `${A}/velvet/velvet-texture.webp`,
+  /** seamless (top-to-bottom) version used for the whole page — referenced in globals.css */
+  paperTile: `${A}/bg/paper-tile.webp`,
+  /**
+   * Seamless velvet tile that flows inside the corner drapes.
+   * Made by scripts/prepare-assets.mjs (from a raw "velvet…" image, or the envelope).
+   */
+  velvetTile: `${A}/velvet/velvet-tile.webp`,
   seal: `${A}/seal/wax-seal-tm.png`,
   /** 1 burgundy rose · 2 blush rose · 3 ivory rose · 4 raspberry ranunculus */
   flowers: [1, 2, 3, 4].map((n) => `${A}/flowers/flower-${n}-open.png`),

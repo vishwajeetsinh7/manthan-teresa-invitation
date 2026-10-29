@@ -81,5 +81,13 @@ petals 1–3, paper texture, velvet texture for the drapes (cut from the video).
 Flowers no longer need bud images — they unfurl from the centre.
 
 Still missing: music, real QR.
-Drape PNGs are optional now (the drapes use the envelope's own velvet).
+
+### Velvet corners
+
+The corner drapes are fixed in place (no parallax). Inside them a seamless velvet
+tile (`public/assets/velvet/velvet-tile.webp`) flows endlessly into the corner,
+with a soft sheen passing over it. Speed: `timing.velvet` in `src/config/timing.ts`.
+The tile is made seamless automatically by mirroring: drop a raw image whose name
+starts with `velvet` into your raw folder and run the prepare script. Without one,
+it is cut from the envelope in the video.
 Reference image `public/assets/reference.png` was not in the repo — the layout was designed from the brief and the video.

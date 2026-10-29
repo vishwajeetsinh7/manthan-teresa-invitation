@@ -9,6 +9,7 @@ import { TapScene, VideoScene } from "./IntroScenes";
 import { RevealCard } from "./RevealCard";
 import { Sections } from "./Sections";
 import { DesktopNote } from "./DesktopNote";
+import { moods, type MoodName } from "@/src/config/moods";
 
 type Phase = "tap" | "video" | "reveal";
 
@@ -136,6 +137,11 @@ export function Invitation() {
             </>
           )}
         </div>
+
+        {/* event moods: colour glow driven by scroll (see Sections) */}
+        {(Object.keys(moods) as MoodName[]).map((m) => (
+          <div key={m} className={`mood-glow mood-${m}`} data-mood={m} aria-hidden />
+        ))}
 
         {phase === "reveal" && (
           <div ref={controlsRef} className="controls" style={{ opacity: 0 }}>

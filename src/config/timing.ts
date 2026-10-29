@@ -29,7 +29,7 @@ export const timing = {
     // slower paper fade: it now starts while the envelope is still opening,
     // so the video's burst of light stays visible through the paper
     paper: { at: 0, fadeIn: 2.4, whiteFade: 1.2, scaleDur: 2.8, scaleFrom: 1.05 },
-    drapes: { at: 0.6, dur: 1.4, swayDeg: 1, swayDur: 6 },
+    drapes: { at: 0.6, dur: 1.4 },
     vines: { at: 1.2, dur: 1.9, leafStagger: 0.07, leafDur: 0.45 },
     seal: { at: 1.6, drop: 0.55, press: 0.35, ringDur: 1.2, sheenDelay: 0.25, sheenDur: 0.9 },
     /** each flower unfurls from its centre while turning open */
@@ -71,6 +71,16 @@ export const timing = {
     shimmerEvery: 8,
     shimmerDur: 1.6,
     parallaxPx: 6, // max shift for the deepest layer
+  },
+
+  // Velvet corners: they never move; the pattern flows inside them
+  velvet: {
+    /** size of one repeat of the velvet pattern (u ≈ px on a 390-wide phone) */
+    tileU: 210,
+    /** seconds for the pattern to travel one full repeat (bigger = slower) */
+    flowSeconds: 66,
+    /** a soft sheen glides across the fabric once per this many seconds */
+    sheenSeconds: 7,
   },
 
   // Scene 4

@@ -31,6 +31,16 @@ export const invitation = {
   tagline: "Two Traditions, One Journey",
 
   dateLine: "23 – 25 May 2027",
+  /** The date block on the card */
+  dates: {
+    month: "May",
+    year: "2027",
+    days: [
+      { day: "23", weekday: "Sun" },
+      { day: "24", weekday: "Mon" },
+      { day: "25", weekday: "Tue" },
+    ],
+  },
   venueLine: "The Grand Palace, Ahmedabad", // PLACEHOLDER
 
   scrollHint: "Scroll",
@@ -40,33 +50,47 @@ export const invitation = {
 
   /** Scene 4: events (PLACEHOLDER content). */
   eventsHeading: "Celebrations",
+  /**
+   * `mood` (optional) recolours the whole page while that event is on screen —
+   * see src/config/moods.ts. Only "haldi" exists for now.
+   */
   events: [
     {
       day: "23",
       month: "May",
       weekday: "Sunday",
-      title: "Mehendi & Sangeet",
-      time: "5:00 PM onwards",
-      place: "Garden Lawns",
-      note: "Festive colours",
+      title: "Mehndi",
+      time: "9:00 AM – 11:00 AM",
+      place: "Garden Lawns", // PLACEHOLDER
+      note: "Festive colours", // PLACEHOLDER
     },
     {
       day: "24",
       month: "May",
       weekday: "Monday",
-      title: "Haldi & Hindu Wedding",
-      time: "10:00 AM onwards",
-      place: "The Grand Palace",
-      note: "Traditional Indian",
+      title: "Haldi",
+      time: "10:00 AM onwards", // PLACEHOLDER
+      place: "The Grand Palace", // PLACEHOLDER
+      note: "Wear yellow",
+      mood: "haldi",
+    },
+    {
+      day: "24",
+      month: "May",
+      weekday: "Monday",
+      title: "Hindu Wedding", // PLACEHOLDER
+      time: "6:00 PM onwards", // PLACEHOLDER
+      place: "The Grand Palace", // PLACEHOLDER
+      note: "Traditional Indian", // PLACEHOLDER
     },
     {
       day: "25",
       month: "May",
       weekday: "Tuesday",
-      title: "Church Wedding & Reception",
-      time: "4:00 PM onwards",
-      place: "St. Mary's Church",
-      note: "Formal / Gowns & Suits",
+      title: "Church Wedding & Reception", // PLACEHOLDER
+      time: "4:00 PM onwards", // PLACEHOLDER
+      place: "St. Mary's Church", // PLACEHOLDER
+      note: "Formal / Gowns & Suits", // PLACEHOLDER
     },
   ],
 

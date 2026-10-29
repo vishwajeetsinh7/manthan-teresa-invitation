@@ -8,6 +8,7 @@ import { assets } from "@/src/config/assets";
 import { AssetImage } from "./AssetImage";
 import { Divider } from "./art/LineArt";
 import { FlowerOpenPlaceholder } from "./art/Placeholders";
+import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 
 function Countdown() {
   const target = new Date(C.countdownTo).getTime();
@@ -52,6 +53,15 @@ function CornerBloom({ kind }: { kind: number }) {
 export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTMLDivElement | null>; enabled: boolean }) {
   const root = useRef<HTMLDivElement>(null);
 
+  // leaving (e.g. replay intro) always restores the normal top-bar colour
+  useEffect(
+    () => () => {
+      const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+      if (meta) meta.content = defaultThemeColor;
+    },
+    [],
+  );
+
   useGSAP(
     () => {
       if (!enabled || !scrollerRef.current) return;
@@ -59,6 +69,44 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const q = gsap.utils.selector(root);
       const D = timing.sections;
+
+      /* Event moods (e.g. Haldi): the page glows in the event's colour while
+         it is on screen, and the phone's top bar follows. Scroll-linked, so it
+         also runs with reduced motion (nothing moves, only colour fades). */
+      const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+      let currentTheme = meta?.content ?? defaultThemeColor;
+      const setTheme = (c: string) => {
+        if (meta && c !== currentTheme) {
+          meta.content = c;
+          currentTheme = c;
+        }
+      };
+      const activeMoods = new Set<string>();
+      q("[data-mood]").forEach((el) => {
+        const name = (el as HTMLElement).dataset.mood as MoodName;
+        const glow = document.querySelector<HTMLElement>(`.mood-glow[data-mood="${name}"]`);
+        if (!glow || !moods[name]) return;
+        gsap
+          .timeline({
+            scrollTrigger: {
+              trigger: el,
+              scroller,
+              start: "top 92%",
+              end: "bottom 8%",
+              scrub: 0.6,
+              onUpdate: (self) => {
+                // bar turns yellow while the glow is mostly in
+                const inside = self.progress > 0.2 && self.progress < 0.8;
+                if (inside) activeMoods.add(name);
+                else activeMoods.delete(name);
+                setTheme(activeMoods.size ? moods[[...activeMoods][0] as MoodName].themeColor : defaultThemeColor);
+              },
+            },
+          })
+          .fromTo(glow, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" })
+          .to(glow, { opacity: 1, duration: 0.4 })
+          .to(glow, { opacity: 0, duration: 0.3, ease: "power1.in" });
+      });
 
       if (reduce) return;
 
@@ -118,7 +166,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           <Divider />
         </div>
         {C.events.map((e, i) => (
-          <article key={e.title} className="event-card">
+          <article key={e.title} className="event-card" data-mood={"mood" in e ? e.mood : undefined}>
             <CornerBloom kind={[0, 1, 2][i % 3]} />
             <div className="event-date">
               <div className="event-day">{e.day}</div>
