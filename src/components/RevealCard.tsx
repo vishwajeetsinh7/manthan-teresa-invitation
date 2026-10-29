@@ -380,13 +380,21 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
             const img = it.head.querySelector("img");
             const rect = it.head.getBoundingClientRect();
             const delay = i * B.stagger;
+            // The guest may scroll before the opening animation has finished:
+            // a flower still blooming in blasts from whatever is visible, and
+            // one not shown yet just disappears quietly (no petals from nowhere).
+            const shownEl = it.bud ? it.el : (it.el.querySelector(".flower-bloom") as HTMLElement);
+            const shown = +getComputedStyle(shownEl).opacity > 0.35 && rect.width > 6;
             // swell for a beat, then the flower is gone — the canvas takes over
             gsap.killTweensOf(it.head, "scale,opacity");
             gsap
               .timeline({ delay })
-              .to(it.head, { scale: 1.16, duration: B.swell, ease: "power2.out" })
+              .to(it.head, { scale: shown ? 1.16 : 1, duration: shown ? B.swell : 0.01, ease: "power2.out" })
               .set(it.head, { opacity: 0, scale: 0.2 });
             it.leaves.forEach((lf) => {
+              // stop any opening-animation tween on the leaf so it can't
+              // bring the leaf back while the flower is gone
+              gsap.killTweensOf(lf);
               gsap.to(lf, {
                 x: rnd(-40, 40) * unit,
                 y: rnd(90, 190) * unit,
@@ -398,7 +406,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
                 overwrite: "auto",
               });
             });
-            if (img && img.complete && img.naturalWidth) {
+            if (shown && img && img.complete && img.naturalWidth) {
               sources.push({ img, rect, extras: extrasFor(it.kind), delay: delay + B.swell, small: it.bud || rect.width < 46 * unit });
             }
           });
@@ -420,6 +428,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
                 y: 0,
                 rotation: +(lf.dataset.rot ?? 0),
                 opacity: 1,
+                scale: 1,
                 duration: 0.7,
                 delay: i * 0.06 + 0.1,
                 ease: "power2.out",
@@ -445,6 +454,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
           burstActive = items.some((it) => it.blasted);
         };
         scroller.addEventListener("scroll", check, { passive: true });
+        check(); // the guest may already have scrolled
 
         // bottom-right velvet: rounds off and slides away behind the right edge (scroll-linked)
         const drape = q(".drape-br")[0] as HTMLElement | undefined;
@@ -647,7 +657,9 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         });
       });
       tl.call(startAmbient);
-      tl.call(() => startScrollBurst());
+      // armed as the invitation starts appearing (not at the end), so it
+      // works however early the guest starts scrolling
+      tl.call(() => startScrollBurst(), undefined, 0.05);
 
       tl.play(0);
       // dev only: scrub from the console, e.g. __revealTl.pause().seek(4)
