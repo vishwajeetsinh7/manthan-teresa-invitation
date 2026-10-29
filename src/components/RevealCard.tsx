@@ -17,6 +17,7 @@ import { CornerVine, TailVine, Divider, Flourish, NameFlourish, Chevron } from "
 import { Petals } from "./Petals";
 import { GoldDust } from "./GoldDust";
 import { SOFT_BLUR, isTouchDevice } from "@/src/lib/device";
+import { PetalBlast, type BlastSource } from "@/src/lib/petalBlast";
 import { imagesReady } from "@/src/lib/preload";
 
 const u = (n: number) => `calc(var(--u) * ${n})`;
@@ -327,121 +328,156 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       const cleanups: (() => void)[] = [];
 
       let burstActive = false;
-      /* ── Scroll burst ──────────────────────────────────────────────────
-         Scrolling down from the first screen, every flower swells and
-         bursts into petals of its own colour that fly out and rain down the
-         page; leaves flutter away; the bottom-right velvet rounds off and
-         slides away behind the right edge. Scrubbed to the scroll position,
-         so scrolling back up rewinds all of it exactly. */
+      /* ── Flower blast + velvet retreat ─────────────────────────────────
+         • Each flower BLASTS (real-time physics, see lib/petalBlast) when it
+           scrolls up into the top 20% of the screen: it swells, then breaks
+           into petals cut from its own photo that fly out, flutter and fall;
+           its leaves tumble away. Flowers that start in that zone (around the
+           seal) blast as soon as you start scrolling.
+         • Scroll it back down out of the zone (or back to the top) and it
+           blooms again — ready to blast again.
+         • The bottom-right velvet is scroll-linked: it rounds off and slides
+           away behind the right edge, and returns when you scroll back up. */
       const startScrollBurst = contextSafe!(() => {
         const scroller = root.closest(".scroller") as HTMLElement | null;
-        const layer = q(".burst-layer")[0] as HTMLElement | undefined;
-        if (!scroller || !layer) return;
+        const phone = root.closest(".phone") as HTMLElement | null;
+        if (!scroller || !phone) return;
         const B = timing.scrollBurst;
-        const touch = isTouchDevice();
         const unit = Math.min(root.clientWidth, root.clientHeight * 0.5625) / 390;
-        const H = root.clientHeight;
         const rnd = gsap.utils.random;
-        const box = layer.getBoundingClientRect();
-        // flower kind → petal colour (0 burgundy, 1 blush, 2 ivory, 3 raspberry→burgundy)
-        const petalFor = [assets.petals[0], assets.petals[1], assets.petals[2], assets.petals[0]];
-        const made: HTMLElement[] = [];
+        const engine = new PetalBlast(phone, isTouchDevice());
+        if (process.env.NODE_ENV !== "production") (window as unknown as { __blast: PetalBlast }).__blast = engine;
+        const petalImgs = assets.petals.map((src) => {
+          const im = new Image();
+          im.src = src;
+          return im;
+        });
+        // flower kind → loose petal colour (0 burgundy, 1 blush, 2 ivory, 3 raspberry→burgundy)
+        const extrasFor = (kind: number) => [petalImgs[[0, 1, 2, 0][kind % 4]]];
 
-        const burst = gsap.timeline({ paused: true, defaults: { ease: "none" } });
-        const items = [...q(".flower"), ...q(".rosebud")] as HTMLElement[];
-        items.forEach((el) => {
-          const isBud = el.classList.contains("rosebud");
+        type Item = { el: HTMLElement; head: HTMLElement; leaves: HTMLElement[]; homeY: number; kind: number; bud: boolean; blasted: boolean };
+        const scrollTop0 = scroller.scrollTop;
+        const sTop = scroller.getBoundingClientRect().top;
+        const items: Item[] = ([...q(".flower"), ...q(".rosebud")] as HTMLElement[]).map((el) => {
+          const bud = el.classList.contains("rosebud");
           const r = el.getBoundingClientRect();
-          const cx = r.left + r.width / 2 - box.left;
-          const cy = r.top + r.height / 2 - box.top;
-          // cascade: the higher a flower sits, the sooner it bursts
-          const start = B.cascade * gsap.utils.clamp(0, 1, cy / H);
-          const kind = isBud ? 0 : +(el.dataset.kind ?? 0);
-
-          // 1) the flower swells, then pops
-          const head = isBud ? el : (el.querySelector(".flower-spin") as HTMLElement);
-          burst
-            .to(head, { scale: 1.22, duration: 0.1, ease: "power1.out" }, start)
-            .to(head, { scale: 0, opacity: 0, duration: 0.16, ease: "power2.in" }, start + 0.1);
-
-          // 2) its leaves flutter down
-          const leaves = el.querySelectorAll(".flower-leaf");
-          if (leaves.length) {
-            burst.to(
-              leaves,
-              { y: 60 * unit, rotation: "+=40", opacity: 0, duration: 0.45, ease: "power1.in", stagger: 0.03 },
-              start + 0.08,
-            );
-          }
-
-          // 3) petals fly out from the centre, then rain down the page
-          const big = r.width > 50 * unit;
-          const n = isBud ? 2 : big ? (touch ? 6 : 8) : touch ? 4 : 5;
-          for (let i = 0; i < n; i++) {
-            const p = document.createElement("img");
-            p.className = "burst-petal";
-            p.src = petalFor[kind % 4];
-            p.alt = "";
-            p.decoding = "async";
-            const size = rnd(14, 24) * unit;
-            p.style.width = `${size}px`;
-            p.style.height = `${size}px`;
-            layer.appendChild(p);
-            made.push(p);
-            gsap.set(p, { x: cx, y: cy, xPercent: -50, yPercent: -50, scale: 0, opacity: 0, rotation: rnd(0, 360) });
-
-            const ang = (i / n) * Math.PI * 2 + rnd(-0.45, 0.45);
-            const dist = rnd(0.55, 1.15) * Math.max(r.width, 30 * unit);
-            const ox = cx + Math.cos(ang) * dist;
-            const oy = cy + Math.sin(ang) * dist * 0.7;
-            const t0 = start + 0.12;
-            const fallDur = B.fallDur * rnd(0.8, 1.1);
-            burst
-              .to(p, { scale: 1, opacity: 1, duration: 0.05 }, t0)
-              .to(p, { x: ox, y: oy, rotation: `+=${rnd(-140, 140)}`, duration: 0.18, ease: "power2.out" }, t0)
-              .to(
-                p,
-                {
-                  x: ox + rnd(-50, 50) * unit,
-                  y: oy + H * B.fall * rnd(0.75, 1.1),
-                  rotation: `+=${rnd(-380, 380)}`,
-                  duration: fallDur,
-                  ease: "power1.in",
-                },
-                t0 + 0.18,
-              )
-              .to(p, { opacity: 0, duration: fallDur * 0.3 }, t0 + 0.18 + fallDur * 0.7);
-          }
+          return {
+            el,
+            bud,
+            head: bud ? el : (el.querySelector(".flower-spin") as HTMLElement),
+            leaves: [...el.querySelectorAll<HTMLElement>(".flower-leaf")],
+            // centre measured from the top of the page (independent of scroll)
+            homeY: r.top + r.height / 2 - sTop + scrollTop0,
+            kind: bud ? 0 : +(el.dataset.kind ?? 0),
+            blasted: false,
+          };
         });
 
-        // 4) bottom-right velvet: rounds off and slides away behind the right edge
+        const blast = (list: Item[]) => {
+          const sources: BlastSource[] = [];
+          list.forEach((it, i) => {
+            it.blasted = true;
+            const img = it.head.querySelector("img");
+            const rect = it.head.getBoundingClientRect();
+            const delay = i * B.stagger;
+            // swell for a beat, then the flower is gone — the canvas takes over
+            gsap.killTweensOf(it.head, "scale,opacity");
+            gsap
+              .timeline({ delay })
+              .to(it.head, { scale: 1.16, duration: B.swell, ease: "power2.out" })
+              .set(it.head, { opacity: 0, scale: 0.2 });
+            it.leaves.forEach((lf) => {
+              gsap.to(lf, {
+                x: rnd(-40, 40) * unit,
+                y: rnd(90, 190) * unit,
+                rotation: `+=${rnd(-200, 200)}`,
+                opacity: 0,
+                duration: rnd(1.1, 1.6),
+                delay: delay + B.swell,
+                ease: "power1.in",
+                overwrite: "auto",
+              });
+            });
+            if (img && img.complete && img.naturalWidth) {
+              sources.push({ img, rect, extras: extrasFor(it.kind), delay: delay + B.swell, small: it.bud || rect.width < 46 * unit });
+            }
+          });
+          if (sources.length) engine.blast(sources);
+        };
+
+        const rebloom = (list: Item[]) => {
+          list.forEach((it, i) => {
+            it.blasted = false;
+            gsap.killTweensOf(it.head, "scale,opacity");
+            gsap.fromTo(
+              it.head,
+              { opacity: 0, scale: 0.3 },
+              { opacity: 1, scale: 1, duration: 0.8, delay: i * 0.06, ease: "back.out(1.7)" },
+            );
+            it.leaves.forEach((lf) =>
+              gsap.to(lf, {
+                x: 0,
+                y: 0,
+                rotation: +(lf.dataset.rot ?? 0),
+                opacity: 1,
+                duration: 0.7,
+                delay: i * 0.06 + 0.1,
+                ease: "power2.out",
+                overwrite: "auto",
+              }),
+            );
+          });
+        };
+
+        // check on every scroll which flowers entered / left the blast zone
+        const check = () => {
+          const top = scroller.scrollTop;
+          const H = scroller.clientHeight;
+          const toBlast: Item[] = [];
+          const toBloom: Item[] = [];
+          for (const it of items) {
+            const y = it.homeY - top; // centre's position on screen
+            if (!it.blasted && y < H * B.zone && top > H * B.minScroll) toBlast.push(it);
+            else if (it.blasted && (y > H * (B.zone + B.hysteresis) || top < H * B.backAtTop)) toBloom.push(it);
+          }
+          if (toBlast.length) blast(toBlast.sort((a, b) => a.homeY - b.homeY));
+          if (toBloom.length) rebloom(toBloom);
+          burstActive = items.some((it) => it.blasted);
+        };
+        scroller.addEventListener("scroll", check, { passive: true });
+
+        // bottom-right velvet: rounds off and slides away behind the right edge (scroll-linked)
         const drape = q(".drape-br")[0] as HTMLElement | undefined;
         const vine = q(".vine-br")[0] as HTMLElement | undefined;
+        let st: ScrollTrigger | undefined;
+        let velvet: gsap.core.Timeline | undefined;
         if (drape) {
           const morph = { p: 0 };
-          const away = { x: drape.clientWidth * B.drapeAwayX, y: B.drapeAwayY * unit, rotation: B.drapeTurn };
-          burst
-            .to(morph, { p: 1, duration: 0.55, ease: "power1.inOut", onUpdate: () => morphBrDrape(drape, morph.p) }, 0.02)
-            .to([drape, vine].filter(Boolean), { ...away, duration: 0.9, ease: "power2.in" }, 0.12)
-            .set(drape, { autoAlpha: 0 }, 1.02);
-          if (vine) burst.to(vine, { opacity: 0, duration: 0.4 }, 0.02);
+          velvet = gsap
+            .timeline({ paused: true, defaults: { ease: "none" } })
+            .to(morph, { p: 1, duration: 0.55, ease: "power1.inOut", onUpdate: () => morphBrDrape(drape, morph.p) }, 0)
+            .to(
+              [drape, vine].filter(Boolean),
+              { x: drape.clientWidth * B.drapeAwayX, y: B.drapeAwayY * unit, rotation: B.drapeTurn, duration: 0.9, ease: "power2.in" },
+              0.1,
+            )
+            .set(drape, { autoAlpha: 0 }, 1);
+          if (vine) velvet.to(vine, { opacity: 0, duration: 0.4 }, 0);
+          st = ScrollTrigger.create({
+            trigger: root,
+            scroller,
+            start: "top top",
+            end: () => `+=${root.clientHeight * B.distance}`,
+            scrub: B.scrub,
+            animation: velvet,
+          });
         }
 
-        const st = ScrollTrigger.create({
-          trigger: root,
-          scroller,
-          start: "top top",
-          end: () => `+=${root.clientHeight * B.distance}`,
-          scrub: B.scrub,
-          animation: burst,
-          onUpdate: (self) => {
-            burstActive = self.progress > 0.01;
-          },
-        });
         cleanups.push(() => {
-          st.kill();
-          burst.kill();
-          made.forEach((m) => m.remove());
+          scroller.removeEventListener("scroll", check);
+          st?.kill();
+          velvet?.kill();
+          engine.destroy();
         });
       });
 
@@ -680,9 +716,6 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
           <Flower key={i} spec={f} />
         ))}
       </div>
-
-      {/* petals that flowers burst into as you scroll down (filled in by JS) */}
-      <div className="burst-layer" aria-hidden />
 
       {/* Wording */}
       <div className="content" data-depth="0.15">

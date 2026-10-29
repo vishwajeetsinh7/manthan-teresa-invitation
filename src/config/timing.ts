@@ -80,20 +80,26 @@ export const timing = {
   },
 
   /**
-   * Scroll burst (scrubbed to the scroll, reverses on scroll up): flowers
-   * burst into petals and the bottom-right velvet slides away.
+   * Flower blast + velvet retreat on scroll.
+   * A flower blasts when its centre scrolls up into the top `zone` of the
+   * screen; it blooms again once it is back below zone + hysteresis (or you
+   * are back at the top). The velvet part is scroll-linked (scrubbed).
    */
   scrollBurst: {
-    /** scroll distance it plays over, as a share of the screen height */
+    /** blast when a flower reaches the top 20% of the screen */
+    zone: 0.2,
+    /** …and bloom again only once it is this much lower (avoids flicker) */
+    hysteresis: 0.08,
+    /** flowers that start inside the zone wait for this much scrolling */
+    minScroll: 0.02,
+    /** back at the very top → everything blooms again */
+    backAtTop: 0.01,
+    /** gap between flowers that blast together, and the swell before a blast */
+    stagger: 0.07,
+    swell: 0.12,
+    /** velvet: scroll distance (share of screen height) and smoothing */
     distance: 0.85,
-    /** smoothing (seconds the animation lags behind the finger) */
     scrub: 0.6,
-    /** spread of burst start times from top flowers to bottom ones */
-    cascade: 0.15,
-    /** how far petals fall, as a share of the screen height */
-    fall: 1.1,
-    /** length of the fall part of the timeline */
-    fallDur: 0.6,
     /** velvet: slide right by this share of its width, down by this (u), and turn */
     drapeAwayX: 0.7,
     drapeAwayY: 120,
