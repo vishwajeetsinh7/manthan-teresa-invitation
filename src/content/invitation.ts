@@ -53,6 +53,9 @@ export const invitation = {
   /**
    * `mood` (optional) recolours the whole page while that event is on screen —
    * see src/config/moods.ts. Only "haldi" exists for now.
+   * `icons`: gold line icons drawn beside the event (mehndi, haldi, mandap, church, cheers).
+   * `flower`: what the travelling rose turns into on this event —
+   *   kind 0 burgundy · 1 blush · 2 ivory · 3 raspberry; tint "gold" warms it to turmeric.
    */
   events: [
     {
@@ -63,6 +66,8 @@ export const invitation = {
       time: "9:00 AM – 11:00 AM",
       place: "Garden Lawns", // PLACEHOLDER
       note: "Festive colours", // PLACEHOLDER
+      icons: ["mehndi"],
+      flower: { kind: 3 }, // raspberry — henna red
     },
     {
       day: "24",
@@ -73,6 +78,8 @@ export const invitation = {
       place: "The Grand Palace", // PLACEHOLDER
       note: "Wear yellow",
       mood: "haldi",
+      icons: ["haldi"],
+      flower: { kind: 2, tint: "gold" }, // ivory rose tinted turmeric gold
     },
     {
       day: "24",
@@ -82,6 +89,8 @@ export const invitation = {
       time: "6:00 PM onwards", // PLACEHOLDER
       place: "The Grand Palace", // PLACEHOLDER
       note: "Traditional Indian", // PLACEHOLDER
+      icons: ["mandap"],
+      flower: { kind: 0 }, // deep red bridal rose
     },
     {
       day: "25",
@@ -91,6 +100,8 @@ export const invitation = {
       time: "4:00 PM onwards", // PLACEHOLDER
       place: "St. Mary's Church", // PLACEHOLDER
       note: "Formal / Gowns & Suits", // PLACEHOLDER
+      icons: ["church", "cheers"],
+      flower: { kind: 2 }, // ivory — white wedding
     },
   ],
 

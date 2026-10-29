@@ -1076,24 +1076,83 @@ body {
   align-items: center;
   min-height: calc(var(--u) * 40);
 }
-/* rose sits right on the vine node (node centre x = 60/120 of the vine) */
-.t-bloom {
+/* The one travelling rose: centred on the vine (node x = 60/120), moved
+   down to each node with transform: translateY (set by GSAP). */
+.t-traveler {
   position: absolute;
-  left: calc(var(--thread-w) * 0.5 - var(--u) * 19);
-  top: 50%;
-  width: calc(var(--u) * 38);
-  height: calc(var(--u) * 38);
-  margin-top: calc(var(--u) * -19);
+  z-index: 3;
+  left: calc(var(--thread-w) * 0.5 - var(--u) * 21);
+  top: calc(var(--u) * -21);
+  width: calc(var(--u) * 42);
+  height: calc(var(--u) * 42);
   will-change: transform, opacity;
+}
+.t-traveler-pop,
+.t-flower {
+  position: absolute;
+  inset: 0;
+  will-change: transform, opacity;
+}
+/* "gold" tint turns the ivory rose turmeric for Haldi */
+.t-flower[data-tint="gold"] img {
+  filter: sepia(0.55) saturate(2.4) hue-rotate(-6deg) brightness(1.04);
 }
 .t-text {
   position: relative;
   isolation: isolate;
-  margin-left: calc(var(--thread-w) * 0.5 + var(--u) * 32);
-  padding-right: calc(var(--u) * 10);
+  margin-left: calc(var(--thread-w) * 0.5 + var(--u) * 34);
+  padding-right: calc(var(--u) * 58);
   display: flex;
   flex-direction: column;
   gap: calc(var(--u) * 2);
+}
+/* gold line icon(s) at the right of each event */
+.t-icons {
+  position: absolute;
+  right: calc(var(--u) * 6);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 4);
+}
+.event-icon {
+  display: block;
+  width: calc(var(--u) * 48);
+  height: calc(var(--u) * 48);
+  color: var(--gold);
+}
+.event-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.event-icon path {
+  stroke-width: 1.5;
+}
+/* focus: the event the rose sits on is full strength, others soften */
+.t-text,
+.t-icons {
+  transition: opacity 600ms ease;
+}
+.timeline.has-focus .t-event:not(.is-focus) .t-text,
+.timeline.has-focus .t-event:not(.is-focus) .t-icons {
+  opacity: 0.38;
+}
+
+/* lotus mandala divider under the Celebrations title */
+.divider.lotus-divider {
+  display: block;
+  width: calc(var(--u) * 270);
+  height: calc(var(--u) * 50.6);
+  color: var(--gold);
+}
+.lotus-divider svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 .t-date {
   font-family: var(--font-serif);

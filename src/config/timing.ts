@@ -91,6 +91,10 @@ export const timing = {
     bloomDur: 0.9,
     /** schedule event titles are written in like the names */
     titleWrite: 1.1,
+    /** gold event icon draws itself in this long */
+    iconDraw: 1.3,
+    /** the one rose that travels down the vine to the event in focus */
+    traveler: { pxPerSecond: 320, minDur: 0.7, maxDur: 1.6, roll: 0.6 },
   },
 
   music: { fadeIn: 2.5, volume: 0.55 },

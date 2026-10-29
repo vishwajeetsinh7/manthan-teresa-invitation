@@ -8,6 +8,7 @@ import { assets } from "@/src/config/assets";
 import { AssetImage } from "./AssetImage";
 import { Divider, ScheduleThread, THREAD_NODES } from "./art/LineArt";
 import { FlowerOpenPlaceholder } from "./art/Placeholders";
+import { EVENT_ICONS, LotusDivider, SvgArt, type EventIconName } from "./art/svgArt";
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 
 function Countdown() {
@@ -42,11 +43,27 @@ function Countdown() {
   );
 }
 
-/** Rose that unfurls on a vine node */
-function NodeBloom({ kind }: { kind: number }) {
+type EventFlower = { kind: number; tint?: string };
+const SCHEDULE = C.events.slice(0, THREAD_NODES.length);
+
+/**
+ * One rose that travels down the vine to whichever event is in focus,
+ * rolling as it goes and turning into that event's flower on arrival.
+ * It holds one stacked layer per event; only the focused one is visible.
+ */
+function TravellingRose() {
   return (
-    <div className="t-bloom" aria-hidden>
-      <AssetImage src={assets.flowers[kind]} alt="" sizes="80px" fallback={<FlowerOpenPlaceholder kind={kind} />} />
+    <div className="t-traveler" aria-hidden>
+      <div className="t-traveler-pop">
+        {SCHEDULE.map((e, i) => {
+          const f = ("flower" in e ? e.flower : { kind: i % 4 }) as EventFlower;
+          return (
+            <div key={i} className="t-flower" data-tint={f.tint}>
+              <AssetImage src={assets.flowers[f.kind]} alt="" sizes="80px" fallback={<FlowerOpenPlaceholder kind={f.kind} />} />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -109,6 +126,67 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           .to(glow, { opacity: 0, duration: 0.3, ease: "power1.in" });
       });
 
+      /* Travelling rose: whichever event sits in the middle of the screen is
+         "in focus". The rose rolls down (or back up) the vine to its node and
+         turns into that event's flower; the focused event is full strength,
+         the others soften. With reduced motion it simply appears there. */
+      const timeline = q(".timeline")[0] as HTMLElement | undefined;
+      const traveler = q(".t-traveler")[0] as HTMLElement | undefined;
+      if (timeline && traveler) {
+        const events = q(".t-event") as HTMLElement[];
+        const layers = q(".t-flower");
+        const pop = q(".t-traveler-pop")[0];
+        const T = timing.sections.traveler;
+        const speed = reduce ? 0 : 1;
+        let current = -1;
+        let y = 0;
+        let spin = 0;
+        gsap.set(traveler, { opacity: 0, scale: 0.3 });
+        gsap.set(layers, { opacity: 0 });
+
+        const focus = (i: number) => {
+          if (i === current) return;
+          const targetY = THREAD_NODES[i] * timeline.clientHeight;
+          events.forEach((ev, k) => ev.classList.toggle("is-focus", k === i));
+          timeline.classList.add("has-focus");
+
+          if (current < 0) {
+            // first arrival: the rose unfurls on the node
+            y = targetY;
+            gsap.set(traveler, { y });
+            gsap.set(layers[i], { opacity: 1 });
+            gsap.to(traveler, { opacity: 1, scale: 1, rotation: 0, duration: 0.9 * speed, ease: "back.out(1.6)" });
+          } else {
+            const dist = targetY - y;
+            const dur = speed * gsap.utils.clamp(T.minDur, T.maxDur, Math.abs(dist) / T.pxPerSecond);
+            // roll like a wheel: turn by the distance travelled / radius
+            spin += (dist / (traveler.clientWidth / 2)) * (180 / Math.PI) * T.roll;
+            gsap.to(traveler, { y: targetY, rotation: spin, duration: dur, ease: "power2.inOut", overwrite: "auto" });
+            layers.forEach((l, k) =>
+              gsap.to(l, { opacity: k === i ? 1 : 0, duration: dur * 0.5, delay: dur * 0.3, ease: "power1.inOut", overwrite: "auto" }),
+            );
+            // a little bloom-pulse as it settles
+            if (speed) {
+              gsap.fromTo(pop, { scale: 1 }, { scale: 1.2, duration: 0.22, delay: dur - 0.12, ease: "power2.out", yoyo: true, repeat: 1, overwrite: "auto" });
+            }
+            y = targetY;
+          }
+          current = i;
+        };
+        events.forEach((ev, i) =>
+          ScrollTrigger.create({
+            trigger: ev,
+            scroller,
+            // in focus while its centre is in the middle band of the screen
+            // (narrower than the gap between events, so only one at a time)
+            start: "center 58%",
+            end: "center 42%",
+            onEnter: () => focus(i),
+            onEnterBack: () => focus(i),
+          }),
+        );
+      }
+
       if (reduce) return;
 
       /* Schedule: the gold vine grows downward with the scroll (scrubbed),
@@ -123,31 +201,23 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         strokes.forEach((p) => grow.to(p, { drawSVG: "100%", duration: p.getTotalLength(), ease: "none" }));
       }
 
-      /* Each event, as the vine reaches it: a rose unfurls on the node, the
-         title is written in, then the details fade up. */
+      /* Each event, as the vine reaches it: the title is written in, its gold
+         icon draws itself, then the details fade up. */
       q(".t-event").forEach((ev) => {
-        const bloom = ev.querySelector(".t-bloom");
         const title = ev.querySelector(".t-title .wipe");
         const lines = ev.querySelectorAll(".t-line");
+        const strokes = ev.querySelectorAll(".event-icon .draw");
+        const dots = ev.querySelectorAll(".event-icon .dot");
         gsap.set(title, { "--wipe": "60%" });
         gsap.set(lines, { opacity: 0, y: 10, filter: "blur(3px)" });
+        gsap.set(strokes, { drawSVG: "0%" });
+        gsap.set(dots, { scale: 0, transformOrigin: "50% 50%" });
         gsap
           .timeline({ scrollTrigger: { trigger: ev, scroller, start: "top 76%", once: true } })
-          .fromTo(
-            bloom,
-            { scale: 0.25, rotation: -70, opacity: 0, clipPath: "circle(16% at 50% 50%)" },
-            {
-              scale: 1,
-              rotation: 0,
-              opacity: 1,
-              clipPath: "circle(75% at 50% 50%)",
-              duration: D.bloomDur,
-              ease: "power3.out",
-              clearProps: "clipPath",
-            },
-          )
-          .to(title, { "--wipe": "0%", duration: D.titleWrite, ease: "power1.inOut" }, 0.2)
-          .to(lines, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power2.out", stagger: 0.1, clearProps: "filter" }, 0.55);
+          .to(title, { "--wipe": "0%", duration: D.titleWrite, ease: "power1.inOut" }, 0)
+          .to(strokes, { drawSVG: "100%", duration: D.iconDraw, ease: "power1.inOut", stagger: D.iconDraw / Math.max(8, strokes.length) }, 0.15)
+          .to(dots, { scale: 1, duration: 0.3, ease: "back.out(3)", stagger: 0.04 }, 0.15 + D.iconDraw * 0.8)
+          .to(lines, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power2.out", stagger: 0.1, clearProps: "filter" }, 0.35);
       });
 
       q(".reveal-up").forEach((el) => {
@@ -161,11 +231,24 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
       });
 
       q(".divider").forEach((d) => {
+        const st = { trigger: d, scroller, start: "top 92%", once: true };
+        const lotus = d.classList.contains("lotus-divider");
         gsap.from(d.querySelectorAll(".draw"), {
           drawSVG: "0%",
-          duration: 1,
+          duration: lotus ? 1.6 : 1,
           ease: "power2.out",
-          scrollTrigger: { trigger: d, scroller, start: "top 92%", once: true },
+          // lotus strokes start at the centre and grow outward one after another
+          stagger: lotus ? 0.05 : 0,
+          scrollTrigger: st,
+        });
+        gsap.from(d.querySelectorAll(".dot"), {
+          scale: 0,
+          transformOrigin: "50% 50%",
+          duration: 0.35,
+          ease: "back.out(3)",
+          stagger: 0.06,
+          delay: lotus ? 1.2 : 0.6,
+          scrollTrigger: st,
         });
       });
 
@@ -181,20 +264,25 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           <h2 id="events-title" className="section-title">
             {C.eventsHeading}
           </h2>
-          <Divider />
+          <LotusDivider />
         </div>
         {/* The schedule hangs on a gold vine: one event per node, written
-            straight onto the paper (no boxes). */}
+            straight onto the paper (no boxes). One rose travels between them. */}
         <div className="timeline">
           <ScheduleThread />
-          {C.events.slice(0, THREAD_NODES.length).map((e, i) => (
+          <TravellingRose />
+          {SCHEDULE.map((e, i) => (
             <article
               key={e.title}
               className="t-event"
               data-mood={"mood" in e ? e.mood : undefined}
               style={{ top: `${THREAD_NODES[i] * 100}%` }}
             >
-              <NodeBloom kind={[0, 1, 2, 3][i % 4]} />
+              <div className="t-icons">
+                {("icons" in e ? (e.icons as readonly EventIconName[]) : []).map((name) => (
+                  <SvgArt key={name} svg={EVENT_ICONS[name]} className="event-icon" />
+                ))}
+              </div>
               <div className="t-text">
                 <p className="t-line t-date">
                   {e.weekday} · {e.day} {e.month}
