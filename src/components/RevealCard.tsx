@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState, useEffect, type RefObject } from "react";
-import { gsap, useGSAP, SplitText } from "@/src/lib/gsap";
+import { gsap, useGSAP, SplitText, ScrollTrigger } from "@/src/lib/gsap";
 import { invitation as C } from "@/src/content/invitation";
 import { timing } from "@/src/config/timing";
 import { assets } from "@/src/config/assets";
 import { AssetImage } from "./AssetImage";
-import { VelvetDrape } from "./art/VelvetDrape";
+import { VelvetDrape, morphBrDrape } from "./art/VelvetDrape";
 import {
   SealPlaceholder,
   FlowerBudPlaceholder,
@@ -67,7 +67,7 @@ const CORNER_BUDS_BR: BudSpec[] = CORNER_BUDS.map(mirror);
 function Flower({ spec }: { spec: FlowerSpec }) {
   const { kind, x, y, size, rot, leaves } = spec;
   return (
-    <div className="flower" style={{ left: u(x - size / 2), top: u(y - size / 2), width: u(size), height: u(size) }}>
+    <div className="flower" data-kind={kind} style={{ left: u(x - size / 2), top: u(y - size / 2), width: u(size), height: u(size) }}>
       {leaves.map((l, i) => (
         <div key={i} className="flower-leaf" data-rot={l.rot} style={{ width: u(l.len * LEAF_SCALE * LEAF_RATIO), height: u(l.len * LEAF_SCALE) }}>
           <AssetImage src={assets.leaves[l.kind]} alt="" sizes="64px" fallback={<LeafPlaceholder kind={l.kind} />} />
@@ -326,6 +326,125 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       /* ── Ambient loop ── */
       const cleanups: (() => void)[] = [];
 
+      let burstActive = false;
+      /* ── Scroll burst ──────────────────────────────────────────────────
+         Scrolling down from the first screen, every flower swells and
+         bursts into petals of its own colour that fly out and rain down the
+         page; leaves flutter away; the bottom-right velvet rounds off and
+         slides away behind the right edge. Scrubbed to the scroll position,
+         so scrolling back up rewinds all of it exactly. */
+      const startScrollBurst = contextSafe!(() => {
+        const scroller = root.closest(".scroller") as HTMLElement | null;
+        const layer = q(".burst-layer")[0] as HTMLElement | undefined;
+        if (!scroller || !layer) return;
+        const B = timing.scrollBurst;
+        const touch = isTouchDevice();
+        const unit = Math.min(root.clientWidth, root.clientHeight * 0.5625) / 390;
+        const H = root.clientHeight;
+        const rnd = gsap.utils.random;
+        const box = layer.getBoundingClientRect();
+        // flower kind → petal colour (0 burgundy, 1 blush, 2 ivory, 3 raspberry→burgundy)
+        const petalFor = [assets.petals[0], assets.petals[1], assets.petals[2], assets.petals[0]];
+        const made: HTMLElement[] = [];
+
+        const burst = gsap.timeline({ paused: true, defaults: { ease: "none" } });
+        const items = [...q(".flower"), ...q(".rosebud")] as HTMLElement[];
+        items.forEach((el) => {
+          const isBud = el.classList.contains("rosebud");
+          const r = el.getBoundingClientRect();
+          const cx = r.left + r.width / 2 - box.left;
+          const cy = r.top + r.height / 2 - box.top;
+          // cascade: the higher a flower sits, the sooner it bursts
+          const start = B.cascade * gsap.utils.clamp(0, 1, cy / H);
+          const kind = isBud ? 0 : +(el.dataset.kind ?? 0);
+
+          // 1) the flower swells, then pops
+          const head = isBud ? el : (el.querySelector(".flower-spin") as HTMLElement);
+          burst
+            .to(head, { scale: 1.22, duration: 0.1, ease: "power1.out" }, start)
+            .to(head, { scale: 0, opacity: 0, duration: 0.16, ease: "power2.in" }, start + 0.1);
+
+          // 2) its leaves flutter down
+          const leaves = el.querySelectorAll(".flower-leaf");
+          if (leaves.length) {
+            burst.to(
+              leaves,
+              { y: 60 * unit, rotation: "+=40", opacity: 0, duration: 0.45, ease: "power1.in", stagger: 0.03 },
+              start + 0.08,
+            );
+          }
+
+          // 3) petals fly out from the centre, then rain down the page
+          const big = r.width > 50 * unit;
+          const n = isBud ? 2 : big ? (touch ? 6 : 8) : touch ? 4 : 5;
+          for (let i = 0; i < n; i++) {
+            const p = document.createElement("img");
+            p.className = "burst-petal";
+            p.src = petalFor[kind % 4];
+            p.alt = "";
+            p.decoding = "async";
+            const size = rnd(14, 24) * unit;
+            p.style.width = `${size}px`;
+            p.style.height = `${size}px`;
+            layer.appendChild(p);
+            made.push(p);
+            gsap.set(p, { x: cx, y: cy, xPercent: -50, yPercent: -50, scale: 0, opacity: 0, rotation: rnd(0, 360) });
+
+            const ang = (i / n) * Math.PI * 2 + rnd(-0.45, 0.45);
+            const dist = rnd(0.55, 1.15) * Math.max(r.width, 30 * unit);
+            const ox = cx + Math.cos(ang) * dist;
+            const oy = cy + Math.sin(ang) * dist * 0.7;
+            const t0 = start + 0.12;
+            const fallDur = B.fallDur * rnd(0.8, 1.1);
+            burst
+              .to(p, { scale: 1, opacity: 1, duration: 0.05 }, t0)
+              .to(p, { x: ox, y: oy, rotation: `+=${rnd(-140, 140)}`, duration: 0.18, ease: "power2.out" }, t0)
+              .to(
+                p,
+                {
+                  x: ox + rnd(-50, 50) * unit,
+                  y: oy + H * B.fall * rnd(0.75, 1.1),
+                  rotation: `+=${rnd(-380, 380)}`,
+                  duration: fallDur,
+                  ease: "power1.in",
+                },
+                t0 + 0.18,
+              )
+              .to(p, { opacity: 0, duration: fallDur * 0.3 }, t0 + 0.18 + fallDur * 0.7);
+          }
+        });
+
+        // 4) bottom-right velvet: rounds off and slides away behind the right edge
+        const drape = q(".drape-br")[0] as HTMLElement | undefined;
+        const vine = q(".vine-br")[0] as HTMLElement | undefined;
+        if (drape) {
+          const morph = { p: 0 };
+          const away = { x: drape.clientWidth * B.drapeAwayX, y: B.drapeAwayY * unit, rotation: B.drapeTurn };
+          burst
+            .to(morph, { p: 1, duration: 0.55, ease: "power1.inOut", onUpdate: () => morphBrDrape(drape, morph.p) }, 0.02)
+            .to([drape, vine].filter(Boolean), { ...away, duration: 0.9, ease: "power2.in" }, 0.12)
+            .set(drape, { autoAlpha: 0 }, 1.02);
+          if (vine) burst.to(vine, { opacity: 0, duration: 0.4 }, 0.02);
+        }
+
+        const st = ScrollTrigger.create({
+          trigger: root,
+          scroller,
+          start: "top top",
+          end: () => `+=${root.clientHeight * B.distance}`,
+          scrub: B.scrub,
+          animation: burst,
+          onUpdate: (self) => {
+            burstActive = self.progress > 0.01;
+          },
+        });
+        cleanups.push(() => {
+          st.kill();
+          burst.kill();
+          made.forEach((m) => m.remove());
+        });
+      });
+
       const startAmbient = contextSafe!(() => {
         setAmbient(true);
 
@@ -375,7 +494,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         // Tap a flower: it twirls and throws a little burst of gold sparks
         const twirl = contextSafe!((bloom: HTMLElement) => {
           const spin = bloom.querySelector<HTMLElement>(".flower-spin")!;
-          if (gsap.isTweening(spin)) return;
+          if (gsap.isTweening(spin) || burstActive) return;
           const dir = Math.random() > 0.5 ? 1 : -1;
           gsap
             .timeline()
@@ -492,6 +611,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         });
       });
       tl.call(startAmbient);
+      tl.call(() => startScrollBurst());
 
       tl.play(0);
       // dev only: scrub from the console, e.g. __revealTl.pause().seek(4)
@@ -560,6 +680,9 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
           <Flower key={i} spec={f} />
         ))}
       </div>
+
+      {/* petals that flowers burst into as you scroll down (filled in by JS) */}
+      <div className="burst-layer" aria-hidden />
 
       {/* Wording */}
       <div className="content" data-depth="0.15">

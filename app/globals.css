@@ -918,6 +918,23 @@ body {
   }
 }
 
+/* petals the flowers burst into on scroll (placed by JS; free to fall
+   past the first screen into the next part) */
+.burst-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+}
+.burst-petal {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  user-select: none;
+  object-fit: contain;
+}
+
 /* runs past the first screen so petals drift on into the next part
    (they fade out before reaching the bottom of this box) */
 .petals {

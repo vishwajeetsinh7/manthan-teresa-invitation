@@ -49,6 +49,62 @@ const maskOf = (s: Shape) =>
   )}")`;
 const MASKS = { tl: maskOf(DRAPES.tl), br: maskOf(DRAPES.br) };
 
+/* ── Bottom-right drape morph (used by the scroll burst) ──────────────────
+ * The pointed swag rounds off into a soft bulge hugging the right edge.
+ * Both shapes use the same commands, so every number can be blended.   */
+const BR_ROUND = {
+  path: "M178 40 C150 40 112 66 98 104 C86 136 72 168 76 198 C80 234 110 260 140 270 C156 276 168 279 178 281 Z",
+  edge: "M178 40 C150 40 112 66 98 104 C86 136 72 168 76 198 C80 234 110 260 140 270 C156 276 168 279 178 281",
+  inner: "M178 49 C154 49 119 74 106 108 C95 138 82 168 86 197 C90 229 117 252 143 261 C158 266 169 269 178 271",
+};
+const NUM = /-?\d*\.?\d+/g;
+const numsOf = (d: string) => (d.match(NUM) ?? []).map(Number);
+const lerpPath = (from: string, to: string) => {
+  const a = numsOf(from);
+  const b = numsOf(to);
+  return (p: number, sx = 1, sy = 1) => {
+    let i = 0;
+    return from.replace(NUM, () => {
+      const v = a[i] + (b[i] - a[i]) * p;
+      const out = (i % 2 === 0 ? v * sx : v * sy).toFixed(2);
+      i++;
+      return out;
+    });
+  };
+};
+const brPath = lerpPath(DRAPES.br.path, BR_ROUND.path);
+const brEdge = lerpPath(DRAPES.br.edge, BR_ROUND.edge);
+const brInner = lerpPath(DRAPES.br.inner, BR_ROUND.inner);
+
+/**
+ * Blend the bottom-right drape between its normal shape (p = 0) and the
+ * rounded one (p = 1). At p = 0 it goes back to the GPU-friendly mask.
+ */
+export function morphBrDrape(drape: HTMLElement, p: number) {
+  const body = drape.querySelector<HTMLElement>(".velvet-body");
+  if (!body) return;
+  if (p <= 0.001) {
+    body.style.clipPath = "";
+    body.style.removeProperty("-webkit-clip-path");
+    body.style.maskImage = MASKS.br;
+    body.style.setProperty("-webkit-mask-image", MASKS.br);
+  } else {
+    // while morphing, a px-based clip-path replaces the static mask
+    const sx = body.clientWidth / DRAPES.br.w;
+    const sy = body.clientHeight / DRAPES.br.h;
+    const clip = `path('${brPath(p, sx, sy)}')`;
+    body.style.maskImage = "none";
+    body.style.setProperty("-webkit-mask-image", "none");
+    body.style.clipPath = clip;
+    body.style.setProperty("-webkit-clip-path", clip);
+  }
+  const d = brPath(p);
+  const edge = brEdge(p);
+  drape.querySelectorAll(".v-outline").forEach((el) => el.setAttribute("d", d));
+  drape.querySelectorAll(".v-edge").forEach((el) => el.setAttribute("d", edge));
+  drape.querySelectorAll(".v-inner").forEach((el) => el.setAttribute("d", brInner(p)));
+}
+
 // fold wedges radiating from the gathered point: [angle from, angle to, light?]
 const FOLDS: [number, number, boolean][] = [
   [4, 11, true],
@@ -91,7 +147,7 @@ export function VelvetDrape({ variant, tile, tileU, flowSeconds, sheenSeconds }:
             <feGaussianBlur stdDeviation="5" />
           </filter>
         </defs>
-        <path d={s.path} fill="#3a060d" opacity="0.42" filter={`url(#s${id})`} />
+        <path className="v-outline" d={s.path} fill="#3a060d" opacity="0.42" filter={`url(#s${id})`} />
       </svg>
 
       <div className="velvet-body" style={{ WebkitMaskImage: MASKS[variant], maskImage: MASKS[variant] }}>
@@ -116,15 +172,15 @@ export function VelvetDrape({ variant, tile, tileU, flowSeconds, sheenSeconds }:
           ))}
           <rect width={s.w} height={s.h} fill={`url(#d${id})`} />
           {/* velvet sheen rolling over the free edge */}
-          <path d={s.edge} fill="none" stroke="#ff9fae" strokeOpacity="0.15" strokeWidth="10" />
+          <path className="v-edge" d={s.edge} fill="none" stroke="#ff9fae" strokeOpacity="0.15" strokeWidth="10" />
         </svg>
       </div>
 
       {/* gold trim along the free edge */}
       <svg className="velvet-trim" viewBox={vb} preserveAspectRatio="none">
-        <path d={s.edge} fill="none" stroke="#e6c98d" strokeWidth="2.4" strokeLinecap="round" />
-        <path d={s.edge} fill="none" stroke="#8a6a33" strokeWidth="0.6" transform="translate(1.2 1.2)" opacity="0.8" />
-        <path d={s.inner} fill="none" stroke="#dcc08a" strokeWidth="0.8" strokeDasharray="1.5 3.2" opacity="0.75" />
+        <path className="v-edge" d={s.edge} fill="none" stroke="#e6c98d" strokeWidth="2.4" strokeLinecap="round" />
+        <path className="v-edge" d={s.edge} fill="none" stroke="#8a6a33" strokeWidth="0.6" transform="translate(1.2 1.2)" opacity="0.8" />
+        <path className="v-inner" d={s.inner} fill="none" stroke="#dcc08a" strokeWidth="0.8" strokeDasharray="1.5 3.2" opacity="0.75" />
       </svg>
     </div>
   );

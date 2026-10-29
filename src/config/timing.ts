@@ -79,6 +79,27 @@ export const timing = {
     parallaxPx: 6, // max shift for the deepest layer
   },
 
+  /**
+   * Scroll burst (scrubbed to the scroll, reverses on scroll up): flowers
+   * burst into petals and the bottom-right velvet slides away.
+   */
+  scrollBurst: {
+    /** scroll distance it plays over, as a share of the screen height */
+    distance: 0.85,
+    /** smoothing (seconds the animation lags behind the finger) */
+    scrub: 0.6,
+    /** spread of burst start times from top flowers to bottom ones */
+    cascade: 0.15,
+    /** how far petals fall, as a share of the screen height */
+    fall: 1.1,
+    /** length of the fall part of the timeline */
+    fallDur: 0.6,
+    /** velvet: slide right by this share of its width, down by this (u), and turn */
+    drapeAwayX: 0.7,
+    drapeAwayY: 120,
+    drapeTurn: 10,
+  },
+
   // Velvet corners: they never move; the pattern flows inside them
   velvet: {
     /** size of one repeat of the velvet pattern (u ≈ px on a 390-wide phone) */
