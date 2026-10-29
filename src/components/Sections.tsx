@@ -8,7 +8,7 @@ import { assets } from "@/src/config/assets";
 import { AssetImage } from "./AssetImage";
 import { Divider, ScheduleThread, THREAD_NODES } from "./art/LineArt";
 import { FlowerOpenPlaceholder } from "./art/Placeholders";
-import { EVENT_ICONS, LotusDivider, SvgArt, type EventIconName } from "./art/svgArt";
+import { EVENT_ICONS, LotusDivider, MEHNDI_MANDALA, SvgArt, type EventIconName } from "./art/svgArt";
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 
 function Countdown() {
@@ -218,6 +218,22 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           .to(strokes, { drawSVG: "100%", duration: D.iconDraw, ease: "power1.inOut", stagger: D.iconDraw / Math.max(8, strokes.length) }, 0.15)
           .to(dots, { scale: 1, duration: 0.3, ease: "back.out(3)", stagger: 0.04 }, 0.15 + D.iconDraw * 0.8)
           .to(lines, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power2.out", stagger: 0.1, clearProps: "filter" }, 0.35);
+
+        // Mehndi mandala: draws from the centre ring outward, then turns very slowly
+        const pattern = ev.querySelector<HTMLElement>(".t-pattern");
+        if (pattern) {
+          const pStrokes = pattern.querySelectorAll(".draw");
+          const pDots = pattern.querySelectorAll(".dot");
+          gsap.set(pStrokes, { drawSVG: "0%" });
+          gsap.set(pDots, { opacity: 0 });
+          gsap
+            .timeline({ scrollTrigger: { trigger: ev, scroller, start: "top 80%", once: true } })
+            .to(pStrokes, { drawSVG: "100%", duration: D.mandala.draw, ease: "power1.inOut", stagger: D.mandala.stagger }, 0)
+            .to(pDots, { opacity: 1, duration: 0.4, stagger: 0.012 }, D.mandala.draw * 0.4)
+            .add(() => {
+              gsap.to(pattern, { rotation: 360, duration: D.mandala.spinSeconds, ease: "none", repeat: -1 });
+            });
+        }
       });
 
       q(".reveal-up").forEach((el) => {
@@ -284,6 +300,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                 ))}
               </div>
               <div className="t-text">
+                {"pattern" in e && e.pattern === "mehndi" && <SvgArt svg={MEHNDI_MANDALA} className="t-pattern" />}
                 <p className="t-line t-date">
                   {e.weekday} · {e.day} {e.month}
                 </p>
