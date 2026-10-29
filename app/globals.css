@@ -30,11 +30,19 @@
   --safe-r: env(safe-area-inset-right, 0px);
 }
 
+/* --chrome = colour of the phone's top/bottom browser bars. iOS 26 Safari
+   ignores theme-color and tints its bars from the body / the full-screen
+   fixed .stage background, so the mood code updates this variable too
+   (and theme-color, for older iOS and Android). */
+:root {
+  --chrome: #4a0a12;
+}
 html,
 body {
   margin: 0;
   height: 100%;
-  background: var(--burgundy-deep);
+  background-color: var(--chrome);
+  transition: background-color 600ms ease;
   color: var(--ink);
   font-family: var(--font-serif);
   overscroll-behavior: none;
@@ -48,7 +56,9 @@ body {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: var(--burgundy-deep);
+  /* hidden behind the invitation on phones; drives Safari's bar tint */
+  background-color: var(--chrome);
+  transition: background-color 600ms ease;
 }
 
 .stage-backdrop {
@@ -956,20 +966,22 @@ body {
   opacity: 0;
   will-change: opacity;
 }
+/* Kept subtle: a hint of turmeric warmth, not a yellow wash. Top band
+   stays solid only inside the status-bar area. */
 .mood-haldi {
   background:
-    /* status-bar band + soft fade below it */
+    /* status-bar band + gentle fade below it */
     linear-gradient(
       180deg,
       #f2c12e 0,
-      #f2c12e calc(var(--safe-t) + 2px),
-      rgb(242 193 46 / 0.55) calc(var(--safe-t) + 18px),
-      rgb(242 193 46 / 0) calc(var(--safe-t) + 120px)
+      #f2c12e var(--safe-t),
+      rgb(242 193 46 / 0.22) calc(var(--safe-t) + 14px),
+      rgb(242 193 46 / 0) calc(var(--safe-t) + 80px)
     ),
     /* turmeric light rising from the bottom */
-    linear-gradient(0deg, rgb(240 178 30 / 0.4) 0, rgb(240 178 30 / 0) 32%),
-    /* warm glow around the edges, clear in the middle */
-    radial-gradient(ellipse 85% 70% at 50% 50%, rgb(255 214 90 / 0) 55%, rgb(245 190 40 / 0.34) 100%);
+    linear-gradient(0deg, rgb(240 178 30 / 0.16) 0, rgb(240 178 30 / 0) 24%),
+    /* faint warmth at the edges, clear in the middle */
+    radial-gradient(ellipse 90% 75% at 50% 50%, rgb(255 214 90 / 0) 62%, rgb(245 190 40 / 0.14) 100%);
 }
 
 /* Haldi on the schedule: turmeric bloom of colour behind it, golden text */
@@ -979,7 +991,7 @@ body {
   inset: calc(var(--u) * -18) calc(var(--u) * -14) calc(var(--u) * -18) calc(var(--u) * -40);
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(ellipse at 40% 50%, rgb(250 205 70 / 0.42), rgb(250 205 70 / 0) 70%);
+  background: radial-gradient(ellipse at 40% 50%, rgb(250 205 70 / 0.2), rgb(250 205 70 / 0) 70%);
   pointer-events: none;
 }
 .t-event[data-mood="haldi"] .t-title {

@@ -43,6 +43,18 @@ function Countdown() {
   );
 }
 
+/**
+ * Colour the phone's browser bars (status bar / Safari toolbar).
+ * - theme-color meta: Android Chrome and iOS Safari up to 18
+ * - --chrome (body + full-screen fixed .stage background): iOS 26 Safari,
+ *   which ignores theme-color and samples those backgrounds instead
+ */
+function setBrowserChrome(color: string) {
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (meta) meta.content = color;
+  document.documentElement.style.setProperty("--chrome", color);
+}
+
 type EventFlower = { kind: number; tint?: string };
 const SCHEDULE = C.events.slice(0, THREAD_NODES.length);
 
@@ -72,13 +84,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
   const root = useRef<HTMLDivElement>(null);
 
   // leaving (e.g. replay intro) always restores the normal top-bar colour
-  useEffect(
-    () => () => {
-      const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-      if (meta) meta.content = defaultThemeColor;
-    },
-    [],
-  );
+  useEffect(() => () => setBrowserChrome(defaultThemeColor), []);
 
   useGSAP(
     () => {
@@ -91,13 +97,11 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
       /* Event moods (e.g. Haldi): the page glows in the event's colour while
          it is on screen, and the phone's top bar follows. Scroll-linked, so it
          also runs with reduced motion (nothing moves, only colour fades). */
-      const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-      let currentTheme = meta?.content ?? defaultThemeColor;
+      let currentTheme = defaultThemeColor;
       const setTheme = (c: string) => {
-        if (meta && c !== currentTheme) {
-          meta.content = c;
-          currentTheme = c;
-        }
+        if (c === currentTheme) return;
+        currentTheme = c;
+        setBrowserChrome(c);
       };
       const activeMoods = new Set<string>();
       q("[data-mood]").forEach((el) => {
