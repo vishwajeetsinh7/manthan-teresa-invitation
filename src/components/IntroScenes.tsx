@@ -74,6 +74,7 @@ export function VideoScene({ videoRef, veilRef, playing, showSkip, onStarted, on
   const skipRef = useRef<HTMLButtonElement>(null);
   const revealed = useRef(false);
   const done = useRef(false);
+  const started = useRef(false);
 
   const reveal = () => {
     if (revealed.current) return;
@@ -91,19 +92,47 @@ export function VideoScene({ videoRef, veilRef, playing, showSkip, onStarted, on
     onFinish();
   };
 
-  // Skip / error: flash to white, then reveal from the white veil
+  // Skip / error: flash to white, then reveal from the white veil.
+  // The reveal is started by a plain timer, not by the fade finishing, so a
+  // slow/throttled animation frame can never leave the guest stuck.
+  const jumping = useRef(false);
   const jumpToReveal = (dur: number) => {
     if (revealed.current) return finish();
+    if (jumping.current) return;
+    jumping.current = true;
     const veil = veilRef.current;
-    if (!veil) return finish();
-    gsap.to(veil, { opacity: 1, duration: dur, ease: "power1.in", onComplete: finish });
+    if (veil) gsap.to(veil, { opacity: 1, duration: dur, ease: "power1.in" });
+    window.setTimeout(() => {
+      if (veil) {
+        gsap.killTweensOf(veil);
+        gsap.set(veil, { opacity: 1 });
+      }
+      finish();
+    }, dur * 1000 + 40);
   };
+
+  // remember if every <source> failed (can happen before the tap)
+  const sourcesFailed = useRef(false);
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const sources = v.querySelectorAll("source");
+    const last = sources[sources.length - 1];
+    const onFail = () => (sourcesFailed.current = true);
+    last?.addEventListener("error", onFail);
+    return () => last?.removeEventListener("error", onFail);
+  }, [videoRef]);
 
   // Watch playback each frame
   useEffect(() => {
     if (!playing) return;
     const v = videoRef.current;
     if (!v) return;
+    // nothing playable at all → open straight away
+    if (sourcesFailed.current || v.error || v.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+      jumpToReveal(0.3);
+      return;
+    }
     let raf = 0;
     /** returns true once the video is over */
     const check = () => {
@@ -123,10 +152,41 @@ export function VideoScene({ videoRef, veilRef, playing, showSkip, onStarted, on
     const onTime = () => void check();
     v.addEventListener("timeupdate", onTime);
     v.addEventListener("ended", onTime);
+
+    /* Safety nets — the invitation must open even if the video doesn't:
+       1. it never starts (slow network, codec, in-app browser quirks)
+       2. it freezes part-way (stall, interrupted by the OS)
+       3. none of its sources can be played                              */
+    const { startTimeout, stallTimeout } = timing.video;
+    const startTimer = window.setTimeout(() => {
+      if (!started.current && !revealed.current) jumpToReveal(0.4);
+    }, startTimeout * 1000);
+
+    let lastT = -1;
+    let lastMove = performance.now();
+    const stallTimer = window.setInterval(() => {
+      if (!started.current || done.current) return;
+      if (v.currentTime !== lastT) {
+        lastT = v.currentTime;
+        lastMove = performance.now();
+        return;
+      }
+      if (v.paused && !v.ended) v.play().catch(() => {}); // e.g. paused by the OS
+      if (performance.now() - lastMove > stallTimeout * 1000) jumpToReveal(0.4);
+    }, 500);
+
+    const sources = v.querySelectorAll("source");
+    const lastSource = sources[sources.length - 1];
+    const onSourceError = () => jumpToReveal(0.3);
+    lastSource?.addEventListener("error", onSourceError);
+
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(startTimer);
+      window.clearInterval(stallTimer);
       v.removeEventListener("timeupdate", onTime);
       v.removeEventListener("ended", onTime);
+      lastSource?.removeEventListener("error", onSourceError);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing]);
@@ -148,12 +208,16 @@ export function VideoScene({ videoRef, veilRef, playing, showSkip, onStarted, on
         preload="auto"
         poster={assets.video.poster}
         disablePictureInPicture
-        onPlaying={onStarted}
+        onPlaying={() => {
+          started.current = true;
+          onStarted();
+        }}
         onError={() => playing && jumpToReveal(0.3)}
         aria-label="An envelope opening"
       >
-        <source src={assets.video.webm} type='video/webm; codecs="vp9, opus"' />
+        {/* MP4 (H.264) first: hardware-decoded on every iPhone and Android */}
         <source src={assets.video.mp4} type="video/mp4" />
+        <source src={assets.video.webm} type='video/webm; codecs="vp9, opus"' />
       </video>
       {showSkip && (
         <button ref={skipRef} type="button" className="skip-btn" onClick={() => jumpToReveal(timing.video.skipFade)}>

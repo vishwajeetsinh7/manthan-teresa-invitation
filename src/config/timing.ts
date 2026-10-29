@@ -22,6 +22,10 @@ export const timing = {
     skipAppearsAfter: 1.5,
     skipFade: 0.35,
     audioFade: 2.5,
+    /** safety nets: open the invitation anyway if the video hasn't started
+     *  this long after the tap, or freezes for this long */
+    startTimeout: 7,
+    stallTimeout: 4,
   },
 
   // Scene 3 — invitation reveal (0 = the moment it starts over the video)

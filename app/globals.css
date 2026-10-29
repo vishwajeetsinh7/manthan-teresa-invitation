@@ -309,7 +309,6 @@ body {
 .layer {
   position: absolute;
   pointer-events: none;
-  will-change: transform;
 }
 
 /* One seamless paper sheet for the whole page. The card paints it from the
@@ -361,7 +360,6 @@ body {
 .drape-in {
   position: absolute;
   inset: 0;
-  will-change: transform;
 }
 
 /* Velvet drape: fixed outline, endlessly flowing pattern inside */
@@ -387,7 +385,11 @@ body {
   inset: 0;
   overflow: hidden;
   background: #5a0b16;
-  /* clip-path (the drape outline) is set inline per variant */
+  /* mask-image (the drape outline) is set inline per variant */
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 /* The pattern drifts diagonally by exactly one tile per loop, so the loop is
    seamless. Top-left flows up into its corner, bottom-right flows down
@@ -521,7 +523,6 @@ body {
 .seal {
   position: absolute;
   inset: 0;
-  will-change: transform, opacity;
 }
 .seal-shadow {
   position: absolute;
@@ -530,9 +531,8 @@ body {
   top: 30%;
   bottom: -14%;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgb(70 30 10 / 0.42), transparent 68%);
-  filter: blur(4px);
-  will-change: transform, opacity;
+  /* soft by itself — no filter: blur (costly to re-render while it scales) */
+  background: radial-gradient(ellipse at center, rgb(70 30 10 / 0.38) 0%, rgb(70 30 10 / 0.16) 45%, transparent 72%);
 }
 .seal-sheen {
   position: absolute;
@@ -565,14 +565,12 @@ body {
     inset 0 0 8px rgb(220 192 138 / 0.3);
   opacity: 0;
   pointer-events: none;
-  will-change: transform, opacity;
 }
 
 /* Rosebuds: pivot from their base */
 .rosebud {
   position: absolute;
   transform-origin: 50% 100%;
-  will-change: transform, opacity;
 }
 
 /* Flowers */
@@ -586,17 +584,14 @@ body {
   inset: 0;
 }
 .flower {
-  will-change: transform;
 }
 .flower-bloom {
-  will-change: transform;
   /* flowers are tappable (they twirl) even though their clusters are not */
   pointer-events: auto;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 .flower-spin {
-  will-change: transform;
 }
 .spark {
   position: absolute;
@@ -609,14 +604,12 @@ body {
   background: radial-gradient(circle, #fff6d8 0%, #e6c98d 45%, rgb(176 138 74 / 0) 72%);
   pointer-events: none;
   z-index: 2;
-  will-change: transform, opacity;
 }
 .flower-leaf {
   position: absolute;
   left: 50%;
   bottom: 50%;
   transform-origin: 50% 100%;
-  will-change: transform, opacity;
 }
 .corner-cluster {
   position: absolute;
@@ -685,7 +678,6 @@ body {
 }
 .together .char {
   display: inline-block;
-  will-change: transform, opacity;
 }
 
 .script {
@@ -764,7 +756,6 @@ body {
   margin-top: calc(var(--u) * 1);
 }
 .fade-up {
-  will-change: transform, opacity, filter;
 }
 
 .joiner {
@@ -809,7 +800,6 @@ body {
   width: calc(var(--u) * 44);
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold) 60%);
-  will-change: transform;
 }
 .date-rule:first-child {
   transform-origin: 100% 50%;
@@ -827,7 +817,6 @@ body {
   text-transform: uppercase;
   color: var(--gold-dark);
   font-variant-numeric: lining-nums;
-  will-change: transform, opacity;
 }
 .date-dot {
   color: var(--gold);
@@ -854,7 +843,6 @@ body {
   padding-left: 0.28em;
   text-transform: uppercase;
   color: var(--gold-dark);
-  will-change: transform, opacity;
 }
 /* the numbers rise in from behind this edge */
 .date-num-mask {
@@ -870,7 +858,6 @@ body {
   line-height: 1.05;
   color: var(--burgundy);
   font-variant-numeric: lining-nums tabular-nums;
-  will-change: transform;
 }
 .date-gem {
   width: calc(var(--u) * 6);
@@ -878,7 +865,6 @@ body {
   margin-bottom: calc(var(--u) * 15);
   background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
   box-shadow: 0 0 6px rgb(220 192 138 / 0.6);
-  will-change: transform;
 }
 .venue {
   display: inline-flex;
@@ -890,7 +876,6 @@ body {
   font-weight: 500;
   font-size: calc(var(--u) * 15);
   color: var(--ink);
-  will-change: transform, opacity;
 }
 .venue-pin {
   width: calc(var(--u) * 13);
@@ -1103,7 +1088,6 @@ body {
 .t-flower {
   position: absolute;
   inset: 0;
-  will-change: transform, opacity;
 }
 /* "gold" tint turns the ivory rose turmeric for Haldi */
 .t-flower[data-tint="gold"] img {
@@ -1220,7 +1204,6 @@ body {
   color: var(--gold-dark);
 }
 .t-line {
-  will-change: transform, opacity;
 }
 
 /* gold swash under each name (overlaps the descenders a little) */
@@ -1244,7 +1227,6 @@ body {
   color: var(--ink);
 }
 .reveal-up {
-  will-change: transform, opacity;
 }
 
 .btn-gold {

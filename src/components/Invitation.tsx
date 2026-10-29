@@ -10,6 +10,8 @@ import { RevealCard } from "./RevealCard";
 import { Sections } from "./Sections";
 import { DesktopNote } from "./DesktopNote";
 import { moods, type MoodName } from "@/src/config/moods";
+import { revealImages } from "@/src/config/assets";
+import { preloadImages } from "@/src/lib/preload";
 
 type Phase = "tap" | "video" | "reveal";
 
@@ -21,6 +23,7 @@ export function Invitation() {
   const [videoDone, setVideoDone] = useState(false);
   const [run, setRun] = useState(0);
   const [musicOn, setMusicOn] = useState(true);
+  const [musicAvailable, setMusicAvailable] = useState(false);
 
   const veilRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -49,9 +52,10 @@ export function Invitation() {
       });
     }
 
-    // 2) unlock background music for later (muted play → pause)
+    // 2) unlock background music for later (muted play → pause) — only when
+    //    a music file actually exists, so nothing extra competes with the video
     const a = audioRef.current;
-    if (a) {
+    if (a && musicAvailable) {
       a.muted = true;
       a.play()
         .then(() => {
@@ -64,23 +68,39 @@ export function Invitation() {
         });
     }
 
-    // 3) device tilt permission (iOS 13+); other browsers don't ask
+    // 3) device tilt: used only where it needs NO permission (Android etc.).
+    //    iOS asks with a system popup, which on first visit interrupted the
+    //    opening video — so on iPhone the parallax uses touch-drag instead.
     const DOE = (typeof DeviceOrientationEvent !== "undefined" ? DeviceOrientationEvent : undefined) as DOEWithPermission | undefined;
-    if (DOE?.requestPermission) {
-      DOE.requestPermission()
-        .then((s) => (tiltRef.current = s === "granted"))
-        .catch(() => (tiltRef.current = false));
-    } else {
-      tiltRef.current = !!DOE;
-    }
+    tiltRef.current = !!DOE && !DOE.requestPermission;
+
+    // make sure the reveal images are on their way (no-op if already)
+    preloadImages(revealImages);
 
     setPhase("video");
   };
 
+  /* While the guest looks at the envelope: fetch + decode every reveal image
+     in the background, and check once whether a music file exists. */
+  useEffect(() => {
+    let live = true;
+    const start = () => preloadImages(revealImages);
+    // after the poster has painted, without blocking it
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
+    if (w.requestIdleCallback) w.requestIdleCallback(start, { timeout: 1200 });
+    else setTimeout(start, 400);
+    fetch(assets.music, { method: "HEAD" })
+      .then((r) => live && setMusicAvailable(r.ok))
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
+
   /* Background music: fades in once the invitation reveals */
   useEffect(() => {
     const a = audioRef.current;
-    if (!a) return;
+    if (!a || !musicAvailable) return;
     if (phase === "reveal" && musicOn) {
       a.volume = 0;
       a.play()
@@ -90,7 +110,7 @@ export function Invitation() {
       gsap.killTweensOf(a);
       a.pause();
     }
-  }, [phase, musicOn]);
+  }, [phase, musicOn, musicAvailable]);
 
   /* Controls fade in with the reveal */
   useGSAP(
@@ -157,6 +177,7 @@ export function Invitation() {
                 <path d="M4 4v4.5h4.5" />
               </svg>
             </button>
+            {musicAvailable && (
             <button
               type="button"
               className="ctrl"
@@ -180,6 +201,7 @@ export function Invitation() {
                 </svg>
               )}
             </button>
+            )}
           </div>
         )}
 
@@ -202,7 +224,8 @@ export function Invitation() {
 
         <div ref={veilRef} className="white-veil" aria-hidden />
 
-        <audio ref={audioRef} src={assets.music} loop preload="none" />
+        {/* only exists once a music file has been added */}
+        {musicAvailable && <audio ref={audioRef} src={assets.music} loop preload="none" />}
       </div>
 
       <DesktopNote />

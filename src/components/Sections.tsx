@@ -10,6 +10,7 @@ import { Divider, ScheduleThread, THREAD_NODES } from "./art/LineArt";
 import { FlowerOpenPlaceholder } from "./art/Placeholders";
 import { EVENT_ICONS, LotusDivider, MEHNDI_MANDALA, SvgArt, type EventIconName } from "./art/svgArt";
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
+import { SOFT_BLUR } from "@/src/lib/device";
 
 function Countdown() {
   const target = new Date(C.countdownTo).getTime();
@@ -213,7 +214,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         const strokes = ev.querySelectorAll(".event-icon .draw");
         const dots = ev.querySelectorAll(".event-icon .dot");
         gsap.set(title, { "--wipe": "60%" });
-        gsap.set(lines, { opacity: 0, y: 10, filter: "blur(3px)" });
+        gsap.set(lines, { opacity: 0, y: 10, filter: SOFT_BLUR(3) });
         gsap.set(strokes, { drawSVG: "0%" });
         gsap.set(dots, { scale: 0, transformOrigin: "50% 50%" });
         gsap
@@ -221,7 +222,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           .to(title, { "--wipe": "0%", duration: D.titleWrite, ease: "power1.inOut" }, 0)
           .to(strokes, { drawSVG: "100%", duration: D.iconDraw, ease: "power1.inOut", stagger: D.iconDraw / Math.max(8, strokes.length) }, 0.15)
           .to(dots, { scale: 1, duration: 0.3, ease: "back.out(3)", stagger: 0.04 }, 0.15 + D.iconDraw * 0.8)
-          .to(lines, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power2.out", stagger: 0.1, clearProps: "filter" }, 0.35);
+          .to(lines, { opacity: 1, y: 0, filter: SOFT_BLUR(0), duration: 0.7, ease: "power2.out", stagger: 0.1, clearProps: "filter" }, 0.35);
 
         // Mehndi mandala: draws from the centre ring outward, then turns very slowly
         const pattern = ev.querySelector<HTMLElement>(".t-pattern");

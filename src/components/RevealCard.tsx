@@ -6,7 +6,7 @@ import { invitation as C } from "@/src/content/invitation";
 import { timing } from "@/src/config/timing";
 import { assets } from "@/src/config/assets";
 import { AssetImage } from "./AssetImage";
-import { VelvetDefs, VelvetDrape } from "./art/VelvetDrape";
+import { VelvetDrape } from "./art/VelvetDrape";
 import {
   SealPlaceholder,
   FlowerBudPlaceholder,
@@ -16,6 +16,8 @@ import {
 import { CornerVine, TailVine, Divider, Flourish, NameFlourish, Chevron } from "./art/LineArt";
 import { Petals } from "./Petals";
 import { GoldDust } from "./GoldDust";
+import { SOFT_BLUR, isTouchDevice } from "@/src/lib/device";
+import { imagesReady } from "@/src/lib/preload";
 
 const u = (n: number) => `calc(var(--u) * ${n})`;
 const V = timing.velvet;
@@ -105,27 +107,39 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
     () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
 
-  // Make sure the web fonts are loaded before measuring / splitting text
+  // Wait (briefly) for the web fonts — needed to measure/split text — and the
+  // preloaded images. Never blocks for long, and a failing font check can
+  // never leave the card hidden: every path ends in setFontsReady(true).
   useEffect(() => {
     const el = card.current;
     if (!el) return;
-    const fam = (sel: string) => getComputedStyle(el.querySelector(sel)!).fontFamily;
-    const loads = [
-      document.fonts.load(`50px ${fam(".name")}`),
-      document.fonts.load(`600 12px ${fam(".together")}`),
-      document.fonts.load(`italic 14px ${fam(".relation")}`),
-    ];
-    const timeout = new Promise((r) => setTimeout(r, 3000));
     let live = true;
-    Promise.race([Promise.all(loads).then(() => document.fonts.ready), timeout]).then(() => live && setFontsReady(true));
+    const fonts = (async () => {
+      try {
+        const fam = (sel: string) => getComputedStyle(el.querySelector(sel)!).fontFamily;
+        await Promise.all([
+          document.fonts.load(`50px ${fam(".name")}`),
+          document.fonts.load(`600 12px ${fam(".together")}`),
+          document.fonts.load(`italic 14px ${fam(".relation")}`),
+        ]);
+        await document.fonts.ready;
+      } catch {
+        /* some browsers reject odd family strings — carry on */
+      }
+    })();
+    const timeout = new Promise((r) => setTimeout(r, 2500));
+    Promise.race([Promise.all([fonts, imagesReady(2000)]), timeout]).finally(() => live && setFontsReady(true));
     return () => {
       live = false;
     };
   }, []);
 
   useGSAP(
-    (_ctx, contextSafe) => {
+    (ctx, contextSafe) => {
       if (!active || !fontsReady || !card.current) return;
+      // Safety net: if anything below throws on some browser, undo every
+      // animation state and simply show the finished card.
+      try {
       const root = card.current;
       const q = gsap.utils.selector(root);
       const veil = veilRef.current;
@@ -177,7 +191,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       gsap.set(q(".wipe"), { "--wipe": "60%" });
       gsap.set(q(".name-flourish .draw"), { drawSVG: "0%" });
       gsap.set(q(".name-flourish .dot"), { scale: 0, transformOrigin: "50% 50%" });
-      gsap.set(q(".fade-up"), { opacity: 0, y: 12, filter: "blur(4px)" });
+      gsap.set(q(".fade-up"), { opacity: 0, y: 12, filter: SOFT_BLUR(4) });
       gsap.set(q(".joiner-word"), { opacity: 0, y: 6 });
       gsap.set(q(".scroll-hint"), { opacity: 0, y: 8 });
       gsap.set(q(".date-month"), { opacity: 0, y: 8 });
@@ -185,7 +199,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       gsap.set(q(".date-num"), { yPercent: 110 });
       gsap.set(q(".date-wk"), { opacity: 0, y: 4 });
       gsap.set(q(".date-gem"), { scale: 0, rotation: 0 });
-      gsap.set(q(".venue"), { opacity: 0, y: 10, filter: "blur(4px)" });
+      gsap.set(q(".venue"), { opacity: 0, y: 10, filter: SOFT_BLUR(4) });
 
       // "TOGETHER WITH OUR FAMILIES": tracking tightens 0.6em → 0.25em,
       // done with transforms on each letter (no layout during animation)
@@ -274,7 +288,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       const write = (sel: string, at: number, dur: number) =>
         tl.to(q(sel), { "--wipe": "0%", duration: dur, ease: "power1.inOut" }, at);
       const fadeUp = (sel: string, at: number, dur: number, stagger = 0.12) =>
-        tl.to(q(sel), { opacity: 1, y: 0, filter: "blur(0px)", duration: dur, ease: "power2.out", stagger }, at);
+        tl.to(q(sel), { opacity: 1, y: 0, filter: SOFT_BLUR(0), duration: dur, ease: "power2.out", stagger }, at);
 
       // 3.4  names written in like a pen
       // gold swash under a name: strokes grow from the centre outward as the pen lifts
@@ -305,7 +319,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       tl.to(q(".date-num"), { yPercent: 0, duration: Dt.dur, ease: "power4.out", stagger: Dt.stagger }, Dt.at + 0.25);
       tl.to(q(".date-wk"), { opacity: 1, y: 0, duration: 0.6, stagger: Dt.stagger }, Dt.at + 0.45);
       tl.to(q(".date-gem"), { scale: 1, rotation: 45, duration: 0.5, ease: "back.out(3)", stagger: Dt.stagger }, Dt.at + 0.5);
-      tl.to(q(".venue"), { opacity: 1, y: 0, filter: "blur(0px)", duration: Dt.dur, ease: "power2.out" }, Dt.at + 0.75);
+      tl.to(q(".venue"), { opacity: 1, y: 0, filter: SOFT_BLUR(0), duration: Dt.dur, ease: "power2.out" }, Dt.at + 0.75);
       tl.to(q(".scroll-hint"), { opacity: 1, y: 0, duration: R.scrollHint.dur }, R.scrollHint.at);
       tl.set(q(".fade-up, .venue"), { clearProps: "filter" });
 
@@ -484,6 +498,12 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       if (process.env.NODE_ENV !== "production") (window as unknown as { __revealTl: gsap.core.Timeline }).__revealTl = tl;
 
       return () => cleanups.forEach((fn) => fn());
+      } catch (err) {
+        console.error("Reveal animation failed — showing the invitation without it.", err);
+        ctx.revert(); // back to plain CSS: everything visible
+        if (card.current) card.current.dataset.armed = "1";
+        if (veilRef.current) veilRef.current.style.opacity = "0";
+      }
     },
     { dependencies: [active, fontsReady, reduced], scope: card },
   );
@@ -502,7 +522,6 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
 
       {/* Velvet corners — fixed in place (no parallax); only the fabric
           pattern flows inside them */}
-      <VelvetDefs />
       <div className="layer drape drape-tl" aria-hidden>
         <div className="drape-in">
           <VelvetDrape variant="tl" tile={assets.velvetTile} tileU={V.tileU} flowSeconds={V.flowSeconds} sheenSeconds={V.sheenSeconds} />
@@ -522,7 +541,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         <TailVine />
       </div>
 
-      {ambient && !reduced && <GoldDust count={timing.ambient.dustParticles} />}
+      {ambient && !reduced && <GoldDust count={isTouchDevice() ? 24 : timing.ambient.dustParticles} />}
 
       {/* Corner flowers */}
       <div className="corner-cluster corner-bl layer" aria-hidden>
@@ -640,7 +659,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         </button>
       </div>
 
-      {ambient && !reduced && <Petals count={timing.ambient.petals} />}
+      {ambient && !reduced && <Petals count={isTouchDevice() ? 6 : timing.ambient.petals} />}
     </section>
   );
 }

@@ -1,7 +1,8 @@
 /**
- * Asset paths (under /public). Missing files fall back to built-in
- * placeholders automatically, so the site always runs.
- * Raw images → `node scripts/prepare-assets.mjs "<folder>"` cleans and places them.
+ * Asset paths (under /public). Images are small pre-sized WebP files made by
+ * `node scripts/prepare-assets.mjs "<raw folder>"` from the masters in
+ * assets-src/ — they are served as-is (no on-demand resizing), so they load
+ * fast even on a cold CDN. Missing files still fall back to placeholders.
  */
 const A = "/assets";
 
@@ -11,20 +12,27 @@ export const assets = {
     webm: `${A}/video/envelope.webm`,
     poster: `${A}/video/envelope-poster.webp`,
   },
-  paper: `${A}/bg/paper.webp`,
-  /** seamless (top-to-bottom) version used for the whole page — referenced in globals.css */
+  /** seamless (top-to-bottom) paper used for the whole page — referenced in globals.css */
   paperTile: `${A}/bg/paper-tile.webp`,
-  /**
-   * Seamless velvet tile that flows inside the corner drapes.
-   * Made by scripts/prepare-assets.mjs (from a raw "velvet…" image, or the envelope).
-   */
+  /** seamless velvet tile that flows inside the corner drapes */
   velvetTile: `${A}/velvet/velvet-tile.webp`,
-  seal: `${A}/seal/wax-seal-tm.png`,
+  seal: `${A}/seal/wax-seal-tm.webp`,
   /** 1 burgundy rose · 2 blush rose · 3 ivory rose · 4 raspberry ranunculus */
-  flowers: [1, 2, 3, 4].map((n) => `${A}/flowers/flower-${n}-open.png`),
-  rosebud: `${A}/flowers/rosebud.png`,
-  leaves: [1, 2, 3, 4, 5].map((n) => `${A}/leaves/leaf-${n}.png`),
-  petals: [1, 2, 3].map((n) => `${A}/petals/petal-${n}.png`),
+  flowers: [1, 2, 3, 4].map((n) => `${A}/flowers/flower-${n}.webp`),
+  rosebud: `${A}/flowers/rosebud.webp`,
+  leaves: [1, 2, 3, 4, 5].map((n) => `${A}/leaves/leaf-${n}.webp`),
+  petals: [1, 2, 3].map((n) => `${A}/petals/petal-${n}.webp`),
   music: `${A}/audio/music.mp3`,
   og: `${A}/og.jpg`,
 } as const;
+
+/** Everything the reveal shows, so it can be fetched before it is needed. */
+export const revealImages: string[] = [
+  assets.paperTile,
+  assets.velvetTile,
+  assets.seal,
+  ...assets.flowers,
+  assets.rosebud,
+  ...assets.leaves,
+  ...assets.petals,
+];

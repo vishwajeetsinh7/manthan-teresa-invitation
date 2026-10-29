@@ -1,59 +1,40 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type ReactNode } from "react";
-
-/** One HEAD request per asset, shared by every component that asks. */
-const probes = new Map<string, Promise<boolean>>();
-export function assetExists(src: string): Promise<boolean> {
-  let p = probes.get(src);
-  if (!p) {
-    p = fetch(src, { method: "HEAD", cache: "force-cache" })
-      .then((r) => r.ok)
-      .catch(() => false);
-    probes.set(src, p);
-  }
-  return p;
-}
+import { useState, type ReactNode } from "react";
 
 type Props = {
   src: string;
   alt: string;
-  /** Rendered until (and unless) the real file is found. */
+  /** Shown only if the file is missing. */
   fallback: ReactNode;
-  sizes: string;
+  /** kept for call-site readability; images are pre-sized, so unused */
+  sizes?: string;
   fit?: "contain" | "cover";
   className?: string;
 };
 
 /**
- * Real image when the file exists in /public, otherwise the placeholder.
- * Fills its (positioned) parent.
+ * Fills its (positioned) parent with a pre-sized WebP. Served as-is
+ * (unoptimized): the files are already the right size, and skipping the
+ * on-demand resizer avoids slow first loads on the live site. The same URL
+ * was preloaded on the tap screen, so it comes straight from cache.
  */
-export function AssetImage({ src, alt, fallback, sizes, fit = "contain", className }: Props) {
-  const [ok, setOk] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let live = true;
-    assetExists(src).then((v) => live && setOk(v));
-    return () => {
-      live = false;
-    };
-  }, [src]);
-
-  if (!ok) return <>{fallback}</>;
+export function AssetImage({ src, alt, fallback, fit = "contain", className }: Props) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <>{fallback}</>;
   return (
     <Image
       src={src}
       alt={alt}
       fill
-      sizes={sizes}
+      unoptimized
       loading="eager"
-      fetchPriority="high"
+      decoding="async"
       draggable={false}
       className={className}
       style={{ objectFit: fit }}
-      onError={() => setOk(false)}
+      onError={() => setFailed(true)}
     />
   );
 }

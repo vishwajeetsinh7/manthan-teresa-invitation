@@ -72,7 +72,19 @@ Put the raw PNGs in a folder, add a line for each to `JOBS` in `scripts/prepare-
 node scripts/prepare-assets.mjs "C:/path/to/raw images"
 ```
 
-It removes edge fringe and specks, trims, centres on a square, bakes a soft shadow (flowers) and writes into `public/assets/`.
+It removes edge fringe and specks, trims, centres on a square and bakes a soft shadow (flowers).
+Full-quality results go to `assets-src/` (kept in the repo, not deployed); the site serves small
+pre-sized WebP copies in `public/assets/` (about 0.5 MB for everything on the card).
+
+## Performance notes
+
+- Images are served as-is (`unoptimized`), so there is no slow on-demand resizing on Vercel.
+- All reveal images are fetched + decoded in the background while the guest is on the
+  "Tap to open" screen (`src/lib/preload.ts`).
+- No permission prompts: iOS motion permission is never requested (it interrupted the
+  opening on first visit); on iPhone the parallax uses touch-drag.
+- Safety nets: if the video can't play, never starts (7s) or freezes (4s), the invitation
+  opens anyway; if any animation code fails, the finished card is shown instead.
 
 ## Status
 

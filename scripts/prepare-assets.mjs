@@ -13,12 +13,15 @@
  * Jobs whose source is missing are skipped, so old and new batches can mix.
  */
 import sharp from "sharp";
-import { readdirSync, statSync, mkdirSync } from "node:fs";
+import { readdirSync, statSync, mkdirSync, existsSync } from "node:fs";
 import { join, dirname, basename } from "node:path";
 
 const SRC = process.argv[2];
 const PREVIEW = process.argv[3];
 if (!SRC) throw new Error("Pass the folder with the raw images");
+/** full-quality processed masters (kept in the repo, NOT deployed) */
+const MASTERS = "assets-src";
+/** what the site serves */
 const OUT = "public/assets";
 
 const walk = (d) =>
@@ -57,7 +60,7 @@ const JOBS = [
 ];
 
 /** Opaque full-bleed images (no cut-out) */
-const PLAIN = [{ src: /^paper/i, out: "bg/paper.webp", w: 1080, h: 1920, quality: 78 }];
+const PLAIN = [{ src: /^paper/i, out: "paper.webp", w: 1080, h: 1920, quality: 78 }];
 
 /* separable min / max filters on an alpha channel */
 function morph(a, w, h, r, op) {
@@ -172,14 +175,14 @@ async function cutout(job, srcPath) {
     .toBuffer();
   const framed = await sharp(big).extract({ left: extra, top: extra, width: cw, height: ch }).png().toBuffer();
 
-  const outPath = join(OUT, job.out);
+  const outPath = join(MASTERS, job.out);
   mkdirSync(dirname(outPath), { recursive: true });
   const res = await sharp(framed).resize(job.w, job.h, { kernel: "lanczos3" }).png({ compressionLevel: 9 }).toFile(outPath);
   return { outPath, kb: res.size / 1024 };
 }
 
 async function plain(job, srcPath) {
-  const outPath = join(OUT, job.out);
+  const outPath = join(MASTERS, job.out);
   mkdirSync(dirname(outPath), { recursive: true });
   const res = await sharp(srcPath)
     .resize(job.w, job.h, { fit: "cover", kernel: "lanczos3" })
@@ -243,7 +246,12 @@ async function rawOf(img) {
  */
 async function velvetTile() {
   const raw = find(/^velvet/i);
-  const S = 1024;
+  // never replace an existing (custom) tile with the envelope fallback
+  if (!raw && existsSync(join(OUT, "velvet/velvet-tile.webp"))) {
+    console.log("velvet: no raw 'velvet…' image, keeping the existing tile");
+    return;
+  }
+  const S = 768; // one repeat is ~210u on screen; 768px is sharp at 3x
   const base = raw
     ? sharp(raw).resize(S, S, { fit: "cover", kernel: "lanczos3" })
     : sharp("public/assets/video/envelope-poster.webp").extract({ left: 200, top: 0, width: 320, height: 320 }).resize(S, S);
@@ -263,7 +271,7 @@ async function velvetTile() {
  */
 async function paperTile() {
   const raw = find(/^paper/i);
-  const src = raw ?? "public/assets/bg/paper.webp";
+  const src = raw ?? join(MASTERS, "paper.webp");
   const W = 1080;
   const H = 1920;
   const img = sharp(src).resize(W, H, { fit: "cover", kernel: "lanczos3" });
@@ -289,6 +297,29 @@ for (const job of [...JOBS, ...PLAIN]) {
 }
 if (!done.length) console.log("No matching source files found.");
 await paperTile();
+
+/* ── Web exports ───────────────────────────────────────────────────────
+ * Small WebP files (with alpha) sized for how big each thing is on screen
+ * at 3× pixel density. The site serves these directly — no on-demand
+ * image resizing, so nothing is slow on a cold CDN.                      */
+const WEB = [
+  ...[1, 2, 3, 4].map((n) => ({ src: `flowers/flower-${n}-open.png`, out: `flowers/flower-${n}.webp`, w: 288 })),
+  { src: "flowers/rosebud.png", out: "flowers/rosebud.webp", w: 144 },
+  ...[1, 2, 3, 4, 5].map((n) => ({ src: `leaves/leaf-${n}.png`, out: `leaves/leaf-${n}.webp`, w: 132 })),
+  ...[1, 2, 3].map((n) => ({ src: `petals/petal-${n}.png`, out: `petals/petal-${n}.webp`, w: 96 })),
+  { src: "seal/wax-seal-tm.png", out: "seal/wax-seal-tm.webp", w: 360 },
+];
+let webTotal = 0;
+for (const j of WEB) {
+  const out = join(OUT, j.out);
+  mkdirSync(dirname(out), { recursive: true });
+  const r = await sharp(join(MASTERS, j.src))
+    .resize({ width: j.w, kernel: "lanczos3" })
+    .webp({ quality: 82, alphaQuality: 90, effort: 6 })
+    .toFile(out);
+  webTotal += r.size;
+}
+console.log(`web exports → ${WEB.length} files, ${(webTotal / 1024).toFixed(0)} KB total`);
 
 if (PREVIEW && done.length) {
   // contact sheet on cream, to spot any remaining halo

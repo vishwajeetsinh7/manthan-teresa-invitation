@@ -38,26 +38,16 @@ export const DRAPES: Record<"tl" | "br", Shape> = {
   },
 };
 
-/** Map every "x y" pair of a path into 0–1 (objectBoundingBox) units. */
-const unit = (d: string, w: number, h: number) =>
-  d.replace(/(-?\d*\.?\d+)[ ,]+(-?\d*\.?\d+)/g, (_m, x, y) => `${(+x / w).toFixed(4)} ${(+y / h).toFixed(4)}`);
-
-export const clipId = (v: "tl" | "br") => `velvet-clip-${v}`;
-
-/** Render once per page: the clip shapes the flowing velvet is cut to. */
-export function VelvetDefs() {
-  return (
-    <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden focusable="false">
-      <defs>
-        {(["tl", "br"] as const).map((v) => (
-          <clipPath key={v} id={clipId(v)} clipPathUnits="objectBoundingBox">
-            <path d={unit(DRAPES[v].path, DRAPES[v].w, DRAPES[v].h)} />
-          </clipPath>
-        ))}
-      </defs>
-    </svg>
-  );
-}
+/**
+ * The drape outline as a CSS mask image. A mask (unlike clip-path: url(#svg))
+ * lets mobile Safari/Chrome keep the endlessly flowing pattern on the GPU
+ * instead of repainting it every frame.
+ */
+const maskOf = (s: Shape) =>
+  `url("data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${s.w} ${s.h}' preserveAspectRatio='none'><path d='${s.path}'/></svg>`,
+  )}")`;
+const MASKS = { tl: maskOf(DRAPES.tl), br: maskOf(DRAPES.br) };
 
 // fold wedges radiating from the gathered point: [angle from, angle to, light?]
 const FOLDS: [number, number, boolean][] = [
@@ -104,7 +94,7 @@ export function VelvetDrape({ variant, tile, tileU, flowSeconds, sheenSeconds }:
         <path d={s.path} fill="#3a060d" opacity="0.42" filter={`url(#s${id})`} />
       </svg>
 
-      <div className="velvet-body" style={{ clipPath: `url(#${clipId(variant)})`, WebkitClipPath: `url(#${clipId(variant)})` }}>
+      <div className="velvet-body" style={{ WebkitMaskImage: MASKS[variant], maskImage: MASKS[variant] }}>
         <div className="velvet-flow" />
         <div className="velvet-sheen" />
         {/* folds + depth, fixed in place over the moving pattern */}
