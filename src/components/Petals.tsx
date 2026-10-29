@@ -33,13 +33,22 @@ export function Petals({ count }: { count: number }) {
         };
         fall(true);
 
-        // sway + 3D tumble on the inner element
+        // Sway + 3D flutter on the inner element.
+        // Perspective is SET once, never tweened: tweening it from 0 made tiny
+        // petals project into huge streaks ("laser" lines) on every cycle.
+        // The flip also stays within ±55° so a petal never turns edge-on
+        // and collapses into a thin bright sliver.
+        const tilt = timing.ambient.petalFlutterDeg * (i % 2 ? 1 : -1);
+        gsap.set(inner, { transformPerspective: 600, rotationY: -tilt, rotationX: r(-20, 20) });
         gsap.to(inner, { x: r(14, 26), duration: r(2.2, 3.4), ease: "sine.inOut", yoyo: true, repeat: -1 });
-        gsap.fromTo(
-          inner,
-          { rotationY: 0, rotationX: r(-20, 20) },
-          { rotationY: 180, rotationX: r(-50, 50), duration: r(2.6, 4.2), ease: "sine.inOut", yoyo: true, repeat: -1, transformPerspective: 400 },
-        );
+        gsap.to(inner, {
+          rotationY: tilt,
+          rotationX: r(-30, 30),
+          duration: r(1.8, 3),
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+        });
       });
     },
     { scope: root },

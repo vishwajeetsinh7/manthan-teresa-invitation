@@ -55,6 +55,7 @@ export const timing = {
   ambient: {
     petals: 8, // 6–10 looks right
     petalFall: [11, 17] as [number, number], // seconds to fall, min/max
+    petalFlutterDeg: 55, // 3D flip range; keep under ~65 so petals never go edge-on
     dustParticles: 40,
     breatheDur: 4,
     breatheScale: 1.03,
