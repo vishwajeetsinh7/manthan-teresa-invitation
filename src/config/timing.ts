@@ -86,8 +86,8 @@ export const timing = {
    * are back at the top). The velvet part is scroll-linked (scrubbed).
    */
   scrollBurst: {
-    /** blast when a flower reaches the top 20% of the screen */
-    zone: 0.2,
+    /** blast when a corner flower reaches the top 30% of the screen */
+    zone: 0.3,
     /** …and bloom again only once it is this much lower (avoids flicker) */
     hysteresis: 0.08,
     /** flowers that start inside the zone wait for this much scrolling */

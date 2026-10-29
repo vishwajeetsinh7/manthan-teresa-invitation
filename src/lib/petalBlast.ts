@@ -33,6 +33,8 @@ type Piece = {
   life: number;
   alpha: number;
   spark?: boolean;
+  /** this petal fades out around the middle of the screen (the rest fall to the bottom) */
+  mid?: boolean;
   delay: number;
 };
 type Puff = { x: number; y: number; r: number; age: number; life: number; delay: number };
@@ -150,12 +152,12 @@ export class PetalBlast {
       // rings of petals: outer, inner, heart
       const rings = s.small
         ? [
-            { n: this.lite ? 5 : 6, rho: 0.56, a: 0.36, b: 0.27 },
-            { n: 3, rho: 0.22, a: 0.26, b: 0.2 },
+            { n: this.lite ? 3 : 4, rho: 0.56, a: 0.38, b: 0.29 },
+            { n: 2, rho: 0.22, a: 0.28, b: 0.21 },
           ]
         : [
-            { n: this.lite ? 7 : 9, rho: 0.6, a: 0.32, b: 0.23 },
-            { n: this.lite ? 4 : 6, rho: 0.33, a: 0.24, b: 0.18 },
+            { n: this.lite ? 5 : 6, rho: 0.6, a: 0.34, b: 0.25 },
+            { n: this.lite ? 2 : 3, rho: 0.33, a: 0.26, b: 0.19 },
             { n: 1, rho: 0, a: 0.17, b: 0.15 },
           ];
       for (const ring of rings) {
@@ -174,7 +176,7 @@ export class PetalBlast {
       }
 
       // a few loose petal images for variety
-      const extraN = s.small ? 1 : this.lite ? 2 : 4;
+      const extraN = s.small ? 0 : this.lite ? 1 : 2;
       for (let i = 0; i < extraN && s.extras.length; i++) {
         const im = s.extras[i % s.extras.length];
         const size = R * rnd(0.32, 0.5);
@@ -185,7 +187,7 @@ export class PetalBlast {
       }
 
       // gold sparks + a flash of light at the moment of the blast
-      const sparks = s.small ? 5 : this.lite ? 8 : 14;
+      const sparks = s.small ? 4 : this.lite ? 6 : 10;
       for (let i = 0; i < sparks; i++) {
         const dir = rnd(0, Math.PI * 2);
         const kick = rnd(260, 720);
@@ -238,6 +240,7 @@ export class PetalBlast {
       age: 0,
       life: rnd(3.6, 5.2),
       alpha: 1,
+      mid: Math.random() < 0.5,
       delay,
     };
   }
@@ -280,7 +283,9 @@ export class PetalBlast {
       p.flip += p.vflip * dt;
       // fade near the end of life / bottom of the screen
       const lifeFade = Math.min(1, (p.life - p.age) / (p.spark ? 0.35 : 0.8));
-      const floorFade = p.spark ? 1 : Math.min(1, (H + 40 - p.y) / (H * 0.25));
+      // half the petals melt away around the middle of the screen; the rest fall to the bottom
+      const floor = p.mid ? H * 0.58 : H + 40;
+      const floorFade = p.spark ? 1 : Math.min(1, (floor - p.y) / (H * (p.mid ? 0.14 : 0.25)));
       p.alpha = Math.max(0, Math.min(lifeFade, floorFade));
     }
     this.pieces = this.pieces.filter((p) => p.delay > 0 || (p.age < p.life && p.y < H + 60 && p.alpha > 0.01));

@@ -329,11 +329,10 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
 
       let burstActive = false;
       /* ── Flower blast + velvet retreat ─────────────────────────────────
-         • Each flower BLASTS (real-time physics, see lib/petalBlast) when it
-           scrolls up into the top 20% of the screen: it swells, then breaks
+         • Each corner flower BLASTS (real-time physics, see lib/petalBlast) when
+           it scrolls up into the top 30% of the screen: it swells, then breaks
            into petals cut from its own photo that fly out, flutter and fall;
-           its leaves tumble away. Flowers that start in that zone (around the
-           seal) blast as soon as you start scrolling.
+           its leaves tumble away. The flowers around the seal never blast.
          • Scroll it back down out of the zone (or back to the top) and it
            blooms again — ready to blast again.
          • The bottom-right velvet is scroll-linked: it rounds off and slides
@@ -358,7 +357,8 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         type Item = { el: HTMLElement; head: HTMLElement; leaves: HTMLElement[]; homeY: number; kind: number; bud: boolean; blasted: boolean };
         const scrollTop0 = scroller.scrollTop;
         const sTop = scroller.getBoundingClientRect().top;
-        const items: Item[] = ([...q(".flower"), ...q(".rosebud")] as HTMLElement[]).map((el) => {
+        // only the corner bouquets blast — the flowers around the seal stay
+        const items: Item[] = ([...q(".corner-cluster .flower"), ...q(".corner-cluster .rosebud")] as HTMLElement[]).map((el) => {
           const bud = el.classList.contains("rosebud");
           const r = el.getBoundingClientRect();
           return {
