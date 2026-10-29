@@ -6,7 +6,7 @@ import { invitation as C } from "@/src/content/invitation";
 import { timing } from "@/src/config/timing";
 import { assets } from "@/src/config/assets";
 import { AssetImage } from "./AssetImage";
-import { Divider } from "./art/LineArt";
+import { Divider, ScheduleThread, THREAD_NODES } from "./art/LineArt";
 import { FlowerOpenPlaceholder } from "./art/Placeholders";
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 
@@ -42,9 +42,10 @@ function Countdown() {
   );
 }
 
-function CornerBloom({ kind }: { kind: number }) {
+/** Rose that unfurls on a vine node */
+function NodeBloom({ kind }: { kind: number }) {
   return (
-    <div className="event-bloom" aria-hidden>
+    <div className="t-bloom" aria-hidden>
       <AssetImage src={assets.flowers[kind]} alt="" sizes="80px" fallback={<FlowerOpenPlaceholder kind={kind} />} />
     </div>
   );
@@ -110,12 +111,28 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
 
       if (reduce) return;
 
-      q(".event-card").forEach((card) => {
-        const bloom = card.querySelector(".event-bloom");
+      /* Schedule: the gold vine grows downward with the scroll (scrubbed),
+         stroke by stroke in drawing order, at a steady pen speed. */
+      const thread = q(".timeline")[0] as HTMLElement | undefined;
+      if (thread) {
+        const strokes = [...thread.querySelectorAll<SVGPathElement>(".thread .draw")];
+        gsap.set(strokes, { drawSVG: "0%" });
+        const grow = gsap.timeline({
+          scrollTrigger: { trigger: thread, scroller, start: "top 82%", end: "bottom 70%", scrub: 0.8 },
+        });
+        strokes.forEach((p) => grow.to(p, { drawSVG: "100%", duration: p.getTotalLength(), ease: "none" }));
+      }
+
+      /* Each event, as the vine reaches it: a rose unfurls on the node, the
+         title is written in, then the details fade up. */
+      q(".t-event").forEach((ev) => {
+        const bloom = ev.querySelector(".t-bloom");
+        const title = ev.querySelector(".t-title .wipe");
+        const lines = ev.querySelectorAll(".t-line");
+        gsap.set(title, { "--wipe": "60%" });
+        gsap.set(lines, { opacity: 0, y: 10, filter: "blur(3px)" });
         gsap
-          .timeline({ scrollTrigger: { trigger: card, scroller, start: "top 88%", once: true } })
-          .from(card, { opacity: 0, y: 36, duration: D.cardDur, ease: "power3.out" })
-          // same unfurl as the hero flowers
+          .timeline({ scrollTrigger: { trigger: ev, scroller, start: "top 76%", once: true } })
           .fromTo(
             bloom,
             { scale: 0.25, rotation: -70, opacity: 0, clipPath: "circle(16% at 50% 50%)" },
@@ -128,8 +145,9 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
               ease: "power3.out",
               clearProps: "clipPath",
             },
-            0.25,
-          );
+          )
+          .to(title, { "--wipe": "0%", duration: D.titleWrite, ease: "power1.inOut" }, 0.2)
+          .to(lines, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.7, ease: "power2.out", stagger: 0.1, clearProps: "filter" }, 0.55);
       });
 
       q(".reveal-up").forEach((el) => {
@@ -165,25 +183,32 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           </h2>
           <Divider />
         </div>
-        {C.events.map((e, i) => (
-          <article key={e.title} className="event-card" data-mood={"mood" in e ? e.mood : undefined}>
-            <CornerBloom kind={[0, 1, 2][i % 3]} />
-            <div className="event-date">
-              <div className="event-day">{e.day}</div>
-              <div className="event-month">{e.month}</div>
-            </div>
-            <div>
-              <h3 className="event-title">{e.title}</h3>
-              <p className="event-meta">
-                {e.weekday} · {e.time}
-                <br />
-                {e.place}
-                <br />
-                <em>{e.note}</em>
-              </p>
-            </div>
-          </article>
-        ))}
+        {/* The schedule hangs on a gold vine: one event per node, written
+            straight onto the paper (no boxes). */}
+        <div className="timeline">
+          <ScheduleThread />
+          {C.events.slice(0, THREAD_NODES.length).map((e, i) => (
+            <article
+              key={e.title}
+              className="t-event"
+              data-mood={"mood" in e ? e.mood : undefined}
+              style={{ top: `${THREAD_NODES[i] * 100}%` }}
+            >
+              <NodeBloom kind={[0, 1, 2, 3][i % 4]} />
+              <div className="t-text">
+                <p className="t-line t-date">
+                  {e.weekday} · {e.day} {e.month}
+                </p>
+                <h3 className="t-title script">
+                  <span className="wipe">{e.title}</span>
+                </h3>
+                <p className="t-line t-time">{e.time}</p>
+                <p className="t-line t-place">{e.place}</p>
+                <p className="t-line t-note">{e.note}</p>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="panel reveal-up" aria-labelledby="venue-title">

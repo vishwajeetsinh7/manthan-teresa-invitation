@@ -13,7 +13,7 @@ import {
   FlowerOpenPlaceholder,
   LeafPlaceholder,
 } from "./art/Placeholders";
-import { CornerVine, TailVine, Divider, Flourish, Chevron } from "./art/LineArt";
+import { CornerVine, TailVine, Divider, Flourish, NameFlourish, Chevron } from "./art/LineArt";
 import { Petals } from "./Petals";
 import { GoldDust } from "./GoldDust";
 
@@ -175,6 +175,8 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       });
       // mask is 3× wide with a feather at 33–40%: 60% = fully hidden, 0% = fully shown
       gsap.set(q(".wipe"), { "--wipe": "60%" });
+      gsap.set(q(".name-flourish .draw"), { drawSVG: "0%" });
+      gsap.set(q(".name-flourish .dot"), { scale: 0, transformOrigin: "50% 50%" });
       gsap.set(q(".fade-up"), { opacity: 0, y: 12, filter: "blur(4px)" });
       gsap.set(q(".joiner-word"), { opacity: 0, y: 6 });
       gsap.set(q(".scroll-hint"), { opacity: 0, y: 8 });
@@ -275,7 +277,14 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         tl.to(q(sel), { opacity: 1, y: 0, filter: "blur(0px)", duration: dur, ease: "power2.out", stagger }, at);
 
       // 3.4  names written in like a pen
+      // gold swash under a name: strokes grow from the centre outward as the pen lifts
+      const swash = (sel: string, at: number) => {
+        tl.to(q(`${sel} .draw`), { drawSVG: "100%", duration: R.flourish.dur, ease: "power2.inOut", stagger: R.flourish.stagger }, at);
+        tl.to(q(`${sel} .dot`), { scale: 1, duration: 0.35, ease: "back.out(3)", stagger: 0.08 }, at + R.flourish.dur * 0.8);
+      };
+
       write(".bride-name", R.bride.at, R.bride.write);
+      swash(".flourish-bride", R.bride.at + R.bride.write * R.flourish.afterWrite);
       fadeUp(".bride-meta", R.brideParents.at, R.brideParents.dur);
 
       tl.to(q(".joiner-word"), { opacity: 1, y: 0, duration: R.joiner.dur, ease: "power2.out" }, R.joiner.at);
@@ -283,6 +292,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       tl.to(q(".flourish .pop"), { scale: 1, duration: 0.3, ease: "back.out(2)" }, R.joiner.at + R.joiner.dur);
 
       write(".groom-name", R.groom.at, R.groom.write);
+      swash(".flourish-groom", R.groom.at + R.groom.write * R.flourish.afterWrite);
       fadeUp(".groom-meta", R.groomParents.at, R.groomParents.dur);
 
       drawDivider(".divider-2", R.divider2.at, R.divider2.dur);
@@ -562,6 +572,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
             <span className="shimmer">{C.bride.name}</span>
           </span>
         </p>
+        <NameFlourish className="flourish-bride" />
         <p className="relation fade-up bride-meta">{C.bride.relation}</p>
         <p className="parents fade-up bride-meta">{C.bride.parents}</p>
 
@@ -576,6 +587,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
             <span className="shimmer">{C.groom.name}</span>
           </span>
         </p>
+        <NameFlourish className="flourish-groom" />
         <p className="relation fade-up groom-meta">{C.groom.relation}</p>
         <p className="parents fade-up groom-meta">{C.groom.parents}</p>
 

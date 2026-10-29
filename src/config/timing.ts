@@ -38,6 +38,8 @@ export const timing = {
     together: { at: 2.8, dur: 1.1 },
     divider1: { at: 3.1, dur: 0.9 },
     bride: { at: 3.4, write: 1.6 },
+    /** gold swash under each name; starts when the pen is this far through the name */
+    flourish: { afterWrite: 0.75, dur: 0.9, stagger: 0.035 },
     brideParents: { at: 4.7, dur: 0.8 },
     joiner: { at: 5.2, dur: 0.8 },
     groom: { at: 5.6, write: 1.6 },
@@ -87,6 +89,8 @@ export const timing = {
   sections: {
     cardDur: 0.9,
     bloomDur: 0.9,
+    /** schedule event titles are written in like the names */
+    titleWrite: 1.1,
   },
 
   music: { fadeIn: 2.5, volume: 0.55 },
