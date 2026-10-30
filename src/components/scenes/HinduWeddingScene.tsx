@@ -140,15 +140,16 @@ export function HinduWeddingScene({ scrollerRef, style, reduce, page }: { scroll
         tl.fromTo(el, { y: 0 }, { y: () => -3 * k(), duration: 0.18, ease: "sine.inOut", yoyo: true, repeat: 5 }, at);
       };
       if (!S.antarpat) {
-        // 3. (antarpat switched off for now) the friends come straight in from the sides with their
-        //    thalis, then groom and bride walk in and see each other
+        // 3. (antarpat switched off for now) the friends come in first, straight from the sides with
+        //    their thalis; once they stand, groom and bride walk in and see each other
         tl.fromTo(gujB, { x: () => -0.5 * W(), autoAlpha: 0 }, { x: 0, duration: 0.9, ease: "power3.out" }, t);
         tl.fromTo(kerB, { x: () => 0.5 * W(), autoAlpha: 0 }, { x: 0, duration: 0.9, ease: "power3.out" }, t);
         tl.to([gujB, kerB], { autoAlpha: 1, duration: 0.12 }, t);
-        walkIn(groomA, -0.45, t + 0.45);
-        walkIn(brideA, 0.45, t + 0.5);
-        tl.set([groomB, brideB], { x: 0 }, t + 0.45);
-        tl.fromTo(q(".hw-sight img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.3 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.4 }], stagger: 0.08 }, t + 1.5);
+        const couple = t + 0.95; // the friends have arrived
+        walkIn(groomA, -0.45, couple);
+        walkIn(brideA, 0.45, couple + 0.05);
+        tl.set([groomB, brideB], { x: 0 }, couple);
+        tl.fromTo(q(".hw-sight img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.3 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.4 }], stagger: 0.08 }, couple + 1.05);
         t += ACT.arrive;
       } else {
         // 3. the antarpat: the friends hold it up from BEHIND the cloth (as it is really done) — the

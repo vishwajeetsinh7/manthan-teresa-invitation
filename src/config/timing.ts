@@ -227,7 +227,7 @@ export const timing = {
     hindu: {
       /** seconds for each act: mandap, pots + fire, arrive (friends, groom, bride — when the antarpat
        *  is off), antarpat, first sight, varmala, together (+ diyas), blessing */
-      acts: { mandap: 1.5, ritual: 1.6, arrive: 2.2, antarpat: 2.2, sight: 1.5, varmala: 1.8, together: 2.4, blessing: 1.6 },
+      acts: { mandap: 1.5, ritual: 1.6, arrive: 2.7, antarpat: 2.2, sight: 1.5, varmala: 1.8, together: 2.4, blessing: 1.6 },
       /** the antarpat (friends hold a cloth between groom and bride, then it drops) — off for now */
       antarpat: false as boolean,
       /** leaving back up rewinds this much faster */
