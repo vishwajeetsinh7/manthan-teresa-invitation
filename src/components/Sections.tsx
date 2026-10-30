@@ -87,23 +87,41 @@ function TravellingRose() {
 }
 
 /**
- * The Mehndi ceremony: a friend applying henna to the bride, a 12-frame
- * sprite (built by scripts/build-mehndi-sprite.mjs). Frames are stepped by a
- * CSS animation that only runs while Mehndi is in focus (.is-focus), so it
- * costs nothing the rest of the time.
+ * The Mehndi ceremony: a friend applying henna to the bride, 24 frames laid
+ * out in a grid (built by scripts/build-mehndi-sprite.mjs). Two CSS step
+ * animations walk the background across the columns and down the rows; they
+ * run only while Mehndi is in focus (.is-focus). Only this small box repaints
+ * per frame (no huge GPU layer), and the sheet is decoded ahead of time so
+ * the first glide onto the page never stutters.
  */
+const SCENE_SRC = "/mehndi/mehndi-sprite.webp";
 function MehndiScene() {
   const m = mehndiSprite;
+  useEffect(() => {
+    // decode off the critical path, well before the guest reaches Mehndi
+    const id = window.setTimeout(() => {
+      const img = new Image();
+      img.src = SCENE_SRC;
+      img.decode?.().catch(() => {});
+    }, 2500);
+    return () => window.clearTimeout(id);
+  }, []);
   return (
     <div
       className="t-scene"
+      data-page-part
       aria-hidden
-      style={{ aspectRatio: `${m.frameWidth} / ${m.frameHeight}`, "--n": m.frameCount, "--loop": `${m.frameCount / m.fps}s` } as CSSProperties}
+      style={
+        {
+          aspectRatio: `${m.frameWidth} / ${m.frameHeight}`,
+          "--cols": m.cols,
+          "--rows": m.rows,
+          "--x-dur": `${m.cols / m.fps}s`,
+          "--y-dur": `${m.frameCount / m.fps}s`,
+        } as CSSProperties
+      }
     >
-      <div className="t-scene-clip">
-        {/* eslint-disable-next-line @next/next/no-img-element -- a sprite strip, stepped by transform */}
-        <img className="t-scene-strip" src="/mehndi/mehndi-sprite.webp" alt="" draggable={false} decoding="async" fetchPriority="low" />
-      </div>
+      <div className="t-scene-art" style={{ backgroundImage: `url(${SCENE_SRC})` }} />
     </div>
   );
 }
@@ -345,7 +363,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
             tl?.kill();
             spin?.kill();
             wobble?.kill();
-            gsap.set(pattern, { rotation: 0, scale: 1 });
+            gsap.set(patternSvg, { rotation: 0 });
             gsap.set(strokes, { drawSVG: "0%" });
             gsap.set(dots, { opacity: 0, scale: 0, transformOrigin: "50% 50%" });
             // map drawing coordinates into this event's box (measured once; they move together)
@@ -398,7 +416,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
               .to(cone, { autoAlpha: 0, duration: 0.15 }, t + 0.1 + N.fly)
               .to(iconCone, { opacity: 1, duration: 0.3 }, t + N.fly - 0.05)
               .add(() => {
-                spin = gsap.to(pattern, { rotation: 360, duration: N.spinSeconds, ease: "none", repeat: -1 });
+                spin = gsap.to(patternSvg, { rotation: 360, transformOrigin: "50% 50%", duration: N.spinSeconds, ease: "none", repeat: -1 });
               });
           };
           on.push(() => {
@@ -417,7 +435,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         }
 
         // an event's illustration rises in the first time the event is focused
-        const scene = ev.querySelector<HTMLElement>(".t-scene");
+        const scene = ev.querySelector<HTMLElement>(".t-scene-art");
         if (scene && !reduce) {
           let shown = false;
           gsap.set(scene, { opacity: 0, y: 18 });
@@ -697,7 +715,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
   return (
     <div ref={root} className="below">
       <section aria-labelledby="events-title">
-        <div className="section-head" data-page="top" style={{ marginBottom: "calc(var(--u) * 22)" }}>
+        <div className="section-head" data-page="mehndi" style={{ marginBottom: "calc(var(--u) * 22)" }}>
           <h2 id="events-title" className="section-title">
             <span className="wipe">{C.eventsHeading}</span>
           </h2>
@@ -708,11 +726,9 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         <div className="timeline" style={{ height: `calc(var(--thread-w) * ${(THREAD.height / 120).toFixed(3)})` }}>
           <ScheduleThread thread={THREAD} />
           <TravellingRose />
-          {/* pages: each event rests in the middle of the screen (Mehndi
-              shares its page with the "Celebrations" heading above it) */}
-          {NODE.map((n, i) =>
-            i === 0 ? null : <span key={i} className="t-snap" data-page="center" style={{ top: `${n * 100}%` }} aria-hidden />,
-          )}
+          {/* native snap points, used only with reduced motion (the pager
+              places pages from their content: data-page) */}
+          {NODE.map((n, i) => (i === 0 ? null : <span key={i} className="t-snap" style={{ top: `${n * 100}%` }} aria-hidden />))}
           {SCHEDULE.map((e, i) => {
             const mehndi = "pattern" in e && e.pattern === "mehndi";
             return (
@@ -727,8 +743,8 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                     <SvgArt key={name} svg={EVENT_ICONS[name]} className="event-icon" />
                   ))}
                 </div>
-                <div className="t-text">
-                  {mehndi && <SvgArt svg={MEHNDI_MANDALA} className="t-pattern" />}
+                <div className="t-text" data-page={i === 0 ? "mehndi" : `event-${i}`}>
+                  {mehndi && <SvgArt svg={MEHNDI_MANDALA} className="t-pattern" data-page-part="" />}
                   {"scene" in e && e.scene === "mehndi" && <MehndiScene />}
                   {"mood" in e && e.mood === "haldi" && <span className="t-halo" aria-hidden />}
                   <EventDate day={e.day} weekday={e.weekday} month={e.month} />
@@ -750,7 +766,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         </div>
       </section>
 
-      <section className="panel reveal-up" data-page="center" aria-labelledby="venue-title">
+      <section className="panel reveal-up" data-page="venue" aria-labelledby="venue-title">
         <h2 id="venue-title" className="section-title">
           {C.venue.heading}
         </h2>
@@ -766,7 +782,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         </a>
       </section>
 
-      <section className="panel reveal-up" data-page="center" aria-labelledby="count-title">
+      <section className="panel reveal-up" data-page="count" aria-labelledby="count-title">
         <h2 id="count-title" className="section-title">
           {C.countdown.heading}
         </h2>
@@ -774,7 +790,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         <Countdown />
       </section>
 
-      <section className="panel reveal-up" data-page="center" aria-labelledby="rsvp-title">
+      <section className="panel reveal-up" data-page="rsvp" aria-labelledby="rsvp-title">
         <h2 id="rsvp-title" className="section-title">
           {C.rsvp.heading}
         </h2>
@@ -785,7 +801,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         </a>
       </section>
 
-      <p className="footer-line reveal-up" data-page="center">{C.footer}</p>
+      <p className="footer-line reveal-up" data-page="rsvp">{C.footer}</p>
     </div>
   );
 }

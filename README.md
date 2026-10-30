@@ -100,11 +100,11 @@ outline and the text's ink). Timings are in `timing.doves`.
 
 ## Mehndi ceremony scene
 
-`assets-src/mehndi-sheet-green.webp` (12 frames on green, a 4 × 3 grid) → `npm run mehndi` →
+`assets-src/mehndi-sheet-1-green.webp` + `-2-` (12 frames each on green, 4 × 3 grids; 24 frames) → `npm run mehndi` →
 `public/mehndi/mehndi-sprite.webp` + `.json` (+ `preview.html`). Same green-screen key as the doves
 (`scripts/lib/chroma-key.mjs`, set strict here because the bride's blouse is olive green); frames
-are aligned on the cushion and bowl. On the page the frames are stepped by a CSS animation that
-runs only while Mehndi is in focus. Speed: `FPS` in the script.
+are aligned on the cushion and bowl, laid out as a 6 × 4 grid. On the page two CSS step animations walk the grid; they
+run only while Mehndi is in focus. Speed: `FPS` in the script.
 
 ## Performance notes
 

@@ -134,6 +134,11 @@ export const timing = {
     cooldown: 0.35,
     /** px of wheel before it counts */
     tolerance: 10,
+    /** where a page's content rests: share of the free space left above it
+     *  (0.5 = centred; less = a little higher), and the margins kept (u) */
+    bias: 0.42,
+    padTop: 30,
+    padBottom: 24,
   },
 
   /** Two doves beside the names (start once the names have been written) */

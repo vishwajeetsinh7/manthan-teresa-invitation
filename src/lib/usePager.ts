@@ -7,10 +7,16 @@ import { timing } from "@/src/config/timing";
 /**
  * One page per gesture, with a smooth glide between pages (GSAP).
  *
- * Pages are marked in the markup with data-page:
- *   "top"    — the element's top rests at the top of the screen (minus its
- *              CSS scroll-margin-top, so a heading gets breathing room)
- *   "center" — the element rests in the middle of the screen
+ * Pages are content groups, marked in the markup with data-page="<name>":
+ * every element with the same name (plus any [data-page-part] inside it, e.g.
+ * the mandala and the ceremony scene hanging below the Mehndi text) makes up
+ * one page. Its resting point is placed from that content:
+ *   • fits on screen → the group sits a little above the middle
+ *     (timing.paging.bias of the free space above it)
+ *   • taller than the screen → its top rests just below the top edge
+ *   • "hero" is always the very top
+ * Boxes are measured without passing animations (entrance offsets, the
+ * spinning mandala), so a page's stop never drifts while things animate.
  *
  * Touch: the page follows the finger at once (up to one page either way);
  * on release it glides on to the next page — or back, for a short nudge —
@@ -53,16 +59,43 @@ export function usePager(scrollerRef: RefObject<HTMLDivElement | null>, active: 
     let gliding = false;
     let quietUntil = 0;
 
+    /** an element's box in scroll coordinates. Elements that slide in on
+        entry (.reveal-up) are measured by layout, ignoring that offset. */
+    const boxOf = (el: HTMLElement, sTop: number, scrollTop: number) => {
+      if (el.classList.contains("reveal-up")) {
+        const top = offsetIn(el, s);
+        return { top, bottom: top + el.offsetHeight };
+      }
+      const r = el.getBoundingClientRect();
+      return { top: r.top - sTop + scrollTop, bottom: r.bottom - sTop + scrollTop };
+    };
     const measure = () => {
       const H = s.clientHeight;
       const max = s.scrollHeight - H;
-      const list: number[] = [];
+      const u = Math.min(s.clientWidth, H * 0.5625) / 390;
+      // the controls sit 14u below the safe area: read the safe area from them
+      const controls = document.querySelector<HTMLElement>(".controls");
+      const safeTop = controls ? Math.max(0, controls.offsetTop - 14 * u) : 0;
+      const padTop = P.padTop * u + safeTop;
+      const padBottom = P.padBottom * u;
+      const sTop = s.getBoundingClientRect().top;
+      const groups = new Map<string, { top: number; bottom: number }>();
       s.querySelectorAll<HTMLElement>("[data-page]").forEach((el) => {
-        const top = offsetIn(el, s);
-        const y =
-          el.dataset.page === "center"
-            ? top + el.offsetHeight / 2 - H / 2
-            : top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0);
+        const name = el.dataset.page!;
+        for (const part of [el, ...el.querySelectorAll<HTMLElement>("[data-page-part]")]) {
+          const b = boxOf(part, sTop, s.scrollTop);
+          if (b.bottom - b.top <= 0) continue;
+          const g = groups.get(name);
+          groups.set(name, g ? { top: Math.min(g.top, b.top), bottom: Math.max(g.bottom, b.bottom) } : b);
+        }
+      });
+      const list: number[] = [];
+      groups.forEach((g, name) => {
+        let y = 0;
+        if (name !== "hero") {
+          const free = H - padTop - padBottom - (g.bottom - g.top);
+          y = g.top - padTop - Math.max(0, free) * P.bias;
+        }
         list.push(clamp(0, max, Math.round(y)));
       });
       list.sort((a, b) => a - b);
@@ -106,6 +139,10 @@ export function usePager(scrollerRef: RefObject<HTMLDivElement | null>, active: 
       glideTo(index + dir);
     };
     api.current = { next: () => step(1), enabled: true };
+    // dev only: inspect from the console
+    if (process.env.NODE_ENV !== "production") {
+      (window as unknown as { __pager: object }).__pager = { pages: () => (measure(), pages), index: () => index, gliding: () => gliding };
+    }
 
     // where are we now? (the guest may have scrolled before this started)
     measure();
@@ -123,6 +160,7 @@ export function usePager(scrollerRef: RefObject<HTMLDivElement | null>, active: 
     });
 
     // touch: the page sticks to the finger, then glides on (or back) on release
+    let dragging = false;
     let dragFrom = 0;
     let lo = 0;
     let hi = 0;
@@ -132,6 +170,7 @@ export function usePager(scrollerRef: RefObject<HTMLDivElement | null>, active: 
       preventDefault: true,
       dragMinimum: 2,
       onDragStart: () => {
+        dragging = true;
         gsap.killTweensOf(s); // a touch during a glide catches the page
         gliding = false;
         measure();
@@ -144,6 +183,7 @@ export function usePager(scrollerRef: RefObject<HTMLDivElement | null>, active: 
         s.scrollTop = clamp(lo, hi, dragFrom - (self.y! - self.startY!));
       },
       onDragEnd: (self) => {
+        dragging = false;
         const moved = self.y! - self.startY!;
         const v = self.velocityY;
         let to = index;
@@ -167,18 +207,25 @@ export function usePager(scrollerRef: RefObject<HTMLDivElement | null>, active: 
     };
     window.addEventListener("keydown", onKey);
 
-    // layout changes (fonts, rotation, resize): stay on the same page
+    // layout changes (fonts, images, rotation): ease back onto the same page —
+    // never while the finger is down or a glide is running, never a jump
+    let raf = 0;
     const realign = () => {
-      if (gliding) return;
-      measure();
-      index = Math.min(index, pages.length - 1);
-      s.scrollTop = pages[index];
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        if (gliding || dragging) return;
+        measure();
+        index = Math.min(index, pages.length - 1);
+        if (Math.abs(s.scrollTop - pages[index]) < 2) return;
+        gsap.to(s, { scrollTop: pages[index], duration: 0.45, ease: "power2.out", overwrite: true });
+      });
     };
     const ro = new ResizeObserver(realign);
     ro.observe(s);
     Array.from(s.children).forEach((c) => ro.observe(c));
 
     return () => {
+      cancelAnimationFrame(raf);
       wheel.kill();
       touch.kill();
       ro.disconnect();

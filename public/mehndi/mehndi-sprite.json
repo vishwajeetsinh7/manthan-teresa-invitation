@@ -1,8 +1,10 @@
 {
-  "frameWidth": 386,
-  "frameHeight": 291,
-  "frameCount": 12,
-  "fps": 8,
+  "frameWidth": 404,
+  "frameHeight": 316,
+  "frameCount": 24,
+  "cols": 6,
+  "rows": 4,
+  "fps": 10,
   "order": [
     1,
     2,
@@ -15,6 +17,18 @@
     9,
     10,
     11,
-    12
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
   ]
 }

@@ -688,7 +688,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
   );
 
   return (
-    <section ref={card} className="card" data-page="top" aria-label="Wedding invitation">
+    <section ref={card} className="card" data-page="hero" aria-label="Wedding invitation">
       <h1 className="sr-only">
         {C.bride.name} &amp; {C.groom.name} — {C.dateLine}
       </h1>

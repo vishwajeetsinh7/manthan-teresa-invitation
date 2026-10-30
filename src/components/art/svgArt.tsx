@@ -29,8 +29,8 @@ export const EVENT_ICONS = {
 export type EventIconName = keyof typeof EVENT_ICONS;
 
 /** Renders one of the markup strings above (trusted, local art). */
-export function SvgArt({ svg, className }: { svg: string; className?: string }) {
-  return <span className={className} aria-hidden dangerouslySetInnerHTML={{ __html: svg }} />;
+export function SvgArt({ svg, className, ...rest }: { svg: string; className?: string } & React.HTMLAttributes<HTMLSpanElement>) {
+  return <span {...rest} className={className} aria-hidden dangerouslySetInnerHTML={{ __html: svg }} />;
 }
 
 /** The henna cone from the Mehndi icon, filled, as a separate "pen" that

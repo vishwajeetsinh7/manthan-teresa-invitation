@@ -4,10 +4,10 @@
  *
  *   npm run mehndi
  *
- * In:  assets-src/mehndi-sheet-green.webp  (12 frames on #00FF00, a 4 × 3 grid
- *                                            with clear green gaps between frames)
- * Out: public/mehndi/mehndi-sprite.webp     (all frames in one row, transparent)
- *      public/mehndi/mehndi-sprite.json     (frameWidth, frameHeight, frameCount, fps)
+ * In:  assets-src/mehndi-sheet-1-green.webp, …-2-…  (12 frames each on #00FF00, a
+ *       4 × 3 grid with clear green gaps; sheet 2 continues sheet 1 → 24 frames)
+ * Out: public/mehndi/mehndi-sprite.webp     (frames in a grid of COLS columns, transparent)
+ *      public/mehndi/mehndi-sprite.json     (frameWidth, frameHeight, frameCount, cols, rows, fps)
  *      public/mehndi/preview.html           (loop at 1× and ½×, plus an onion skin)
  *
  * Steps: chroma key (strict, the bride's blouse is olive green) → find the
@@ -19,116 +19,132 @@ import sharp from "sharp";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { chromaKey } from "./lib/chroma-key.mjs";
 
-const SRC = "assets-src/mehndi-sheet-green.webp";
+const SOURCES = ["assets-src/mehndi-sheet-1-green.webp", "assets-src/mehndi-sheet-2-green.webp"];
 const OUT_DIR = "public/mehndi";
 
-/** Frame order (1-based, source reading order). Reorder or drop frames here. */
-const FRAME_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+/** Frame order (1-based: sheet 1 is 1–12, sheet 2 is 13–24). Reorder or drop frames here. */
+const FRAME_ORDER = Array.from({ length: 24 }, (_, k) => k + 1);
 /** playback speed baked into the JSON (the page reads it) */
-const FPS = 8;
+const FPS = 10;
+/** the sprite is a grid (a single 24-frame row would be too wide for phone GPUs) */
+const COLS = 6;
 
 const KEY = { lo: 64, hi: 170 }; // strict: olive green (dominance ~20–40) stays opaque
 const SPECK = 220; // px; smaller opaque blobs are compression specks
 const PAD = 14;
 const SHADOW = { opacity: 0.2, blur: 7 };
-const QUALITY = 88;
+const QUALITY = 80;
 
 const fail = (msg) => {
   console.error(`✖ ${msg}`);
   process.exit(1);
 };
 
-/* ── 1. key ─────────────────────────────────────────────────────────── */
-const { data: rgb, info } = await sharp(SRC).removeAlpha().raw().toBuffer({ resolveWithObject: true });
-const W = info.width;
-const H = info.height;
-const N = W * H;
-const { rgba, alpha } = chromaKey(rgb, N, KEY);
-
-// drop tiny specks (lossy-compression noise in the green)
-{
-  const seen = new Uint8Array(N);
-  const stack = new Int32Array(N);
-  for (let s = 0; s < N; s++) {
-    if (seen[s] || alpha[s] < 0.5) continue;
-    const blob = [];
-    let top = 0;
-    stack[top++] = s;
-    seen[s] = 1;
-    while (top) {
-      const p = stack[--top];
-      blob.push(p);
-      const x = p % W;
-      for (const q of [p - 1, p + 1, p - W, p + W]) {
-        if (q < 0 || q >= N || seen[q] || alpha[q] < 0.5) continue;
-        if ((q === p - 1 && x === 0) || (q === p + 1 && x === W - 1)) continue;
-        seen[q] = 1;
-        stack[top++] = q;
-      }
-    }
-    if (blob.length < SPECK)
-      for (const p of blob) {
-        alpha[p] = 0;
-        rgba[p * 4 + 3] = 0;
-      }
-  }
-}
-
-/* ── 2. frames: split on the empty green bands ──────────────────────── */
-const bands = (count, len, at) => {
-  const filled = [];
-  for (let k = 0; k < len; k++) filled.push(at(k) > 2);
-  const runs = [];
-  let start = -1;
-  for (let k = 0; k <= len; k++) {
-    if (k < len && filled[k]) {
-      if (start < 0) start = k;
-    } else if (start >= 0) {
-      runs.push([start, k]);
-      start = -1;
-    }
-  }
-  // merge runs split by thin gaps (a frame's own see-through bits)
-  const merged = [];
-  for (const r of runs) {
-    const last = merged[merged.length - 1];
-    if (last && r[0] - last[1] < 18) last[1] = r[1];
-    else merged.push([...r]);
-  }
-  const big = merged.filter((r) => r[1] - r[0] > 40);
-  if (big.length !== count) fail(`expected ${count} bands, found ${big.length} (${big.map((r) => r.join("–")).join(", ")})`);
-  return big;
-};
-const colCount = (x) => {
-  let n = 0;
-  for (let y = 0; y < H; y++) if (alpha[y * W + x] > 0.5) n++;
-  return n;
-};
-const rowCount = (y) => {
-  let n = 0;
-  for (let x = 0; x < W; x++) if (alpha[y * W + x] > 0.5) n++;
-  return n;
-};
-const cols = bands(4, W, colCount);
-const rows = bands(3, H, rowCount);
-
 const frames = [];
-for (const [y0, y1] of rows)
-  for (const [x0, x1] of cols) {
-    const w = x1 - x0;
-    const h = y1 - y0;
-    const px = new Float32Array(w * h * 4);
-    for (let y = 0; y < h; y++)
-      for (let x = 0; x < w; x++) {
-        const i = (y0 + y) * W + (x0 + x);
-        const o = (y * w + x) * 4;
-        px[o] = rgba[i * 4];
-        px[o + 1] = rgba[i * 4 + 1];
-        px[o + 2] = rgba[i * 4 + 2];
-        px[o + 3] = rgba[i * 4 + 3];
+for (const SRC of SOURCES) {
+  /* ── 1. key ─────────────────────────────────────────────────────────── */
+  const { data: rgb, info } = await sharp(SRC).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const W = info.width;
+  const H = info.height;
+  const N = W * H;
+  const { rgba, alpha } = chromaKey(rgb, N, KEY);
+
+  // drop tiny specks (lossy-compression noise in the green)
+  {
+    const seen = new Uint8Array(N);
+    const stack = new Int32Array(N);
+    for (let s = 0; s < N; s++) {
+      if (seen[s] || alpha[s] < 0.5) continue;
+      const blob = [];
+      let top = 0;
+      stack[top++] = s;
+      seen[s] = 1;
+      while (top) {
+        const p = stack[--top];
+        blob.push(p);
+        const x = p % W;
+        for (const q of [p - 1, p + 1, p - W, p + W]) {
+          if (q < 0 || q >= N || seen[q] || alpha[q] < 0.5) continue;
+          if ((q === p - 1 && x === 0) || (q === p + 1 && x === W - 1)) continue;
+          seen[q] = 1;
+          stack[top++] = q;
+        }
       }
-    frames.push({ src: frames.length + 1, x0, y0, w, h, px });
+      if (blob.length < SPECK)
+        for (const p of blob) {
+          alpha[p] = 0;
+          rgba[p * 4 + 3] = 0;
+        }
+    }
   }
+
+  /* ── 2. frames: split on the empty green bands ──────────────────────── */
+  const bands = (count, len, at) => {
+    const filled = [];
+    for (let k = 0; k < len; k++) filled.push(at(k) > 2);
+    const runs = [];
+    let start = -1;
+    for (let k = 0; k <= len; k++) {
+      if (k < len && filled[k]) {
+        if (start < 0) start = k;
+      } else if (start >= 0) {
+        runs.push([start, k]);
+        start = -1;
+      }
+    }
+    // merge runs split by thin gaps (a frame's own see-through bits)
+    const merged = [];
+    for (const r of runs) {
+      const last = merged[merged.length - 1];
+      if (last && r[0] - last[1] < 4) last[1] = r[1];
+      else merged.push([...r]);
+    }
+    const big = merged.filter((r) => r[1] - r[0] > 40);
+    if (big.length !== count) fail(`expected ${count} bands, found ${big.length} (${big.map((r) => r.join("–")).join(", ")})`);
+    return big;
+  };
+  const colCount = (x) => {
+    let n = 0;
+    for (let y = 0; y < H; y++) if (alpha[y * W + x] > 0.5) n++;
+    return n;
+  };
+  const rowCount = (y) => {
+    let n = 0;
+    for (let x = 0; x < W; x++) if (alpha[y * W + x] > 0.5) n++;
+    return n;
+  };
+  const cols = bands(4, W, colCount);
+  const rows = bands(3, H, rowCount);
+
+  for (const [y0, y1] of rows)
+    for (const [x0, x1] of cols) {
+      const w = x1 - x0;
+      const h = y1 - y0;
+      const px = new Float32Array(w * h * 4);
+      for (let y = 0; y < h; y++)
+        for (let x = 0; x < w; x++) {
+          const i = (y0 + y) * W + (x0 + x);
+          const o = (y * w + x) * 4;
+          px[o] = rgba[i * 4];
+          px[o + 1] = rgba[i * 4 + 1];
+          px[o + 2] = rgba[i * 4 + 2];
+          px[o + 3] = rgba[i * 4 + 3];
+        }
+      // tight size of the figures (to spot a sheet drawn at another scale)
+      let tx0 = w, ty0 = h, tx1 = 0, ty1 = 0;
+      for (let y = 0; y < h; y++)
+        for (let x = 0; x < w; x++)
+          if (px[(y * w + x) * 4 + 3] > 128) {
+            if (x < tx0) tx0 = x;
+            if (x > tx1) tx1 = x;
+            if (y < ty0) ty0 = y;
+            if (y > ty1) ty1 = y;
+          }
+      frames.push({ src: frames.length + 1, x0, y0, w, h, px, tw: tx1 - tx0 + 1, th: ty1 - ty0 + 1 });
+    }
+
+}
+console.log(`found ${frames.length} frames in ${SOURCES.length} sheets`);
 
 /* ── 3. align on the static base (bottom third: cushion, bowl, legs) ─ */
 const lum = (f, x, y) => {
@@ -150,7 +166,7 @@ const score = (f, dx, dy, step) => {
     }
   return s;
 };
-const R = 28;
+const R = 40; // the second sheet may sit a little differently in its cells
 for (const f of frames) {
   let best = [Infinity, 0, 0];
   for (let dy = -R; dy <= R; dy += 2) for (let dx = -R; dx <= R; dx += 2) {
@@ -209,14 +225,17 @@ for (const f of used) {
 
 /* ── 5. strip + metadata + preview ──────────────────────────────────── */
 mkdirSync(OUT_DIR, { recursive: true });
-const webp = await sharp({ create: { width: FW * tiles.length, height: FH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
-  .composite(tiles.map((t, k) => ({ input: t, left: k * FW, top: 0 })))
+const cols = Math.min(COLS, tiles.length);
+const rowsN = Math.ceil(tiles.length / cols);
+if (tiles.length !== cols * rowsN) fail(`${tiles.length} frames don't fill a ${cols}-column grid (the page steps a full grid)`);
+const webp = await sharp({ create: { width: FW * cols, height: FH * rowsN, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+  .composite(tiles.map((t, k) => ({ input: t, left: (k % cols) * FW, top: Math.floor(k / cols) * FH })))
   .webp({ quality: QUALITY, alphaQuality: 95, effort: 6, smartSubsample: true })
   .toBuffer();
 writeFileSync(`${OUT_DIR}/mehndi-sprite.webp`, webp);
 writeFileSync(
   `${OUT_DIR}/mehndi-sprite.json`,
-  JSON.stringify({ frameWidth: FW, frameHeight: FH, frameCount: tiles.length, fps: FPS, order: FRAME_ORDER }, null, 2) + "\n",
+  JSON.stringify({ frameWidth: FW, frameHeight: FH, frameCount: tiles.length, cols, rows: rowsN, fps: FPS, order: FRAME_ORDER }, null, 2) + "\n",
 );
 
 writeFileSync(
@@ -228,9 +247,9 @@ writeFileSync(
   body { margin: 0; padding: 24px; background: #f6eee3; font: 14px/1.4 Georgia, serif; color: #5a1520; }
   h2 { font-weight: normal; margin: 24px 0 10px; }
   .row { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
-  .f { width: ${FW}px; height: ${FH}px; background: url(mehndi-sprite.webp) 0 0 / ${FW * tiles.length}px ${FH}px no-repeat; outline: 1px dashed rgb(176 138 74 / .35); }
+  .f { width: ${FW}px; height: ${FH}px; background: url(mehndi-sprite.webp) 0 0 / ${FW * cols}px ${FH * rowsN}px no-repeat; outline: 1px dashed rgb(176 138 74 / .35); }
   .onion { position: relative; width: ${FW}px; height: ${FH}px; outline: 1px dashed rgb(176 138 74 / .35); }
-  .onion div { position: absolute; inset: 0; background: url(mehndi-sprite.webp) 0 0 / ${FW * tiles.length}px ${FH}px no-repeat; opacity: .2; }
+  .onion div { position: absolute; inset: 0; background: url(mehndi-sprite.webp) 0 0 / ${FW * cols}px ${FH * rowsN}px no-repeat; opacity: .2; }
 </style></head><body>
 <p>${tiles.length} frames · ${FW} × ${FH}px each · ${FPS} fps</p>
 <div class="row">
@@ -239,14 +258,15 @@ writeFileSync(
   <div><h2>Onion skin (static parts should look sharp)</h2><div class="onion" id="onion"></div></div>
 </div>
 <script>
-  const n = ${tiles.length}, fw = ${FW}, fps = ${FPS};
+  const n = ${tiles.length}, fw = ${FW}, fh = ${FH}, cols = ${cols}, fps = ${FPS};
+  const at = (k) => -(k % cols) * fw + "px " + -Math.floor(k / cols) * fh + "px";
   const onion = document.getElementById("onion");
-  for (let k = 0; k < n; k++) { const o = document.createElement("div"); o.style.backgroundPositionX = -k * fw + "px"; onion.appendChild(o); }
+  for (let k = 0; k < n; k++) { const o = document.createElement("div"); o.style.backgroundPosition = at(k); onion.appendChild(o); }
   const a = document.getElementById("a"), b = document.getElementById("b"), t0 = performance.now();
   (function loop(now) {
     const t = (now - t0) / 1000;
-    a.style.backgroundPositionX = -(Math.floor(t * fps) % n) * fw + "px";
-    b.style.backgroundPositionX = -(Math.floor(t * fps / 2) % n) * fw + "px";
+    a.style.backgroundPosition = at(Math.floor(t * fps) % n);
+    b.style.backgroundPosition = at(Math.floor((t * fps) / 2) % n);
     requestAnimationFrame(loop);
   })(t0);
 </script>
@@ -255,4 +275,4 @@ writeFileSync(
 );
 
 console.log(`✔ ${tiles.length} frames, ${FW}×${FH}px each → ${OUT_DIR}/mehndi-sprite.webp (${(webp.length / 1024).toFixed(0)} KB)`);
-for (const f of frames) console.log(`  frame ${String(f.src).padStart(2)}  cell ${f.x0},${f.y0} ${f.w}×${f.h}  shift ${f.dx},${f.dy}  match ${f.match.toFixed(1)}`);
+for (const f of frames) console.log(`  frame ${String(f.src).padStart(2)}  size ${f.tw}×${f.th}  cell ${f.x0},${f.y0} ${f.w}×${f.h}  shift ${f.dx},${f.dy}  match ${f.match.toFixed(1)}`);
