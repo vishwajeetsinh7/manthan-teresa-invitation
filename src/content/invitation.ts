@@ -16,7 +16,7 @@ export const invitation = {
   bride: {
     name: "Teresa Joy",
     relation: "Daughter of",
-    parents: "Joy K Mathew & Jaquline Joy",
+    parents: "Joy K Mathew & Jaquiline Joy",
   },
 
   joiner: "with",
