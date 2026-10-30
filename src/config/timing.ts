@@ -117,6 +117,33 @@ export const timing = {
     sheenSeconds: 7,
   },
 
+  /** Two doves beside the names (start once the names have been written) */
+  doves: {
+    /** fly-in from outside the card: seconds, and the right dove's delay */
+    enter: 2.2,
+    rightDelay: 0.25,
+    /** seconds per wingbeat (different, so they never flap in sync) */
+    beat: [0.4, 0.44] as [number, number],
+    /** body lift on each downstroke, and a slow drift (px, amplitude) */
+    bob: 2.5,
+    driftX: 2.5,
+    driftY: 2,
+    driftPeriod: [
+      [3.4, 3.1],
+      [3.9, 3.6],
+    ] as [[number, number], [number, number]],
+    /** glide: wings held level every 4–7 s for 0.6–0.9 s, sinking this much */
+    glideEvery: [4, 7] as [number, number],
+    glideHold: [0.6, 0.9] as [number, number],
+    glideSink: 3,
+    /** size limits (px) and the gap kept from any text */
+    minWidth: 64,
+    maxWidth: 110,
+    clearance: 8,
+    /** how far (px) a dove may rise above the "with" line to find room beside the names */
+    lift: 48,
+  },
+
   // Scene 4
   sections: {
     cardDur: 0.9,

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dove sprite preview</title>
+<style>
+  body { margin: 0; padding: 24px; background: #f6eee3; font: 14px/1.4 Georgia, serif; color: #5a1520; }
+  h2 { font-weight: normal; margin: 28px 0 10px; }
+  .row { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-start; }
+  .dove { width: 448px; height: 425px; background: url(dove-sprite.webp) 0 0 / 5376px 425px no-repeat; outline: 1px dashed rgb(176 138 74 / .35); }
+  .anchor { position: relative; }
+  .anchor::after { content: ""; position: absolute; left: 341px; top: 193px; width: 6px; height: 6px; border-radius: 50%; background: #c00; opacity: .6; }
+  .onion { position: relative; width: 448px; height: 425px; outline: 1px dashed rgb(176 138 74 / .35); }
+  .onion div { position: absolute; inset: 0; background: url(dove-sprite.webp) 0 0 / 5376px 425px no-repeat; opacity: .22; }
+  .strip { display: flex; flex-wrap: wrap; gap: 6px; }
+  .strip div { width: 224px; height: 213px; background: url(dove-sprite.webp) 0 0 / 2688px 213px no-repeat; outline: 1px solid rgb(176 138 74 / .25); position: relative; }
+  .strip span { position: absolute; left: 4px; top: 2px; font-size: 11px; opacity: .6; }
+  label { user-select: none; }
+</style></head><body>
+<p>12 frames · 448 × 425px each · red dot = head anchor (should never move) · <label><input type="checkbox" id="dots" checked> show anchor</label></p>
+<div class="row">
+  <div><h2>Normal speed (0.4 s per wingbeat)</h2><div class="dove anchor" id="a"></div></div>
+  <div><h2>Half speed</h2><div class="dove anchor" id="b"></div></div>
+  <div><h2>Onion skin (all frames)</h2><div class="onion anchor" id="onion"></div></div>
+</div>
+<h2>Frames in order</h2>
+<div class="strip" id="strip"></div>
+<script>
+  const n = 12, fw = 448;
+  const onion = document.getElementById("onion"), strip = document.getElementById("strip");
+  for (let k = 0; k < n; k++) {
+    const o = document.createElement("div"); o.style.backgroundPositionX = -k * fw + "px"; onion.appendChild(o);
+    const s = document.createElement("div"); s.style.backgroundPositionX = -k * fw / 2 + "px"; s.innerHTML = "<span>" + (k + 1) + "</span>"; strip.appendChild(s);
+  }
+  const a = document.getElementById("a"), b = document.getElementById("b");
+  const t0 = performance.now();
+  (function loop(now) {
+    const t = (now - t0) / 1000;
+    a.style.backgroundPositionX = -(Math.floor(t / (0.4 / n)) % n) * fw + "px";
+    b.style.backgroundPositionX = -(Math.floor(t / (0.8 / n)) % n) * fw + "px";
+    requestAnimationFrame(loop);
+  })(t0);
+  document.getElementById("dots").onchange = (e) => document.querySelectorAll(".anchor").forEach((el) => el.classList.toggle("anchor", e.target.checked) || el.classList.add("anchor-off"));
+</script>
+</body></html>

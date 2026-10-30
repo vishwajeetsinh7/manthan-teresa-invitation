@@ -19,6 +19,7 @@ import { GoldDust } from "./GoldDust";
 import { SOFT_BLUR, isTouchDevice } from "@/src/lib/device";
 import { PetalBlast, type BlastSource } from "@/src/lib/petalBlast";
 import { imagesReady } from "@/src/lib/preload";
+import { FlyingDoves } from "./FlyingDoves";
 
 const u = (n: number) => `calc(var(--u) * ${n})`;
 const V = timing.velvet;
@@ -661,6 +662,12 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         });
       });
       tl.call(startAmbient);
+      // both names, their swashes and parents are written → the doves fly in
+      tl.call(
+        () => window.dispatchEvent(new Event("invite:names-done")),
+        undefined,
+        Math.max(R.groom.at + R.groom.write * R.flourish.afterWrite + R.flourish.dur, R.groomParents.at + R.groomParents.dur),
+      );
       // armed as the invitation starts appearing (not at the end), so it
       // works however early the guest starts scrolling
       tl.call(() => startScrollBurst(), undefined, 0.05);
@@ -714,6 +721,9 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       </div>
 
       {ambient && !reduced && <GoldDust count={isTouchDevice() ? 24 : timing.ambient.dustParticles} />}
+
+      {/* Two doves in the side margins, beside the names */}
+      <FlyingDoves cardRef={card} />
 
       {/* Corner flowers */}
       <div className="corner-cluster corner-bl layer" aria-hidden>

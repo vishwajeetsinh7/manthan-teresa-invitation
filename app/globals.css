@@ -1492,3 +1492,42 @@ body {
     animation: none;
   }
 }
+
+/* ── Flying doves beside the names ─────────────────────────────────── */
+/* Above the paper and dust, below the wording (they never overlap it) and
+   the replay / music buttons. Moved only with transforms by FlyingDoves. */
+.doves {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  visibility: hidden;
+}
+.doves[data-on] {
+  visibility: visible;
+}
+.doves[data-fit="none"] {
+  display: none;
+}
+.dove {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--dove-w, 100px);
+  height: var(--dove-h, 100px);
+  transform: translate3d(-200vw, 0, 0);
+  will-change: transform;
+}
+.dove-clip {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.dove-strip {
+  display: block;
+  height: 100%;
+  width: calc(100% * var(--dove-n, 12));
+  max-width: none;
+  will-change: transform;
+  user-select: none;
+}

@@ -80,6 +80,24 @@ It removes edge fringe and specks, trims, centres on a square and bakes a soft s
 Full-quality results go to `assets-src/` (kept in the repo, not deployed); the site serves small
 pre-sized WebP copies in `public/assets/` (about 0.5 MB for everything on the card).
 
+## Flying doves
+
+`assets-src/dove-sheet-green.png` (12 frames of one dove on #00FF00, roughly a 4 × 3 grid) is
+turned into one sprite strip:
+
+```bash
+npm run doves
+```
+
+It keys out the green (soft edges, no green fringe), finds the 12 doves wherever they sit, anchors
+every frame on the head (so the body never jitters), bakes a soft warm glow, and writes
+`public/doves/dove-sprite.webp` + `dove-sprite.json`. Reorder or drop frames in `FRAME_ORDER` at
+the top of the script. Check the loop at `/doves/preview.html` (normal and half speed, onion skin).
+
+`src/components/FlyingDoves.tsx` places them beside the names: each is as large as the margin
+allows (up to 110 px), keeping 8 px from every letter in every frame (it uses the bird's real
+outline and the text's ink). Timings are in `timing.doves`.
+
 ## Performance notes
 
 - Images are served as-is (`unoptimized`), so there is no slow on-demand resizing on Vercel.
