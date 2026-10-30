@@ -343,12 +343,12 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
               .to(pattern, { opacity: N.opacity, duration: 0.4 }, 0)
               .to(cone, { ...at(strokes[0], 0), scale: 1, duration: N.fly, ease: "power2.inOut" }, 0)
               .add(() => {
-                wobble = gsap.fromTo(cone, { rotation: -4 }, { rotation: 5, duration: 0.16, ease: "sine.inOut", yoyo: true, repeat: -1 });
+                wobble = gsap.fromTo(cone, { rotation: -3 }, { rotation: 3.5, duration: N.wobble, ease: "sine.inOut", yoyo: true, repeat: -1 });
               }, N.fly);
             let t = N.fly;
             strokes.forEach((p, i) => {
               if (i > 0) {
-                tl!.to(cone, { ...at(p, 0), duration: N.hop, ease: "power1.inOut" }, t);
+                tl!.to(cone, { ...at(p, 0), duration: N.hop, ease: "sine.inOut" }, t);
                 t += N.hop;
               }
               const len = lens[i];
@@ -357,9 +357,9 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                 {
                   drawSVG: "100%",
                   duration: (N.drawSeconds * len) / total,
-                  ease: "none",
+                  ease: "sine.inOut",
                   onUpdate(this: gsap.core.Tween) {
-                    gsap.set(cone, at(p, this.progress() * len));
+                    gsap.set(cone, at(p, this.ratio * len));
                   },
                 },
                 t,
@@ -600,21 +600,15 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         };
 
         events.forEach((ev, i) => {
-          // in focus while its centre is in the middle band of the screen…
+          // in focus once its centre is well on screen (the newest one wins),
+          // out of focus once it has clearly gone
           ScrollTrigger.create({
             trigger: ev,
             scroller,
-            start: "center 58%",
-            end: "center 42%",
+            start: "center 88%",
+            end: "center 12%",
             onEnter: () => setFocus(i),
             onEnterBack: () => setFocus(i),
-          });
-          // …and out of focus once it has clearly moved away
-          ScrollTrigger.create({
-            trigger: ev,
-            scroller,
-            start: "center 80%",
-            end: "center 20%",
             onLeave: () => focused === i && setFocus(-1),
             onLeaveBack: () => focused === i && setFocus(-1),
           });
@@ -668,7 +662,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
   return (
     <div ref={root} className="below">
       <section aria-labelledby="events-title">
-        <div className="section-head" style={{ marginBottom: "calc(var(--u) * 22)" }}>
+        <div className="section-head" data-page="top" style={{ marginBottom: "calc(var(--u) * 22)" }}>
           <h2 id="events-title" className="section-title">
             <span className="wipe">{C.eventsHeading}</span>
           </h2>
@@ -679,10 +673,11 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         <div className="timeline" style={{ height: `calc(var(--thread-w) * ${(THREAD.height / 120).toFixed(3)})` }}>
           <ScheduleThread thread={THREAD} />
           <TravellingRose />
-          {/* snap points: each event stops in the middle of the screen */}
-          {NODE.map((n, i) => (
-            <span key={i} className="t-snap" style={{ top: `${n * 100}%` }} aria-hidden />
-          ))}
+          {/* pages: each event rests in the middle of the screen (Mehndi
+              shares its page with the "Celebrations" heading above it) */}
+          {NODE.map((n, i) =>
+            i === 0 ? null : <span key={i} className="t-snap" data-page="center" style={{ top: `${n * 100}%` }} aria-hidden />,
+          )}
           {SCHEDULE.map((e, i) => {
             const mehndi = "pattern" in e && e.pattern === "mehndi";
             return (
@@ -719,7 +714,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         </div>
       </section>
 
-      <section className="panel reveal-up" aria-labelledby="venue-title">
+      <section className="panel reveal-up" data-page="center" aria-labelledby="venue-title">
         <h2 id="venue-title" className="section-title">
           {C.venue.heading}
         </h2>
@@ -735,7 +730,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         </a>
       </section>
 
-      <section className="panel reveal-up" aria-labelledby="count-title">
+      <section className="panel reveal-up" data-page="center" aria-labelledby="count-title">
         <h2 id="count-title" className="section-title">
           {C.countdown.heading}
         </h2>
@@ -743,7 +738,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         <Countdown />
       </section>
 
-      <section className="panel reveal-up" aria-labelledby="rsvp-title">
+      <section className="panel reveal-up" data-page="center" aria-labelledby="rsvp-title">
         <h2 id="rsvp-title" className="section-title">
           {C.rsvp.heading}
         </h2>
@@ -754,7 +749,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         </a>
       </section>
 
-      <p className="footer-line reveal-up">{C.footer}</p>
+      <p className="footer-line reveal-up" data-page="center">{C.footer}</p>
     </div>
   );
 }

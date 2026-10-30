@@ -117,6 +117,19 @@ export const timing = {
     sheenSeconds: 7,
   },
 
+  /** One page per swipe: an eased glide between pages (see src/lib/usePager.ts) */
+  paging: {
+    /** first screen ↔ Celebrations */
+    firstDur: 2,
+    /** every other page */
+    dur: 1.4,
+    ease: "power3.inOut",
+    /** ignore input this long after a glide (trackpad momentum) */
+    cooldown: 0.45,
+    /** px of swipe / wheel before it counts */
+    tolerance: 12,
+  },
+
   /** Two doves beside the names (start once the names have been written) */
   doves: {
     /** fly-in from outside the card: seconds, and the right dove's delay */
@@ -136,6 +149,8 @@ export const timing = {
     glideEvery: [4, 7] as [number, number],
     glideHold: [0.6, 0.9] as [number, number],
     glideSink: 3,
+    /** leaving the first page: they fly up and away (s); coming back: they fly in again */
+    exit: 1.3,
     /** size limits (px) and the gap kept from any text */
     minWidth: 64,
     maxWidth: 110,
@@ -159,7 +174,7 @@ export const timing = {
     date: { ring: 0.9, roll: 1.25 },
     /** Mehndi: a henna cone leaves the icon and draws the mandala under the
      *  text in real time (drawSeconds = pen time for the whole design) */
-    henna: { drawSeconds: 3.8, hop: 0.08, fly: 0.7, opacity: 0.85, restOpacity: 0.32, spinSeconds: 140 },
+    henna: { drawSeconds: 7, hop: 0.16, fly: 1.1, wobble: 0.34, opacity: 0.85, restOpacity: 0.32, spinSeconds: 140 },
     /** church: pause between champagne clinks while focused */
     cheers: { pause: 1.1 },
     /** distance between events on the vine, in vine "waves" (1 wave ≈ a quarter screen) */

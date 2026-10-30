@@ -136,15 +136,20 @@ body {
 .scroller::-webkit-scrollbar {
   display: none;
 }
-/* Scroll snapping: the page rests on the first screen, then each event
-   (centred, and a fast swipe cannot skip one), then each later section.
-   No stop on the "Celebrations" heading: from the first screen one swipe
-   glides straight to Mehndi, with the heading written above it. */
+/* Pages: the first screen; "Celebrations" at the top with Mehndi below it;
+   each later event centred; then each later section. Normally a GSAP pager
+   glides between them (src/lib/usePager.ts, .scroller[data-paged]); with
+   reduced motion the same pages are native scroll-snap points. */
 .scroller[data-scroll="on"] {
   scroll-snap-type: y mandatory;
 }
 .card {
   scroll-snap-align: start;
+}
+.section-head {
+  scroll-snap-align: start;
+  /* "Celebrations" rests this far below the top of the screen */
+  scroll-margin-top: calc(var(--u) * 34 + var(--safe-t));
 }
 .sr-only {
   position: absolute;
@@ -172,6 +177,12 @@ body {
 .scroller[data-scroll="on"] {
   overflow-y: auto;
   z-index: 32;
+}
+/* the pager moves the page: no native scrolling, snapping or rubber-banding */
+.scroller[data-scroll="on"][data-paged] {
+  overflow-y: hidden;
+  scroll-snap-type: none;
+  touch-action: none;
 }
 
 /* ── Rotate notice (phone in landscape) ────────────────────────────── */

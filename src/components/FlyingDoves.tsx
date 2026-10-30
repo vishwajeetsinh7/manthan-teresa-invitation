@@ -8,7 +8,9 @@ import sprite from "@/public/doves/dove-sprite.json";
  * Two white doves in the side margins of the card, beside the names, both
  * facing the couple. They fly in once the names are written ("invite:names-done"),
  * then hover: flapping (each at its own rate), bobbing on the downstroke,
- * drifting slowly, and now and then gliding on level wings.
+ * drifting slowly, and now and then gliding on level wings. Leaving the first
+ * page ("invite:page") they fly up and away; coming back, they fly in again
+ * from the sides.
  *
  * - Sprite: public/doves/dove-sprite.webp (built by scripts/build-dove-sprite.mjs),
  *   frames in one row; a frame is shown by sliding the strip inside a clip box,
@@ -162,7 +164,13 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
     const showFrame = (k: number, i: number) => {
       strips[i].style.transform = `translate3d(${(-k * 100) / N}%,0,0)`;
     };
+    const pos = [
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+    ];
     const setPos = (i: number, x: number, y: number) => {
+      pos[i].x = x;
+      pos[i].y = y;
       els[i].style.transform = `translate3d(${x}px,${y}px,0)${i ? " scaleX(-1)" : ""}`;
     };
 
@@ -178,7 +186,13 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
       glideFrom: -1,
       glideFor: 0,
       seed: i * 1.7,
+      /** where the fly-in starts (null = beyond the card edge, a little high) */
+      from: null as null | { x: number; y: number },
+      exitAt: -1, // flying away since (s, loop clock)
+      exitFrom: { x: 0, y: 0 },
+      gone: false,
     }));
+    let page = 0; // which page the guest is on (from the pager)
 
     /* the loop: one rAF for both doves; runs only while visible */
     let raf = 0;
@@ -194,7 +208,7 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
       const L = layout;
       if (L) {
         for (const d of doves) {
-          if (d.start < 0 || clock < d.start) continue;
+          if (d.gone || d.start < 0 || clock < d.start) continue;
           const t = clock - d.start;
           const tx = L.x[d.i];
           const ty = L.y;
@@ -208,7 +222,8 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
               d.nextGlide = clock + rnd(D.glideEvery[0], D.glideEvery[1]);
             }
           }
-          if (!gliding) d.phase = (d.phase + dt / D.beat[d.i]) % 1;
+          // flying away: wings beat faster
+          if (!gliding) d.phase = (d.phase + dt / (D.beat[d.i] * (d.exitAt >= 0 ? 0.75 : 1))) % 1;
           let frame = gliding ? sprite.glideFrame : Math.floor(d.phase * N) % N;
           if (!gliding && d.wantGlide && frame === sprite.glideFrame) {
             d.wantGlide = false;
@@ -222,13 +237,27 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
             d.frame = frame;
           }
 
+          if (d.exitAt >= 0) {
+            // up and away, out over the top, accelerating
+            const p = Math.min(1, (clock - d.exitAt) / D.exit);
+            const e = p * p;
+            const away = d.i === 0 ? -1 : 1;
+            const topY = -sprite.frameHeight * L.scale - 40;
+            setPos(d.i, d.exitFrom.x + away * 70 * e, d.exitFrom.y + (topY - d.exitFrom.y) * e);
+            if (p >= 1) {
+              d.gone = true;
+              setPos(d.i, d.i ? card.clientWidth + 400 : -400, topY);
+            }
+            continue;
+          }
           if (t < D.enter) {
             // fly in from beyond the card edge on a slight arc, easing out
             const p = t / D.enter;
             const e = 1 - Math.pow(1 - p, 3);
-            const from = d.i === 0 ? -sprite.frameWidth * L.scale - 12 : card.clientWidth + 12;
-            const x = from + (tx - from) * e;
-            const y = ty - 46 * (1 - e) - 16 * Math.sin(Math.PI * e);
+            const fx = d.from ? d.from.x : d.i === 0 ? -sprite.frameWidth * L.scale - 12 : card.clientWidth + 12;
+            const fy = d.from ? d.from.y : ty - 46;
+            const x = fx + (tx - fx) * e;
+            const y = fy + (ty - fy) * e - 16 * Math.sin(Math.PI * e);
             setPos(d.i, x, y);
             if (p > 0.98) d.nextGlide = clock + rnd(D.glideEvery[0], D.glideEvery[1]);
             continue;
@@ -286,11 +315,42 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
         els.forEach((_, i) => setPos(i, i ? card.clientWidth + 400 : -400, layout!.y));
         doves[0].start = clock + 0.02;
         doves[1].start = clock + 0.02 + D.rightDelay;
+        // already on another page: they wait out of sight and fly in on the way back
+        if (page !== 0) doves.forEach((d) => (d.gone = true));
         begun = true;
         run();
       });
     };
     window.addEventListener("invite:names-done", begin);
+
+    /* leaving the first page → fly up and away; back to it → fly in from the sides */
+    const onPage = (e: Event) => {
+      const { from, to } = (e as CustomEvent<{ from: number; to: number }>).detail;
+      page = to;
+      if (!begun || reduce) return;
+      if (from === 0 && to !== 0) {
+        doves.forEach((d) => {
+          if (d.gone || d.exitAt >= 0) return;
+          d.exitAt = clock + d.i * 0.12;
+          d.exitFrom = { ...pos[d.i] };
+          d.wantGlide = false;
+          d.glideFrom = -1;
+        });
+      } else if (to === 0) {
+        doves.forEach((d) => {
+          // still on screen mid-way out: turn back from where it is; otherwise from the side
+          d.from = d.exitAt >= 0 && !d.gone ? { ...pos[d.i] } : null;
+          d.gone = false;
+          d.exitAt = -1;
+          d.start = clock + 0.15 + d.i * D.rightDelay;
+          d.wantGlide = false;
+          d.glideFrom = -1;
+          d.nextGlide = 0;
+        });
+        run();
+      }
+    };
+    window.addEventListener("invite:page", onPage);
     if (reduce) begin();
 
     const ro = new ResizeObserver(() => {
@@ -311,6 +371,7 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
       disposed = true;
       cancelAnimationFrame(raf);
       window.removeEventListener("invite:names-done", begin);
+      window.removeEventListener("invite:page", onPage);
       document.removeEventListener("visibilitychange", onVis);
       ro.disconnect();
       io.disconnect();

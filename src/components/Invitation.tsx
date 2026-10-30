@@ -8,6 +8,7 @@ import { assets } from "@/src/config/assets";
 import { TapScene, VideoScene, VideoSeal } from "./IntroScenes";
 import { RevealCard } from "./RevealCard";
 import { Sections } from "./Sections";
+import { usePager } from "@/src/lib/usePager";
 import { DesktopNote } from "./DesktopNote";
 import { moods, type MoodName } from "@/src/config/moods";
 import { revealImages } from "@/src/config/assets";
@@ -156,7 +157,9 @@ export function Invitation() {
     setPhase("tap");
   };
 
+  const pager = usePager(scrollerRef, phase === "reveal");
   const scrollToDetails = () => {
+    if (pager.current.enabled) return pager.current.next();
     const s = scrollerRef.current;
     if (s) s.scrollTo({ top: s.clientHeight, behavior: "smooth" });
   };
