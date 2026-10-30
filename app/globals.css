@@ -135,6 +135,30 @@ body {
 .scroller::-webkit-scrollbar {
   display: none;
 }
+/* Scroll snapping: the page rests on the first screen, the Celebrations
+   heading, each event (centred, and a fast swipe cannot skip one), and
+   each later section, so every event gets its moment. */
+.scroller[data-scroll="on"] {
+  scroll-snap-type: y mandatory;
+}
+.card,
+.section-head {
+  scroll-snap-align: start;
+}
+.t-snap {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  pointer-events: none;
+}
+.panel,
+.footer-line {
+  scroll-snap-align: center;
+}
+
 /* once the reveal starts, the card sits above the still-playing video */
 .scroller[data-scroll="on"] {
   overflow-y: auto;
@@ -1008,14 +1032,19 @@ body {
 }
 
 /* Haldi on the schedule: turmeric bloom of colour behind it, golden text */
-.t-event[data-mood="haldi"] .t-text::before {
-  content: "";
+/* Haldi: soft turmeric light behind the event, drifting while focused (JS) */
+.t-halo {
   position: absolute;
-  inset: calc(var(--u) * -18) calc(var(--u) * -14) calc(var(--u) * -18) calc(var(--u) * -40);
   z-index: -1;
+  left: calc(var(--u) * -40);
+  top: calc(var(--u) * -26);
+  right: calc(var(--u) * -10);
+  bottom: calc(var(--u) * -26);
   border-radius: 50%;
-  background: radial-gradient(ellipse at 40% 50%, rgb(250 205 70 / 0.2), rgb(250 205 70 / 0) 70%);
+  background: radial-gradient(ellipse at 42% 50%, rgb(250 200 60 / 0.34), rgb(250 205 70 / 0.12) 45%, rgb(250 205 70 / 0) 72%);
+  opacity: 0;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 .t-event[data-mood="haldi"] .t-title {
   color: #a8650f;
@@ -1150,7 +1179,7 @@ body {
   height: calc(var(--u) * 230);
   margin: calc(var(--u) * -115) 0 0 calc(var(--u) * -115);
   color: #8a4b2a;
-  opacity: 0.2;
+  opacity: 0;
   pointer-events: none;
   will-change: transform;
 }

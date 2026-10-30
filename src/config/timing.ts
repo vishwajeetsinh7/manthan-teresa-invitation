@@ -125,8 +125,12 @@ export const timing = {
     titleWrite: 1.1,
     /** gold event icon draws itself in this long */
     iconDraw: 1.3,
-    /** henna mandala behind Mehndi: per-stroke draw, gap between strokes, one slow turn */
-    mandala: { draw: 1.4, stagger: 0.09, spinSeconds: 120 },
+    /** henna mandala behind Mehndi: drawn out from the centre each time Mehndi is focused */
+    mandala: { draw: 1.4, stagger: 0.09, spinSeconds: 120, focusOpacity: 0.34, restOpacity: 0.1 },
+    /** church: pause between champagne clinks while focused */
+    cheers: { pause: 1.1 },
+    /** distance between events on the vine, in vine "waves" (1 wave ≈ a quarter screen) */
+    wavesPerGap: 3,
     /** the one rose that travels down the vine to the event in focus */
     traveler: { pxPerSecond: 320, minDur: 0.7, maxDur: 1.6, roll: 0.6 },
   },

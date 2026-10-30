@@ -147,40 +147,70 @@ export function NameFlourish({ className = "" }: { className?: string }) {
 }
 
 /**
- * Vertical vine the schedule hangs on. Stem segments, leaves and the four
- * event nodes are listed in drawing order (top → bottom), so a scroll-scrubbed
- * draw-on grows it downward. Node centres (y): 150, 350, 550, 750 of 900.
+ * Vertical vine the schedule hangs on, built from the motifs of the vine
+ * drawn in Claude chat: its top curl, a repeating "wave" of stem with a leaf,
+ * a tendril (alternating sides) and a second leaf, round nodes for events,
+ * and its end flourish. `wavesPerGap` sets how far apart events are (one
+ * wave ≈ 188 units of the 120-wide drawing). Paths are in drawing order
+ * (top → bottom) so a scroll-scrubbed draw-on grows it downward.
  */
-export const THREAD_NODES = [150, 350, 550, 750].map((y) => y / 900);
-const THREAD_PATHS: { d: string; node?: boolean }[] = [
-  { d: "M51.5 20 C53.5 22 51.5 25 48.5 24.2 C44.5 23 45.5 17 50 16.5 C56 16 60 22 60 34 C60 58 52 68 52 89 C52 110 60 120 60 144" },
-  { d: "M52.2 83 C48.1 76 41.8 68.9 31.4 71 C35 78.8 43.6 83.8 52.2 83 C47.3 79.5 42.3 76.1 37.9 73.8" },
-  { d: "M56 115.4 C61 113.5 66 110 70 105.5 C73.5 101.5 72.5 96.5 68.8 96.6 C65.6 96.7 65.2 100.6 67.6 101.2 C69 101.6 69.8 100.2 69.2 99.4" },
-  { d: "M60 144 A6 6 0 1 1 60 156 A6 6 0 1 1 60 144", node: true },
-  { d: "M60 156 C60 180 70 195 70 220 C70 248 50 252 50 280 C50 305 60 320 60 344" },
-  { d: "M69.7 212.8 C73.8 205.8 80.1 198.7 90.5 200.8 C86.9 208.6 78.3 213.6 69.7 212.8 C74.6 209.3 79.6 205.9 84 203.6" },
-  { d: "M60 250 C55 247 49 243 45.5 237.5 C43 233.5 44.8 229 48.6 229.6 C51.6 230.1 51.6 233.8 49.2 234.2 C47.8 234.4 47 233 47.6 232.2" },
-  { d: "M50.6 272.3 C46.5 265.3 40.2 258.2 29.8 260.3 C33.4 268.1 42 273.1 50.6 272.3 C45.7 268.8 40.7 265.4 36.3 263.1" },
-  { d: "M60 344 A6 6 0 1 1 60 356 A6 6 0 1 1 60 344", node: true },
-  { d: "M60 356 C60 380 70 395 70 420 C70 448 50 452 50 480 C50 505 60 520 60 544" },
-  { d: "M69.7 412.8 C73.8 405.8 80.1 398.7 90.5 400.8 C86.9 408.6 78.3 413.6 69.7 412.8 C74.6 409.3 79.6 405.9 84 403.6" },
-  { d: "M60 450 C65 453 71 457 74.5 462.5 C77 466.5 75.2 471 71.4 470.4 C68.4 469.9 68.4 466.2 70.8 465.8 C72.2 465.6 73 467 72.4 467.8" },
-  { d: "M50.6 472.3 C46.5 465.3 40.2 458.2 29.8 460.3 C33.4 468.1 42 473.1 50.6 472.3 C45.7 468.8 40.7 465.4 36.3 463.1" },
-  { d: "M60 544 A6 6 0 1 1 60 556 A6 6 0 1 1 60 544", node: true },
-  { d: "M60 556 C60 580 70 595 70 620 C70 648 50 652 50 680 C50 705 60 720 60 744" },
-  { d: "M69.7 612.8 C73.8 605.8 80.1 598.7 90.5 600.8 C86.9 608.6 78.3 613.6 69.7 612.8 C74.6 609.3 79.6 605.9 84 603.6" },
-  { d: "M60 650 C55 647 49 643 45.5 637.5 C43 633.5 44.8 629 48.6 629.6 C51.6 630.1 51.6 633.8 49.2 634.2 C47.8 634.4 47 633 47.6 632.2" },
-  { d: "M50.6 672.3 C46.5 665.3 40.2 658.2 29.8 660.3 C33.4 668.1 42 673.1 50.6 672.3 C45.7 668.8 40.7 665.4 36.3 663.1" },
-  { d: "M60 744 A6 6 0 1 1 60 756 A6 6 0 1 1 60 744", node: true },
-  { d: "M60 756 C60 780 68 790 68 811 C68 832 60 842 60 866 C60 878 64 884 70 883.5 C74.5 883 75.5 877 71.5 875.8 C68.5 875 66.5 878 68.5 880" },
-  { d: "M67.8 805 C71.9 798 78.2 790.9 88.6 793 C85 800.8 76.4 805.8 67.8 805 C72.7 801.5 77.7 798.1 82.1 795.8" },
-  { d: "M64 837.4 C59.9 830.4 53.6 823.3 43.2 825.4 C46.8 833.2 55.4 838.2 64 837.4 C59.1 833.9 54.1 830.5 49.7 828.2" },
-];
-export function ScheduleThread() {
+export type Thread = { paths: { d: string; node?: boolean }[]; height: number; nodes: number[] };
+
+export function buildThread(count: number, wavesPerGap: number): Thread {
+  const paths: { d: string; node?: boolean }[] = [];
+  const nodes: number[] = [];
+  // top curl + first stretch of stem down to the first node (y 144)
+  paths.push({ d: "M51.5 20 C53.5 22 51.5 25 48.5 24.2 C44.5 23 45.5 17 50 16.5 C56 16 60 22 60 34 C60 58 52 68 52 89 C52 110 60 120 60 144" });
+  paths.push({ d: "M52.2 83 C48.1 76 41.8 68.9 31.4 71 C35 78.8 43.6 83.8 52.2 83 C47.3 79.5 42.3 76.1 37.9 73.8" });
+  paths.push({ d: "M56 115.4 C61 113.5 66 110 70 105.5 C73.5 101.5 72.5 96.5 68.8 96.6 C65.6 96.7 65.2 100.6 67.6 101.2 C69 101.6 69.8 100.2 69.2 99.4" });
+
+  const node = (y: number) => {
+    paths.push({ d: `M60 ${y} A6 6 0 1 1 60 ${y + 12} A6 6 0 1 1 60 ${y}`, node: true });
+    nodes.push(y + 6);
+  };
+  const r = (n: number) => +n.toFixed(1);
+  const wave = (y: number, curlRight: boolean) => {
+    paths.push({ d: `M60 ${r(y)} C60 ${r(y + 24)} 70 ${r(y + 39)} 70 ${r(y + 64)} C70 ${r(y + 92)} 50 ${r(y + 96)} 50 ${r(y + 124)} C50 ${r(y + 149)} 60 ${r(y + 164)} 60 ${r(y + 188)}` });
+    paths.push({
+      d: `M69.7 ${r(y + 56.8)} C73.8 ${r(y + 49.8)} 80.1 ${r(y + 42.7)} 90.5 ${r(y + 44.8)} C86.9 ${r(y + 52.6)} 78.3 ${r(y + 57.6)} 69.7 ${r(y + 56.8)} C74.6 ${r(y + 53.3)} 79.6 ${r(y + 49.9)} 84 ${r(y + 47.6)}`,
+    });
+    paths.push({
+      d: curlRight
+        ? `M60 ${r(y + 94)} C65 ${r(y + 97)} 71 ${r(y + 101)} 74.5 ${r(y + 106.5)} C77 ${r(y + 110.5)} 75.2 ${r(y + 115)} 71.4 ${r(y + 114.4)} C68.4 ${r(y + 113.9)} 68.4 ${r(y + 110.2)} 70.8 ${r(y + 109.8)} C72.2 ${r(y + 109.6)} 73 ${r(y + 111)} 72.4 ${r(y + 111.8)}`
+        : `M60 ${r(y + 94)} C55 ${r(y + 91)} 49 ${r(y + 87)} 45.5 ${r(y + 81.5)} C43 ${r(y + 77.5)} 44.8 ${r(y + 73)} 48.6 ${r(y + 73.6)} C51.6 ${r(y + 74.1)} 51.6 ${r(y + 77.8)} 49.2 ${r(y + 78.2)} C47.8 ${r(y + 78.4)} 47 ${r(y + 77)} 47.6 ${r(y + 76.2)}`,
+    });
+    paths.push({
+      d: `M50.6 ${r(y + 116.3)} C46.5 ${r(y + 109.3)} 40.2 ${r(y + 102.2)} 29.8 ${r(y + 104.3)} C33.4 ${r(y + 112.1)} 42 ${r(y + 117.1)} 50.6 ${r(y + 116.3)} C45.7 ${r(y + 112.8)} 40.7 ${r(y + 109.4)} 36.3 ${r(y + 107.1)}`,
+    });
+  };
+
+  let y = 144;
+  let flip = false;
+  for (let i = 0; i < count; i++) {
+    node(y);
+    y += 12;
+    if (i === count - 1) break;
+    for (let w = 0; w < wavesPerGap; w++) {
+      wave(y, flip);
+      flip = !flip;
+      y += 188;
+    }
+  }
+  // end flourish after the last node
+  const Y = y; // == last node bottom
+  paths.push({
+    d: `M60 ${Y} C60 ${Y + 24} 68 ${Y + 34} 68 ${Y + 55} C68 ${Y + 76} 60 ${Y + 86} 60 ${Y + 110} C60 ${Y + 122} 64 ${Y + 128} 70 ${Y + 127.5} C74.5 ${Y + 127} 75.5 ${Y + 121} 71.5 ${Y + 119.8} C68.5 ${Y + 119} 66.5 ${Y + 122} 68.5 ${Y + 124}`,
+  });
+  paths.push({ d: `M67.8 ${Y + 49} C71.9 ${Y + 42} 78.2 ${Y + 34.9} 88.6 ${Y + 37} C85 ${Y + 44.8} 76.4 ${Y + 49.8} 67.8 ${Y + 49} C72.7 ${Y + 45.5} 77.7 ${Y + 42.1} 82.1 ${Y + 39.8}` });
+  paths.push({ d: `M64 ${Y + 81.4} C59.9 ${Y + 74.4} 53.6 ${Y + 67.3} 43.2 ${Y + 69.4} C46.8 ${Y + 77.2} 55.4 ${Y + 82.2} 64 ${Y + 81.4} C59.1 ${Y + 77.9} 54.1 ${Y + 74.5} 49.7 ${Y + 72.2}` });
+  return { paths, height: Y + 144, nodes };
+}
+
+export function ScheduleThread({ thread }: { thread: Thread }) {
   return (
-    <svg className="thread" viewBox="0 0 120 900" aria-hidden>
+    <svg className="thread" viewBox={`0 0 120 ${thread.height}`} aria-hidden>
       <g fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        {THREAD_PATHS.map((p, i) => (
+        {thread.paths.map((p, i) => (
           <path key={i} className={p.node ? "draw node" : "draw"} d={p.d} />
         ))}
       </g>
