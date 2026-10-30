@@ -64,14 +64,12 @@ type VideoProps = {
   videoRef: RefObject<HTMLVideoElement | null>;
   veilRef: RefObject<HTMLDivElement | null>;
   playing: boolean;
-  showSkip: boolean;
   onStarted: () => void;
   onReveal: () => void;
   onFinish: () => void;
 };
 
-export function VideoScene({ videoRef, veilRef, playing, showSkip, onStarted, onReveal, onFinish }: VideoProps) {
-  const skipRef = useRef<HTMLButtonElement>(null);
+export function VideoScene({ videoRef, veilRef, playing, onStarted, onReveal, onFinish }: VideoProps) {
   const revealed = useRef(false);
   const done = useRef(false);
   const started = useRef(false);
@@ -92,7 +90,7 @@ export function VideoScene({ videoRef, veilRef, playing, showSkip, onStarted, on
     onFinish();
   };
 
-  // Skip / error: flash to white, then reveal from the white veil.
+  // Error / safety nets: flash to white, then reveal from the white veil.
   // The reveal is started by a plain timer, not by the fade finishing, so a
   // slow/throttled animation frame can never leave the guest stuck.
   const jumping = useRef(false);
@@ -191,15 +189,6 @@ export function VideoScene({ videoRef, veilRef, playing, showSkip, onStarted, on
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing]);
 
-  useGSAP(
-    () => {
-      if (showSkip && skipRef.current) {
-        gsap.to(skipRef.current, { opacity: 1, duration: 0.6, delay: timing.video.skipAppearsAfter });
-      }
-    },
-    { dependencies: [showSkip] },
-  );
-
   return (
     <div className="video-scene">
       <video
@@ -219,11 +208,6 @@ export function VideoScene({ videoRef, veilRef, playing, showSkip, onStarted, on
         <source src={assets.video.mp4} type="video/mp4" />
         <source src={assets.video.webm} type='video/webm; codecs="vp9, opus"' />
       </video>
-      {showSkip && (
-        <button ref={skipRef} type="button" className="skip-btn" onClick={() => jumpToReveal(timing.video.skipFade)}>
-          Skip
-        </button>
-      )}
     </div>
   );
 }

@@ -6,6 +6,10 @@ Mobile-only cinematic invitation (Next.js 16 + GSAP). On tablet/desktop it shows
 - Animation timing: `src/config/timing.ts`
 - Asset paths: `src/config/assets.ts`
 - Dev tip: scrub the reveal from the browser console with `__revealTl.pause().seek(4)`
+- Dev tip: skip the envelope video while developing — copy `.env.example` to `.env.local`
+  and set `NEXT_PUBLIC_SKIP_VIDEO=true`. `.env.local` is never committed, and Vercel builds
+  from GitHub, so guests always get the video. (A local `next build` would bake the flag in,
+  so set it back to `false` before building locally for production.)
 
 Every missing file falls back to a built-in placeholder, so the site always runs.
 Drop a file in the right path and it is picked up automatically (reload the page).

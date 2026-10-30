@@ -15,6 +15,9 @@ import { preloadImages } from "@/src/lib/preload";
 
 type Phase = "tap" | "video" | "reveal";
 
+/** .env.local: NEXT_PUBLIC_SKIP_VIDEO=true skips the envelope video (for development) */
+const SKIP_VIDEO = process.env.NEXT_PUBLIC_SKIP_VIDEO === "true";
+
 type DOEWithPermission = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<"granted" | "denied"> };
 
 export function Invitation() {
@@ -36,6 +39,17 @@ export function Invitation() {
   const handleTap = () => {
     if (phase !== "tap") return;
     const v = videoRef.current;
+
+    // Dev switch: NEXT_PUBLIC_SKIP_VIDEO=true in .env.local → tapping goes
+    // straight to the invitation (no envelope video). Not set on Vercel, so
+    // guests always see the video.
+    if (SKIP_VIDEO) {
+      preloadImages(revealImages);
+      if (veilRef.current) gsap.set(veilRef.current, { opacity: 1 });
+      setPhase("reveal");
+      setVideoDone(true);
+      return;
+    }
 
     // 1) video with sound
     if (v) {
@@ -211,7 +225,6 @@ export function Invitation() {
             videoRef={videoRef}
             veilRef={veilRef}
             playing={phase !== "tap"}
-            showSkip={phase === "video"}
             onStarted={() => setVideoStarted(true)}
             onReveal={() => setPhase("reveal")}
             onFinish={() => setVideoDone(true)}

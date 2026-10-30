@@ -19,8 +19,6 @@ export const timing = {
      * top of it (the video is pure white from ~6.0s), so they feel continuous.
      */
     revealBeforeEnd: 5,
-    skipAppearsAfter: 1.5,
-    skipFade: 0.35,
     audioFade: 2.5,
     /** safety nets: open the invitation anyway if the video hasn't started
      *  this long after the tap, or freezes for this long */
