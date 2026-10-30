@@ -37,7 +37,6 @@ import {
 const SC = makeScene(manifest as unknown as Manifest, layout as Layout, 0.15);
 const { url, box, byId, ITEMS, point } = SC;
 const S = timing.sections.hindu;
-const HOLD = (layout as Layout).meta!.antarpatHold as Record<"gujarati" | "kerala", { dx: number; dy: number }>;
 
 const KINDS = {
   petals: ["petal-red-1", "petal-red-2", "petal-red-3", "petal-red-4", "petal-pink-1", "petal-pink-2", "petal-pink-3", "petal-pink-4"],
@@ -135,34 +134,46 @@ export function HinduWeddingScene({ scrollerRef, style, reduce, page }: { scroll
       tl.fromTo(items("scatter-"), { opacity: 0 }, { opacity: 1, duration: 0.4, stagger: 0.03 }, t + 1.0);
       t += ACT.ritual;
 
-      // 3. the friends come in from the sides and unroll the antarpat between them; groom and bride walk in
+      // 3. the antarpat: the friends hold it up from BEHIND the cloth (as it is really done) — the
+      //    Kerala friend's raised hand (image-left) takes the left end of the rod, the Gujarati
+      //    friend's (image-right) the right end, so both stand hidden behind the cloth with only
+      //    their hands on the rod. Groom and bride walk in either side of it, clear of everyone.
       //    (each figure shows at once as it starts moving — no slow see-through fade)
-      const hold = (who: "gujarati" | "kerala") => ({ x: () => (HOLD[who].dx / 100) * W(), y: () => (HOLD[who].dy / 100) * H() });
-      const slideIn = (el: HTMLElement, who: "gujarati" | "kerala", from: number, at: number) => {
-        tl.fromTo(el, { x: () => (HOLD[who].dx / 100) * W() + from * W(), y: hold(who).y, autoAlpha: 0 }, { x: hold(who).x, duration: 0.9, ease: "power3.out" }, at);
-        tl.to(el, { autoAlpha: 1, duration: 0.15 }, at);
-        tl.fromTo(el, { scaleY: 1 }, { scaleY: 1.012, duration: 0.15, ease: "sine.inOut", yoyo: true, repeat: 5 }, at);
+      const rodL = point("antarpat", "rodL");
+      const rodR = point("antarpat", "rodR");
+      const holdAt = (id: string, rod: { x: number; y: number }) => {
+        const h = point(id, "hand");
+        return { x: () => ((rod.x - h.x) / 100) * W(), y: () => ((rod.y - h.y) / 100) * H() };
       };
-      slideIn(gujA, "gujarati", -0.55, t);
-      slideIn(kerA, "kerala", 0.55, t);
+      const kerHold = holdAt("kerala-a", rodL);
+      const gujHold = holdAt("gujarati-a", rodR);
+      const slideIn = (el: HTMLElement, at0: { x: () => number; y: () => number }, from: number, at: number) => {
+        tl.fromTo(el, { x: () => at0.x() + from * W(), y: at0.y, autoAlpha: 0 }, { x: at0.x, duration: 0.85, ease: "power3.out" }, at);
+        tl.to(el, { autoAlpha: 1, duration: 0.12 }, at);
+      };
+      slideIn(kerA, kerHold, -0.6, t);
+      slideIn(gujA, gujHold, 0.6, t);
+      // the cloth unrolls down from the rod as they arrive, hiding them behind it
       gsap.set(antar, { transformOrigin: "50% 0%" });
-      tl.fromTo(antar, { scaleY: 0, autoAlpha: 0 }, { scaleY: 1, autoAlpha: 1, duration: 0.6, ease: "power2.out" }, t + 0.75);
+      tl.fromTo(antar, { scaleY: 0, autoAlpha: 0 }, { scaleY: 1, autoAlpha: 1, duration: 0.55, ease: "power2.out" }, t + 0.45);
       const walkIn = (el: HTMLElement, from: number, at: number) => {
         tl.fromTo(el, { x: () => from * W(), autoAlpha: 0 }, { x: 0, duration: 1.1, ease: "power2.out" }, at);
         tl.to(el, { autoAlpha: 1, duration: 0.15 }, at);
         tl.fromTo(el, { y: 0 }, { y: () => -3 * k(), duration: 0.18, ease: "sine.inOut", yoyo: true, repeat: 5 }, at);
       };
-      walkIn(groomA, -0.45, t + 0.9);
-      walkIn(brideA, 0.45, t + 0.95);
-      tl.set([groomB, brideB], { x: 0 }, t + 0.9);
+      walkIn(groomA, -0.45, t + 0.95);
+      walkIn(brideA, 0.45, t + 1.0);
+      tl.set([groomB, brideB], { x: 0 }, t + 0.95);
       t += ACT.antarpat;
 
-      // 4. first sight: the cloth drops away; the friends switch to their thalis and glide out
-      tl.to(antar, { y: () => H() * 0.35, rotation: 6, autoAlpha: 0, duration: 0.9, ease: "power2.in" }, t);
-      tl.to([gujA, kerA], { x: 0, y: 0, autoAlpha: 0, duration: 0.9, ease: "power2.inOut" }, t + 0.15);
-      tl.fromTo(gujB, { x: hold("gujarati").x, y: hold("gujarati").y, autoAlpha: 0 }, { x: 0, y: 0, autoAlpha: 1, duration: 0.9, ease: "power2.inOut" }, t + 0.15);
-      tl.fromTo(kerB, { x: hold("kerala").x, y: hold("kerala").y, autoAlpha: 0 }, { x: 0, y: 0, autoAlpha: 1, duration: 0.9, ease: "power2.inOut" }, t + 0.15);
-      tl.fromTo(q(".hw-sight img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.3 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.4 }], stagger: 0.08 }, t + 0.5);
+      // 4. first sight: the friends let go and slip away as the cloth drops; then they come back in
+      //    from the sides with their thalis
+      tl.to([kerA, gujA], { autoAlpha: 0, duration: 0.18 }, t);
+      tl.to(antar, { y: () => H() * 0.35, rotation: 6, autoAlpha: 0, duration: 0.9, ease: "power2.in" }, t + 0.08);
+      tl.fromTo(gujB, { x: () => -0.5 * W(), autoAlpha: 0 }, { x: 0, duration: 0.9, ease: "power3.out" }, t + 0.5);
+      tl.fromTo(kerB, { x: () => 0.5 * W(), autoAlpha: 0 }, { x: 0, duration: 0.9, ease: "power3.out" }, t + 0.5);
+      tl.to([gujB, kerB], { autoAlpha: 1, duration: 0.12 }, t + 0.5);
+      tl.fromTo(q(".hw-sight img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.3 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.4 }], stagger: 0.08 }, t + 0.4);
       t += ACT.sight;
 
       // 5. varmala: they step closer; the garlands fly to each other's necks while they switch pose
