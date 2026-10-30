@@ -1192,15 +1192,17 @@ body {
   flex-direction: column;
   gap: calc(var(--u) * 2);
 }
-/* henna mandala under the Mehndi text, drawn live by the henna cone */
+/* small henna mandala beside the Mehndi text, around the henna-cone icon,
+   drawn live by the cone */
 .t-pattern {
   position: absolute;
   z-index: -1;
-  left: calc(50% - var(--u) * 29);
-  top: 100%;
-  width: calc(var(--u) * 172);
-  height: calc(var(--u) * 172);
-  margin: calc(var(--u) * 14) 0 0 calc(var(--u) * -86);
+  /* centred on the henna-cone icon at the right of the event */
+  left: calc(var(--u) * 197);
+  top: 50%;
+  width: calc(var(--u) * 90);
+  height: calc(var(--u) * 90);
+  margin: calc(var(--u) * -45) 0 0 0;
   color: var(--henna);
   opacity: 0;
   pointer-events: none;
@@ -1546,25 +1548,21 @@ body {
 }
 
 /* ── Mehndi scene (src/components/scenes/MehndiScene.tsx) ──────────── */
-/* A tall wrapper; the stage inside it stays put (sticky) while the scroll
-   through the wrapper assembles the scene. Transparent over the paper. */
+/* In the bottom part of the Mehndi page, right of the vine (which runs on
+   past it): as big as fits under the Mehndi details on this screen (the
+   page above it takes ~404u), up to 260u wide. Transparent over the paper. */
 .ms-wrap {
+  --sw: clamp(calc(var(--u) * 170), calc((100cqh - var(--u) * 404) / 1.65), calc(var(--u) * 260));
   position: absolute;
-  left: calc(50% - var(--u) * 195);
-  width: calc(var(--u) * 390);
+  left: calc(var(--u) * 222 - var(--sw) / 2);
+  width: var(--sw);
   pointer-events: none;
 }
 .ms-stage {
-  position: sticky;
-  /* centred on the screen while it holds still */
-  top: max(0px, calc((100cqh - var(--u) * 643.5) / 2));
+  position: relative;
   width: 100%;
   aspect-ratio: 1 / 1.65;
   overflow: visible;
-}
-.ms-wrap[data-reduce] .ms-stage {
-  position: relative;
-  top: 0;
 }
 .ms-debug {
   position: absolute;

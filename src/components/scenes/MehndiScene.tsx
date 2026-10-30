@@ -13,9 +13,10 @@ import layout from "@/src/config/scenes/mehndi.json";
  * and the henna palms come from scripts/build-scene-assets.mjs (manifest);
  * where everything sits is src/config/scenes/mehndi.json (stage %, tweakable).
  *
- * The stage is "pinned" with position: sticky inside a tall wrapper (smooth
- * on iOS with the page-by-page pager): the assembly is scrubbed by the scroll
- * through that wrapper. ?debug=1 shows the master art behind the stage.
+ * The stage sits in the bottom part of the Mehndi page, beside the vine. As
+ * that page glides in (one swipe), the pieces come in one by one on a timer
+ * (~3 s, no extra scrolling needed) and go back out if the guest returns up.
+ * ?debug=1 shows the master art behind the stage.
  */
 const DIR = "/scenes/mehndi/";
 type PieceName = keyof typeof manifest.pieces;
@@ -91,7 +92,6 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       const H = () => stage.clientHeight;
       const k = () => stage.clientWidth / 390; // px per design px
       const rnd = gsap.utils.random;
-      const stickyTop = () => parseFloat(getComputedStyle(stage).top) || 0;
 
       /* ── assembly, scrubbed by the scroll through the wrapper ───────── */
       let assembled = false;
@@ -326,20 +326,23 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       const onVis = () => run();
       document.addEventListener("visibilitychange", onVis);
 
+      // the whole assembly in S.assemble seconds as the page arrives; back out (faster) when leaving up
+      const speed = T / S.assemble;
+      tl.eventCallback("onComplete", () => {
+        assembled = true;
+        startIdle();
+        if (performance.now() - lastRun > S.girlEvery * 1000) runGirl();
+      });
+      const play = () => tl.timeScale(speed).play();
       ScrollTrigger.create({
-        animation: tl,
-        trigger: root,
+        trigger: stage,
         scroller,
         start: `top ${S.startAt}`,
-        end: () => `bottom ${stickyTop() + stage.offsetHeight}px`,
-        scrub: S.scrub,
-        invalidateOnRefresh: true,
-        onUpdate: (st) => {
-          if (st.progress > 0.995 && !assembled) {
-            assembled = true;
-            startIdle();
-            if (performance.now() - lastRun > S.girlEvery * 1000) runGirl();
-          } else if (st.progress < 0.9) assembled = false;
+        onEnter: play,
+        onEnterBack: play,
+        onLeaveBack: () => {
+          assembled = false;
+          tl.timeScale(speed * S.reverseSpeed).reverse();
         },
       });
       return () => {
@@ -371,16 +374,7 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
   }, [toran]);
 
   return (
-    <div
-      ref={wrap}
-      className="ms-wrap"
-      data-page-pin={reduce ? undefined : ""}
-      data-page-dur={S.glideDur}
-      data-page={reduce ? "mehndi-scene" : undefined}
-      data-reduce={reduce || undefined}
-      style={style}
-      aria-hidden
-    >
+    <div ref={wrap} className="ms-wrap" data-page="mehndi" data-reduce={reduce || undefined} style={style} aria-hidden>
       <div className="ms-stage" data-ready={ready || undefined}>
         {debug && (
           <img
@@ -473,7 +467,5 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
   );
 }
 
-/** stage height in u (design px of a 390-wide phone) */
-export const MEHNDI_STAGE_H = 390 * ASPECT;
 export { RUNTIME as MEHNDI_PIECES };
 export type { PieceName };

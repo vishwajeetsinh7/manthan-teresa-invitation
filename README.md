@@ -115,9 +115,10 @@ exports WebP at ~3× on-screen size to `public/scenes/mehndi/` with `manifest.js
 Check every cut-out at `/scenes/mehndi/contact.html`.
 
 Layout: `src/config/scenes/mehndi.json` (stage %, x/y = the piece's pivot, w = width, z = order) —
-tweak freely; `?debug=1` shows the master at 40% behind the stage. The stage holds still
-(sticky) while the scroll assembles it (`timing.sections.scene`); the pager stops once where it
-settles and once when it has finished, then idles (sway, breathing, flames, petals, the flower girl).
+tweak freely; `?debug=1` shows the master at 40% behind the stage. The stage sits in the bottom
+part of the Mehndi page, beside the vine; as that page arrives the pieces come in one by one
+(~3 s, `timing.sections.scene`), go back out if the guest returns up, and otherwise idle (sway,
+breathing, flames, petals, the flower girl).
 
 ## Performance notes
 

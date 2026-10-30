@@ -11,7 +11,7 @@ import { FlowerOpenPlaceholder } from "./art/Placeholders";
 import { EVENT_ICONS, HENNA_CONE, LotusDivider, MEHNDI_MANDALA, SvgArt, type EventIconName } from "./art/svgArt";
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 import { SOFT_BLUR } from "@/src/lib/device";
-import { MehndiScene, MEHNDI_STAGE_H } from "./scenes/MehndiScene";
+import { MehndiScene } from "./scenes/MehndiScene";
 
 function Countdown() {
   const target = new Date(C.countdownTo).getTime();
@@ -59,28 +59,17 @@ function setBrowserChrome(color: string) {
 
 type EventFlower = { kind: number; tint?: string };
 const SCHEDULE = C.events;
-/** the event followed by the Mehndi scene (-1: none) */
+/** the event whose page shows the Mehndi scene (-1: none) */
 const SCENE_AT = SCHEDULE.findIndex((e) => "scene" in e && e.scene === "mehndi");
 const SC = timing.sections.scene;
-/** drawing units (the vine is drawn 120 wide) per u */
-const UNITS_PER_U = 120 / 104;
 
-/**
- * The vine: one node per event, a few vine-waves apart (about a screen); after
- * the Mehndi event it leaves a vine-less gap for the full-width scene: the
- * stage plus the scroll through which it holds still while it assembles
- * (none with reduced motion, where the scene is simply shown).
- */
-function layoutThread(reduce: boolean) {
-  const pin = reduce ? 0 : SC.pin;
-  const scene = SCENE_AT >= 0 ? { after: SCENE_AT, units: (SC.clearance + MEHNDI_STAGE_H + pin + SC.bottom) * UNITS_PER_U - 6 } : undefined;
-  const thread = buildThread(SCHEDULE.length, timing.sections.wavesPerGap, scene);
+/** The vine: one node per event, a few vine-waves apart (continuous throughout). */
+function layoutThread() {
+  const thread = buildThread(SCHEDULE.length, timing.sections.wavesPerGap);
   /** node positions as a share of the vine height */
   const node = thread.nodes.map((n) => n / thread.height);
   const sceneStyle: CSSProperties | null =
-    SCENE_AT >= 0
-      ? { top: `calc(${(node[SCENE_AT] * 100).toFixed(4)}% + var(--u) * ${SC.clearance})`, height: `calc(var(--u) * ${(MEHNDI_STAGE_H + pin).toFixed(1)})` }
-      : null;
+    SCENE_AT >= 0 ? { top: `calc(${(node[SCENE_AT] * 100).toFixed(4)}% + var(--u) * ${SC.offset})` } : null;
   return { THREAD: thread, NODE: node, sceneStyle };
 }
 
@@ -157,7 +146,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
   const root = useRef<HTMLDivElement>(null);
   // client-only component (mounts after the opening tap), so matchMedia is safe here
   const [reduceMotion] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  const { THREAD, NODE, sceneStyle } = useMemo(() => layoutThread(reduceMotion), [reduceMotion]);
+  const { THREAD, NODE, sceneStyle } = useMemo(() => layoutThread(), []);
 
   // leaving (e.g. replay intro) always restores the normal top-bar colour
   useEffect(() => () => setBrowserChrome(defaultThemeColor), []);

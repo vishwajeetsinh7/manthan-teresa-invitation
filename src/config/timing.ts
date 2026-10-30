@@ -189,22 +189,20 @@ export const timing = {
     /** church: pause between champagne clinks while focused */
     cheers: { pause: 1.1 },
     /** distance between events on the vine, in vine "waves" (1 wave ≈ a quarter screen) */
-    wavesPerGap: 3,
-    /** the Mehndi scene after the Mehndi details (u = design px of a 390-wide phone) */
+    /** vine waves between events (Mehndi → Haldi is longer: the Mehndi scene sits there) */
+    wavesPerGap: [4, 3, 3] as readonly number[],
+    /** the Mehndi scene, in the bottom part of the Mehndi page (u = design px of a 390-wide phone) */
     scene: {
-      /** gap from the Mehndi node to the stage (clears the mandala), stage → Haldi */
-      clearance: 290,
-      bottom: 70,
-      /** scroll through which the stage stays put while it assembles (~150% of a screen) */
-      pin: 1260,
-      /** assembly starts when the stage's top reaches this point of the screen */
-      startAt: "72%",
-      scrub: 0.6,
-      /** the pager's glide through the assembly (s) */
-      glideDur: 2.6,
+      /** from the Mehndi node down to the stage's top */
+      offset: 86,
+      /** the pieces come in one by one, all within this long (s), as the page arrives; reverses faster */
+      assemble: 3.2,
+      reverseSpeed: 1.8,
+      /** it starts once the stage's top is this far up the screen */
+      startAt: "96%",
       maxAmbient: 8,
       /** the flower girl's dash across the front (s), and the least time between dashes */
-      girlRun: 4.2,
+      girlRun: 3.6,
       girlEvery: 30,
       /** where petals leave the Kerala friend's fingers / the girl's basket (share of the piece) */
       fingers: [0.13, 0.33] as [number, number],
