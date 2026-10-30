@@ -225,8 +225,11 @@ export const timing = {
     },
     /** the Hindu wedding scene ("Four Rounds of Fire"): the story plays (timed) as its page arrives */
     hindu: {
-      /** seconds for each act: mandap, pots + fire, antarpat, first sight, varmala, together (+ diyas), blessing */
-      acts: { mandap: 1.5, ritual: 1.6, antarpat: 2.2, sight: 1.5, varmala: 1.8, together: 2.4, blessing: 1.6 },
+      /** seconds for each act: mandap, pots + fire, arrive (friends, groom, bride — when the antarpat
+       *  is off), antarpat, first sight, varmala, together (+ diyas), blessing */
+      acts: { mandap: 1.5, ritual: 1.6, arrive: 2.2, antarpat: 2.2, sight: 1.5, varmala: 1.8, together: 2.4, blessing: 1.6 },
+      /** the antarpat (friends hold a cloth between groom and bride, then it drops) — off for now */
+      antarpat: false as boolean,
       /** leaving back up rewinds this much faster */
       reverseSpeed: 6,
       startAt: "96%",
