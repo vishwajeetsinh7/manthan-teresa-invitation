@@ -117,17 +117,23 @@ export const timing = {
     sheenSeconds: 7,
   },
 
-  /** One page per swipe: an eased glide between pages (see src/lib/usePager.ts) */
+  /** One page per swipe (see src/lib/usePager.ts). The glide starts at
+   *  once at about the finger's speed and eases to rest. */
   paging: {
-    /** first screen ↔ Celebrations */
-    firstDur: 2,
+    /** first screen ↔ Celebrations (a full glide; less if the finger moved part way) */
+    firstDur: 1.8,
     /** every other page */
-    dur: 1.4,
-    ease: "power3.inOut",
-    /** ignore input this long after a glide (trackpad momentum) */
-    cooldown: 0.45,
-    /** px of swipe / wheel before it counts */
-    tolerance: 12,
+    dur: 1.2,
+    /** a short nudge springs back this fast */
+    backDur: 0.5,
+    ease: "power3.out",
+    /** a drag this long (px) or a flick this fast (px/s) turns the page */
+    swipe: 48,
+    flick: 450,
+    /** ignore wheel input this long after a glide (trackpad momentum) */
+    cooldown: 0.35,
+    /** px of wheel before it counts */
+    tolerance: 10,
   },
 
   /** Two doves beside the names (start once the names have been written) */
@@ -178,7 +184,7 @@ export const timing = {
     /** church: pause between champagne clinks while focused */
     cheers: { pause: 1.1 },
     /** distance between events on the vine, in vine "waves" (1 wave ≈ a quarter screen) */
-    wavesPerGap: 3,
+    wavesPerGap: [4, 3, 3] as readonly number[], // Mehndi → Haldi is longer: room for the ceremony scene
     /** the one rose that travels down the vine to the event in focus */
     traveler: { pxPerSecond: 320, minDur: 0.7, maxDur: 1.6, roll: 0.6 },
   },

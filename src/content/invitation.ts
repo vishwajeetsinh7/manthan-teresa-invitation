@@ -53,6 +53,7 @@ export const invitation = {
   /**
    * `mood` (optional) recolours the whole page while that event is on screen —
    * see src/config/moods.ts. Only "haldi" exists for now.
+   * `scene`: an animated illustration under the event (public/<scene>/<scene>-sprite.webp).
    * `icons`: gold line icons drawn beside the event (mehndi, haldi, mandap, church, cheers).
    * `flower`: what the travelling rose turns into on this event —
    *   kind 0 burgundy · 1 blush · 2 ivory · 3 raspberry · 4 pale pink; tint "gold" warms it to turmeric.
@@ -67,7 +68,8 @@ export const invitation = {
       place: "Garden Lawns", // PLACEHOLDER
       note: "Festive colours", // PLACEHOLDER
       icons: ["mehndi"],
-      pattern: "mehndi", // faint henna mandala behind this event
+      pattern: "mehndi", // henna mandala under this event, drawn by the henna cone
+      scene: "mehndi", // animated illustration: a friend applying henna to the bride
       flower: { kind: 3 }, // raspberry — henna red
     },
     {

@@ -156,7 +156,9 @@ export function NameFlourish({ className = "" }: { className?: string }) {
  */
 export type Thread = { paths: { d: string; node?: boolean }[]; height: number; nodes: number[] };
 
-export function buildThread(count: number, wavesPerGap: number): Thread {
+export function buildThread(count: number, wavesPerGap: number | readonly number[]): Thread {
+  /** waves between event i and i + 1 (a list sets each gap; the last value repeats) */
+  const gap = (i: number) => (typeof wavesPerGap === "number" ? wavesPerGap : (wavesPerGap[i] ?? wavesPerGap[wavesPerGap.length - 1]));
   const paths: { d: string; node?: boolean }[] = [];
   const nodes: number[] = [];
   // top curl + first stretch of stem down to the first node (y 144)
@@ -190,7 +192,7 @@ export function buildThread(count: number, wavesPerGap: number): Thread {
     node(y);
     y += 12;
     if (i === count - 1) break;
-    for (let w = 0; w < wavesPerGap; w++) {
+    for (let w = 0; w < gap(i); w++) {
       wave(y, flip);
       flip = !flip;
       y += 188;

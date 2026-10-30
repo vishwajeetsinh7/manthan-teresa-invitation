@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "doves": "node scripts/build-dove-sprite.mjs"
+    "doves": "node scripts/build-dove-sprite.mjs",
+    "mehndi": "node scripts/build-mehndi-sprite.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

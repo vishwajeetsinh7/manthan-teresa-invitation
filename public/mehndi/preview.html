@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mehndi sprite preview</title>
+<style>
+  body { margin: 0; padding: 24px; background: #f6eee3; font: 14px/1.4 Georgia, serif; color: #5a1520; }
+  h2 { font-weight: normal; margin: 24px 0 10px; }
+  .row { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
+  .f { width: 386px; height: 291px; background: url(mehndi-sprite.webp) 0 0 / 4632px 291px no-repeat; outline: 1px dashed rgb(176 138 74 / .35); }
+  .onion { position: relative; width: 386px; height: 291px; outline: 1px dashed rgb(176 138 74 / .35); }
+  .onion div { position: absolute; inset: 0; background: url(mehndi-sprite.webp) 0 0 / 4632px 291px no-repeat; opacity: .2; }
+</style></head><body>
+<p>12 frames · 386 × 291px each · 8 fps</p>
+<div class="row">
+  <div><h2>Normal speed</h2><div class="f" id="a"></div></div>
+  <div><h2>Half speed</h2><div class="f" id="b"></div></div>
+  <div><h2>Onion skin (static parts should look sharp)</h2><div class="onion" id="onion"></div></div>
+</div>
+<script>
+  const n = 12, fw = 386, fps = 8;
+  const onion = document.getElementById("onion");
+  for (let k = 0; k < n; k++) { const o = document.createElement("div"); o.style.backgroundPositionX = -k * fw + "px"; onion.appendChild(o); }
+  const a = document.getElementById("a"), b = document.getElementById("b"), t0 = performance.now();
+  (function loop(now) {
+    const t = (now - t0) / 1000;
+    a.style.backgroundPositionX = -(Math.floor(t * fps) % n) * fw + "px";
+    b.style.backgroundPositionX = -(Math.floor(t * fps / 2) % n) * fw + "px";
+    requestAnimationFrame(loop);
+  })(t0);
+</script>
+</body></html>

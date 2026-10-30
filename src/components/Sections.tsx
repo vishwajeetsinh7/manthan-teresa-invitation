@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { gsap, useGSAP, ScrollTrigger } from "@/src/lib/gsap";
 import { invitation as C } from "@/src/content/invitation";
 import { timing } from "@/src/config/timing";
@@ -11,6 +11,7 @@ import { FlowerOpenPlaceholder } from "./art/Placeholders";
 import { EVENT_ICONS, HENNA_CONE, LotusDivider, MEHNDI_MANDALA, SvgArt, type EventIconName } from "./art/svgArt";
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 import { SOFT_BLUR } from "@/src/lib/device";
+import mehndiSprite from "@/public/mehndi/mehndi-sprite.json";
 
 function Countdown() {
   const target = new Date(C.countdownTo).getTime();
@@ -80,6 +81,28 @@ function TravellingRose() {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The Mehndi ceremony: a friend applying henna to the bride, a 12-frame
+ * sprite (built by scripts/build-mehndi-sprite.mjs). Frames are stepped by a
+ * CSS animation that only runs while Mehndi is in focus (.is-focus), so it
+ * costs nothing the rest of the time.
+ */
+function MehndiScene() {
+  const m = mehndiSprite;
+  return (
+    <div
+      className="t-scene"
+      aria-hidden
+      style={{ aspectRatio: `${m.frameWidth} / ${m.frameHeight}`, "--n": m.frameCount, "--loop": `${m.frameCount / m.fps}s` } as CSSProperties}
+    >
+      <div className="t-scene-clip">
+        {/* eslint-disable-next-line @next/next/no-img-element -- a sprite strip, stepped by transform */}
+        <img className="t-scene-strip" src="/mehndi/mehndi-sprite.webp" alt="" draggable={false} decoding="async" fetchPriority="low" />
       </div>
     </div>
   );
@@ -393,6 +416,18 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           });
         }
 
+        // an event's illustration rises in the first time the event is focused
+        const scene = ev.querySelector<HTMLElement>(".t-scene");
+        if (scene && !reduce) {
+          let shown = false;
+          gsap.set(scene, { opacity: 0, y: 18 });
+          on.push(() => {
+            if (shown) return;
+            shown = true;
+            afterIntro(index, () => gsap.to(scene, { opacity: 1, y: 0, duration: 1.1, ease: "power2.out" }));
+          });
+        }
+
         // Haldi: a soft turmeric light that drifts around the event
         const halo = ev.querySelector<HTMLElement>(".t-halo");
         if (halo) {
@@ -694,6 +729,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                 </div>
                 <div className="t-text">
                   {mehndi && <SvgArt svg={MEHNDI_MANDALA} className="t-pattern" />}
+                  {"scene" in e && e.scene === "mehndi" && <MehndiScene />}
                   {"mood" in e && e.mood === "haldi" && <span className="t-halo" aria-hidden />}
                   <EventDate day={e.day} weekday={e.weekday} month={e.month} />
                   <h3 className="t-title script">

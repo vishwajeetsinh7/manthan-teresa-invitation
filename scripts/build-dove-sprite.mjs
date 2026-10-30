@@ -17,6 +17,7 @@
  */
 import sharp from "sharp";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { chromaKey } from "./lib/chroma-key.mjs";
 
 const SRC = "assets-src/dove-sheet-green.png";
 const OUT_DIR = "public/doves";
@@ -39,42 +40,13 @@ const fail = (msg) => {
   console.error(`✖ ${msg}`);
   process.exit(1);
 };
-const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
-const smooth = (e0, e1, x) => {
-  const t = clamp((x - e0) / (e1 - e0), 0, 1);
-  return t * t * (3 - 2 * t);
-};
 
 /* ── 1. chroma key + despill ─────────────────────────────────────────── */
 const { data: rgb, info } = await sharp(SRC).removeAlpha().raw().toBuffer({ resolveWithObject: true });
 const W = info.width;
 const H = info.height;
 const N = W * H;
-const rgba = Buffer.alloc(N * 4);
-const alpha = new Float32Array(N);
-for (let i = 0; i < N; i++) {
-  const r = rgb[i * 3];
-  const g = rgb[i * 3 + 1];
-  const b = rgb[i * 3 + 2];
-  const dom = g - Math.max(r, b);
-  const a = 1 - smooth(KEY_LO, KEY_HI, dom);
-  alpha[i] = a;
-  let R = r;
-  let G = g;
-  let B = b;
-  if (a > 0 && a < 1) {
-    // un-mix the green screen: C = a·F + (1 − a)·(0, 255, 0)  →  F
-    R = clamp(r / a, 0, 255);
-    B = clamp(b / a, 0, 255);
-    G = clamp((g - (1 - a) * 255) / a, 0, 255);
-  }
-  // despill: green may never exceed the brighter of red/blue (cream feathers have r ≥ g)
-  G = Math.min(G, Math.max(R, B));
-  rgba[i * 4] = R;
-  rgba[i * 4 + 1] = G;
-  rgba[i * 4 + 2] = B;
-  rgba[i * 4 + 3] = Math.round(a * 255);
-}
+const { rgba, alpha } = chromaKey(rgb, N, { lo: KEY_LO, hi: KEY_HI });
 
 /* ── 2. find the doves (connected blobs), reading order ─────────────── */
 const label = new Int32Array(N).fill(-1);
