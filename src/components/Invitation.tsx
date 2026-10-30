@@ -5,7 +5,7 @@ import { gsap, useGSAP } from "@/src/lib/gsap";
 import { invitation as C } from "@/src/content/invitation";
 import { timing } from "@/src/config/timing";
 import { assets } from "@/src/config/assets";
-import { TapScene, VideoScene } from "./IntroScenes";
+import { TapScene, VideoScene, VideoSeal } from "./IntroScenes";
 import { RevealCard } from "./RevealCard";
 import { Sections } from "./Sections";
 import { DesktopNote } from "./DesktopNote";
@@ -234,6 +234,9 @@ export function Invitation() {
         {(phase === "tap" || (phase === "video" && !videoStarted)) && (
           <TapScene key={`tap-${run}`} onTap={handleTap} leaving={phase !== "tap"} />
         )}
+
+        {/* the new wax seal over the video's gold seal (tap screen + video) */}
+        {phase !== "reveal" && <VideoSeal key={`vs-${run}`} videoRef={videoRef} opened={phase === "video"} />}
 
         <div ref={veilRef} className="white-veil" aria-hidden />
 

@@ -39,11 +39,12 @@ const SOFT = { opacity: 0.22, blur: 0.01, dy: 0.008 };
 /** w×h = output px, fill = subject size as share of the canvas */
 const JOBS = [
   // batch 1 — seal (no baked shadow: the site animates its own) + flowers
-  { src: /wax-seal/i, out: "seal/wax-seal-tm.png", w: 600, h: 600, fill: 0.96, erode: 2 },
+  { src: /^seal-burgundy|wax-seal/i, out: "seal/wax-seal-tm.png", w: 600, h: 600, fill: 0.96, erode: 2 },
   { src: /^Flower 1/i, out: "flowers/flower-1-open.png", w: 512, h: 512, fill: 0.9, erode: 3, shadow: SHADOW },
   { src: /light pink/i, out: "flowers/flower-2-open.png", w: 512, h: 512, fill: 0.9, erode: 3, shadow: SHADOW },
   { src: /^Flower 3/i, out: "flowers/flower-3-open.png", w: 512, h: 512, fill: 0.9, erode: 3, shadow: { ...SHADOW, opacity: 0.4 } },
   { src: /^Flower 4/i, out: "flowers/flower-4-open.png", w: 512, h: 512, fill: 0.9, erode: 3, shadow: SHADOW },
+  { src: /^pink rose/i, out: "flowers/flower-5-open.png", w: 512, h: 512, fill: 0.9, erode: 3, shadow: SHADOW },
   { src: /buds/i, out: "flowers/rosebud.png", w: 400, h: 400, fill: 0.92, erode: 3, shadow: SHADOW },
 
   // batch 2 — leaves (stem at bottom-centre = the pivot they fan out from)
@@ -303,7 +304,7 @@ await paperTile();
  * at 3× pixel density. The site serves these directly — no on-demand
  * image resizing, so nothing is slow on a cold CDN.                      */
 const WEB = [
-  ...[1, 2, 3, 4].map((n) => ({ src: `flowers/flower-${n}-open.png`, out: `flowers/flower-${n}.webp`, w: 288 })),
+  ...[1, 2, 3, 4, 5].map((n) => ({ src: `flowers/flower-${n}-open.png`, out: `flowers/flower-${n}.webp`, w: 288 })),
   { src: "flowers/rosebud.png", out: "flowers/rosebud.webp", w: 144 },
   ...[1, 2, 3, 4, 5].map((n) => ({ src: `leaves/leaf-${n}.png`, out: `leaves/leaf-${n}.webp`, w: 132 })),
   ...[1, 2, 3].map((n) => ({ src: `petals/petal-${n}.png`, out: `petals/petal-${n}.webp`, w: 96 })),

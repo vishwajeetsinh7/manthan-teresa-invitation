@@ -55,7 +55,7 @@ export const invitation = {
    * see src/config/moods.ts. Only "haldi" exists for now.
    * `icons`: gold line icons drawn beside the event (mehndi, haldi, mandap, church, cheers).
    * `flower`: what the travelling rose turns into on this event —
-   *   kind 0 burgundy · 1 blush · 2 ivory · 3 raspberry; tint "gold" warms it to turmeric.
+   *   kind 0 burgundy · 1 blush · 2 ivory · 3 raspberry · 4 pale pink; tint "gold" warms it to turmeric.
    */
   events: [
     {
@@ -80,7 +80,7 @@ export const invitation = {
       note: "Wear yellow",
       mood: "haldi",
       icons: ["haldi"],
-      flower: { kind: 2, tint: "gold" }, // ivory rose tinted turmeric gold
+      flower: { kind: 4 }, // pale pink rose
     },
     {
       day: "24",

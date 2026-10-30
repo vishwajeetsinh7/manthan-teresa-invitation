@@ -16,9 +16,10 @@ export const assets = {
   paperTile: `${A}/bg/paper-tile.webp`,
   /** seamless velvet tile that flows inside the corner drapes */
   velvetTile: `${A}/velvet/velvet-tile.webp`,
+  /** burgundy wax seal with rose-gold T&M — on the card and over the video seal */
   seal: `${A}/seal/wax-seal-tm.webp`,
-  /** 1 burgundy rose · 2 blush rose · 3 ivory rose · 4 raspberry ranunculus */
-  flowers: [1, 2, 3, 4].map((n) => `${A}/flowers/flower-${n}.webp`),
+  /** 1 burgundy rose · 2 blush rose · 3 ivory rose · 4 raspberry ranunculus · 5 pale pink rose */
+  flowers: [1, 2, 3, 4, 5].map((n) => `${A}/flowers/flower-${n}.webp`),
   rosebud: `${A}/flowers/rosebud.webp`,
   leaves: [1, 2, 3, 4, 5].map((n) => `${A}/leaves/leaf-${n}.webp`),
   petals: [1, 2, 3].map((n) => `${A}/petals/petal-${n}.webp`),

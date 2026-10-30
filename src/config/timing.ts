@@ -24,6 +24,9 @@ export const timing = {
      *  this long after the tap, or freezes for this long */
     startTimeout: 7,
     stallTimeout: 4,
+    /** the new wax seal over the video: glows with the video at ~1 s, then
+     *  vanishes into the video's burst of light at ~3 s (video seconds) */
+    seal: { glowAt: 0.85, burstAt: 2.88 },
   },
 
   // Scene 3 — invitation reveal (0 = the moment it starts over the video)

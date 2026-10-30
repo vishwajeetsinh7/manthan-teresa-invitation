@@ -55,6 +55,78 @@ export function TapScene({ onTap, leaving }: { onTap: () => void; leaving: boole
   );
 }
 
+/* ── The new wax seal, laid exactly over the video's gold seal ───────
+ * The video (720 × 1280, cropped to fill the screen) has its seal centred
+ * at (357, 588), about 202 px across, perfectly still until ~2.9 s; then a
+ * burst of light at ~3.0 s, it shrinks away by ~3.25 s and the flaps open.
+ * This overlay covers it (CSS mirrors the video's crop, see .video-seal),
+ * presses in when tapped, and follows the video's own clock to glow at ~1 s
+ * and vanish into that burst — so the video seems to have our seal.       */
+export function VideoSeal({ videoRef, opened }: { videoRef: RefObject<HTMLVideoElement | null>; opened: boolean }) {
+  const root = useRef<HTMLDivElement>(null);
+
+  // tap: the seal presses in and springs back, a sheen crosses it
+  useGSAP(
+    () => {
+      if (!opened) return;
+      gsap
+        .timeline()
+        .to(".vs-press", { scale: 0.9, duration: 0.1, ease: "power2.in" })
+        .to(".vs-press", { scale: 1, duration: 0.75, ease: "elastic.out(1, 0.45)" })
+        .fromTo(".vs-sheen", { "--sheen": "-120%" }, { "--sheen": "120%", duration: 0.8, ease: "power2.inOut" }, 0.05);
+      navigator.vibrate?.(12);
+    },
+    { dependencies: [opened], scope: root },
+  );
+
+  // follow the video's clock (stays in sync even if playback stutters)
+  useEffect(() => {
+    if (!opened || !root.current) return;
+    const v = videoRef.current;
+    if (!v) return;
+    const q = gsap.utils.selector(root);
+    const T = timing.video.seal;
+    const tl = gsap
+      .timeline({ paused: true })
+      // the video's seal glows around 1 s — ours glows with it
+      .to(q(".vs-glow"), { opacity: 0.85, scale: 1.1, duration: 0.35, ease: "sine.out" }, T.glowAt)
+      .to(q(".vs-glow"), { opacity: 0.2, scale: 1, duration: 0.7, ease: "sine.inOut" }, T.glowAt + 0.35)
+      // into the burst of light: swell, flare…
+      .to(q(".vs-sync"), { scale: 1.08, duration: 0.15, ease: "power2.out" }, T.burstAt)
+      .to(q(".vs-glow"), { opacity: 1, scale: 1.6, duration: 0.18, ease: "power2.out" }, T.burstAt)
+      // …then shrink away a step ahead of the video's own seal, so it never peeks out
+      .to(q(".vs-sync"), { scale: 0.42, duration: 0.2, ease: "power2.in" }, T.burstAt + 0.15)
+      .to(q(".vs-sync"), { scale: 0, opacity: 0, duration: 0.22, ease: "power2.in" }, T.burstAt + 0.35)
+      .to(q(".vs-glow"), { opacity: 0, duration: 0.3 }, T.burstAt + 0.2);
+    let raf = 0;
+    const sync = () => {
+      tl.time(Math.min(v.currentTime, tl.duration()));
+      if (v.currentTime < tl.duration()) raf = requestAnimationFrame(sync);
+    };
+    raf = requestAnimationFrame(sync);
+    const onTime = () => tl.time(Math.min(v.currentTime, tl.duration()));
+    v.addEventListener("timeupdate", onTime);
+    return () => {
+      cancelAnimationFrame(raf);
+      v.removeEventListener("timeupdate", onTime);
+      tl.kill();
+    };
+  }, [opened, videoRef]);
+
+  return (
+    <div ref={root} className="video-seal" aria-hidden>
+      <div className="vs-sync">
+        <div className="vs-glow" />
+        <div className="vs-shadow" />
+        <div className="vs-press">
+          <Image src={assets.seal} alt="" fill unoptimized preload sizes="160px" draggable={false} />
+          <div className="vs-sheen" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Scene 2: envelope video → hands off to the reveal ──────────────
  * `revealBeforeEnd` seconds before the end, onReveal() fires and the card
  * starts building ON TOP of the still-playing video (its ending is white),

@@ -263,6 +263,53 @@ body {
   object-fit: cover;
   display: block;
 }
+/* New wax seal over the video's gold seal.
+   The video (720×1280) is cropped to fill the phone ("cover"): one video px
+   = max(width/720, height/1280), centred. Its seal is centred at (357, 588)
+   and ~202 px wide; this box is 238 video px so the gold rim never shows (waves differ). */
+.video-seal {
+  --vs: max(calc(100cqw / 720), calc(100cqh / 1280));
+  position: absolute;
+  z-index: 41;
+  left: calc(50cqw + (357 - 360 - 119) * var(--vs));
+  top: calc(50cqh + (588 - 640 - 119) * var(--vs));
+  width: calc(238 * var(--vs));
+  height: calc(238 * var(--vs));
+  pointer-events: none;
+}
+.vs-sync,
+.vs-press {
+  position: absolute;
+  inset: 0;
+  will-change: transform, opacity;
+}
+.vs-glow {
+  position: absolute;
+  inset: -45%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 236 190 / 0.95) 0%, rgb(235 200 130 / 0.45) 32%, rgb(220 180 110 / 0) 66%);
+  opacity: 0;
+}
+.vs-shadow {
+  position: absolute;
+  inset: 4% 2% -6% 6%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 55%, rgb(20 2 5 / 0.55) 40%, rgb(20 2 5 / 0) 72%);
+}
+.vs-sheen {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.vs-sheen::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background: linear-gradient(125deg, transparent 38%, rgb(255 230 215 / 0.55) 50%, transparent 62%);
+  transform: translateX(var(--sheen, -120%));
+}
+
 .white-veil {
   position: absolute;
   inset: 0;
