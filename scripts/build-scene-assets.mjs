@@ -324,7 +324,10 @@ for (const V of cfg.variants ?? []) {
       let bestD = reach;
       hints.forEach((hs, k) => hs.forEach(([hx, hy]) => {
         const d = near(r, hx, hy);
-        if (d < bestD) (bestD = d), (bestR = k);
+        if (d < bestD) {
+          bestD = d;
+          bestR = k;
+        }
       }));
       if (bestR >= 0) regions[bestR].list.push(...r.list);
       else if (rest) rest.list.push(...r.list);
@@ -364,7 +367,10 @@ for (const V of cfg.variants ?? []) {
     }
     let sx = 0;
     let sy = 0;
-    for (const q of R.list) (sx += q % P.w), (sy += Math.floor(q / P.w));
+    for (const q of R.list) {
+      sx += q % P.w;
+      sy += Math.floor(q / P.w);
+    }
     const cx = sx / R.list.length;
     const cy = sy / R.list.length;
     let rad = 0;
