@@ -8,6 +8,9 @@
  *    bigger one join it (a strand's bell, the lamp's flames, rug tassels);
  *    tiny specks are dropped
  * 3. names each piece from the config (`at`: a point inside it on its sheet)
+ *    (two drawings that touch on the sheet — a bridesmaid's saree and a flower
+ *    girl's basket — share one blob: `clip` [x0, y0, x1, y1] or `split`
+ *    { line: [[x, y], …], keep: "left" | "right" } takes just its own part)
  *    (a piece with `gather` also takes in loose specks that near it: a
  *    powder puff's flecks, an umbrella's tassels)
  * 4. lamp: records each baked wick flame as an anchor, then erases it
@@ -114,7 +117,7 @@ for (const spec of cfg.pieces) {
     sh.groups.filter((g) => px >= g.x0 && px <= g.x1 && py >= g.y0 && py <= g.y1).sort((a, b) => b.area - a.area)[0];
   if (!found) fail(`${spec.name}: no piece at ${px},${py} on ${spec.sheet}`);
   const key = `${spec.sheet}:${found.id}`;
-  if (used.has(key)) fail(`${spec.name}: that piece is already named`);
+  if (used.has(key) && !spec.clip && !spec.split) fail(`${spec.name}: that piece is already named`);
   used.add(key);
   picks.push({ spec, sh, hit: { ...found, parts: [...found.parts] } });
 }
@@ -146,6 +149,7 @@ for (const { spec, sh, hit } of picks) {
   const w = x1 - x0 + 1;
   const h = y1 - y0 + 1;
   const own = new Set(hit.parts);
+  const inside = cutFilter(spec);
   const px4 = Buffer.alloc(w * h * 4);
   // a warm-only piece (powder, gold) is re-keyed with a stronger cap (see chroma-key)
   const warm = spec.warm !== undefined ? chromaKey(sh.rgb.subarray(0), sh.W * sh.H, { ...cfg.key, cap: spec.warm }) : null;
@@ -155,9 +159,57 @@ for (const { spec, sh, hit } of picks) {
       const lab = sh.label[i];
       if (lab !== -1 && !own.has(lab)) continue;
       if (lab === -1 && sh.alpha[i] <= 0) continue;
+      if (inside && !inside(x0 + x, y0 + y)) continue;
       (warm ? warm.rgba : sh.rgba).copy(px4, (y * w + x) * 4, i * 4, i * 4 + 4);
     }
-  pieces[spec.name] = { spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} };
+  pieces[spec.name] = inside ? trim({ spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} }) : { spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} };
+}
+
+/** a clip rectangle or a split line (sheet px) → is (x, y) part of this piece? */
+function cutFilter(spec) {
+  if (spec.clip) {
+    const [cx0, cy0, cx1, cy1] = spec.clip;
+    return (x, y) => x >= cx0 && x < cx1 && y >= cy0 && y < cy1;
+  }
+  if (spec.split) {
+    const L = spec.split.line;
+    const lineX = (y) => {
+      if (y <= L[0][1]) return L[0][0];
+      for (let k = 1; k < L.length; k++)
+        if (y <= L[k][1]) {
+          const [ax, ay] = L[k - 1];
+          const [bx, by] = L[k];
+          return ax + ((bx - ax) * (y - ay)) / (by - ay || 1);
+        }
+      return L[L.length - 1][0];
+    };
+    return spec.split.keep === "left" ? (x, y) => x < lineX(y) : (x, y) => x >= lineX(y);
+  }
+  return null;
+}
+/** shrink a cut-out to its solid pixels (plus the pad) */
+function trim(p) {
+  let tx0 = p.w;
+  let ty0 = p.h;
+  let tx1 = -1;
+  let ty1 = -1;
+  for (let y = 0; y < p.h; y++)
+    for (let x = 0; x < p.w; x++)
+      if (p.px[(y * p.w + x) * 4 + 3] > 0) {
+        if (x < tx0) tx0 = x;
+        if (x > tx1) tx1 = x;
+        if (y < ty0) ty0 = y;
+        if (y > ty1) ty1 = y;
+      }
+  tx0 = Math.max(0, tx0 - cfg.pad);
+  ty0 = Math.max(0, ty0 - cfg.pad);
+  tx1 = Math.min(p.w - 1, tx1 + cfg.pad);
+  ty1 = Math.min(p.h - 1, ty1 + cfg.pad);
+  const w = tx1 - tx0 + 1;
+  const h = ty1 - ty0 + 1;
+  const px = Buffer.alloc(w * h * 4);
+  for (let y = 0; y < h; y++) p.px.copy(px, y * w * 4, ((ty0 + y) * p.w + tx0) * 4, ((ty0 + y) * p.w + tx1 + 1) * 4);
+  return { ...p, x0: p.x0 + tx0, y0: p.y0 + ty0, w, h, px };
 }
 for (const [id, sh] of Object.entries(sheets)) {
   const named = [...used].filter((k) => k.startsWith(id + ":")).length;

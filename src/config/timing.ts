@@ -238,6 +238,18 @@ export const timing = {
       offering: [5, 7] as [number, number],
       toss: [3, 5] as [number, number],
     },
+    /** the church wedding scene ("The Aisle"): the story plays (timed) as its page arrives */
+    church: {
+      /** seconds for each act: the church builds, the aisle (runner, pews, candles), the groom
+       *  waits, the procession (flower girl, bride + father), the vows (veil, manthrakodi), the
+       *  recessional (they walk out between the bridesmaids), the blessing */
+      acts: { church: 1.6, aisle: 1.6, groom: 1.1, procession: 3.4, vows: 2.8, recessional: 3.2, blessing: 1.6 },
+      reverseSpeed: 6,
+      startAt: "96%",
+      maxAmbient: 8,
+      /** the bridesmaids' petal tosses once it idles (s between) */
+      toss: [3, 5] as [number, number],
+    },
     /** the one rose that travels down the vine to the event in focus */
     traveler: { pxPerSecond: 320, minDur: 0.7, maxDur: 1.6, roll: 0.6 },
   },

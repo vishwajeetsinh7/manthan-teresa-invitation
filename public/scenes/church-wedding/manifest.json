@@ -1,0 +1,561 @@
+{
+  "name": "church-wedding",
+  "pieces": {
+    "backdrop": {
+      "src": "backdrop.webp",
+      "w": 1024,
+      "h": 1536,
+      "aspect": 0.6667,
+      "pivot": [
+        0.5,
+        1
+      ]
+    },
+    "altar-back": {
+      "src": "altar-back.webp",
+      "w": 551,
+      "h": 594,
+      "aspect": 0.9269,
+      "pivot": [
+        0.5,
+        0.9936
+      ]
+    },
+    "altar-table": {
+      "src": "altar-table.webp",
+      "w": 588,
+      "h": 299,
+      "aspect": 1.9684,
+      "pivot": [
+        0.5,
+        0.9873
+      ]
+    },
+    "arch": {
+      "src": "arch.webp",
+      "w": 679,
+      "h": 540,
+      "aspect": 1.2574,
+      "pivot": [
+        0.5,
+        0
+      ]
+    },
+    "bell-1": {
+      "src": "bell-1.webp",
+      "w": 51,
+      "h": 65,
+      "aspect": 0.7879,
+      "pivot": [
+        0.5038,
+        0.0242
+      ]
+    },
+    "bell-2": {
+      "src": "bell-2.webp",
+      "w": 51,
+      "h": 67,
+      "aspect": 0.7662,
+      "pivot": [
+        0.5,
+        0.026
+      ]
+    },
+    "bell-3": {
+      "src": "bell-3.webp",
+      "w": 51,
+      "h": 66,
+      "aspect": 0.7764,
+      "pivot": [
+        0.492,
+        0.0248
+      ]
+    },
+    "window": {
+      "src": "window.webp",
+      "w": 162,
+      "h": 545,
+      "aspect": 0.2971,
+      "pivot": [
+        0.5,
+        0.9932
+      ]
+    },
+    "candle-tall": {
+      "src": "candle-tall.webp",
+      "w": 58,
+      "h": 214,
+      "aspect": 0.2714,
+      "pivot": [
+        0.5,
+        0.9882
+      ],
+      "points": {
+        "wick": [
+          0.5109,
+          0.059
+        ]
+      }
+    },
+    "candle-short": {
+      "src": "candle-short.webp",
+      "w": 51,
+      "h": 206,
+      "aspect": 0.2473,
+      "pivot": [
+        0.5,
+        0.9859
+      ],
+      "points": {
+        "wick": [
+          0.4286,
+          0.0495
+        ]
+      }
+    },
+    "flower-stand": {
+      "src": "flower-stand.webp",
+      "w": 167,
+      "h": 282,
+      "aspect": 0.5925,
+      "pivot": [
+        0.5,
+        0.9884
+      ]
+    },
+    "bride-father": {
+      "src": "bride-father.webp",
+      "w": 680,
+      "h": 936,
+      "aspect": 0.7265,
+      "pivot": [
+        0.5,
+        0.9957
+      ],
+      "points": {
+        "bride": [
+          0.3132,
+          0.2831
+        ]
+      }
+    },
+    "couple-walk": {
+      "src": "couple-walk.webp",
+      "w": 657,
+      "h": 948,
+      "aspect": 0.693,
+      "pivot": [
+        0.5,
+        0.9958
+      ],
+      "points": {
+        "hands": [
+          0.2694,
+          0.347
+        ]
+      }
+    },
+    "couple-veil": {
+      "src": "couple-veil.webp",
+      "w": 246,
+      "h": 445,
+      "aspect": 0.5522,
+      "pivot": [
+        0.5,
+        0.9958
+      ],
+      "points": {
+        "bride": [
+          0.3081,
+          0.2307
+        ],
+        "groom": [
+          0.6389,
+          0.1837
+        ]
+      }
+    },
+    "couple-kodi": {
+      "src": "couple-kodi.webp",
+      "w": 238,
+      "h": 441,
+      "aspect": 0.5401,
+      "pivot": [
+        0.5,
+        0.9958
+      ],
+      "align": {
+        "to": "couple-veil",
+        "x": -0.0378,
+        "y": 0.0021,
+        "w": 0.9679,
+        "h": 0.9896
+      }
+    },
+    "groom": {
+      "src": "groom.webp",
+      "w": 128,
+      "h": 438,
+      "aspect": 0.2923,
+      "pivot": [
+        0.5,
+        0.9972
+      ]
+    },
+    "priest": {
+      "src": "priest.webp",
+      "w": 281,
+      "h": 475,
+      "aspect": 0.5913,
+      "pivot": [
+        0.5,
+        0.9917
+      ]
+    },
+    "bridesmaid-pink": {
+      "src": "bridesmaid-pink.webp",
+      "w": 371,
+      "h": 704,
+      "aspect": 0.527,
+      "pivot": [
+        0.5,
+        0.9943
+      ],
+      "points": {
+        "basket": [
+          0.6981,
+          0.3494
+        ]
+      }
+    },
+    "bridesmaid-kerala": {
+      "src": "bridesmaid-kerala.webp",
+      "w": 298,
+      "h": 690,
+      "aspect": 0.4319,
+      "pivot": [
+        0.5,
+        0.9942
+      ],
+      "points": {
+        "basket": [
+          0.3859,
+          0.3507
+        ]
+      }
+    },
+    "girl-back": {
+      "src": "girl-back.webp",
+      "w": 296,
+      "h": 525,
+      "aspect": 0.5638,
+      "pivot": [
+        0.5,
+        0.9905
+      ],
+      "points": {
+        "basket": [
+          0.1588,
+          0.4914
+        ]
+      }
+    },
+    "girl-front": {
+      "src": "girl-front.webp",
+      "w": 262,
+      "h": 485,
+      "aspect": 0.5402,
+      "pivot": [
+        0.5,
+        0.9918
+      ],
+      "points": {
+        "basket": [
+          0.542,
+          0.4825
+        ]
+      }
+    },
+    "ring-boy": {
+      "src": "ring-boy.webp",
+      "w": 164,
+      "h": 473,
+      "aspect": 0.3467,
+      "pivot": [
+        0.5,
+        0.9915
+      ]
+    },
+    "runner": {
+      "src": "runner.webp",
+      "w": 621,
+      "h": 980,
+      "aspect": 0.6337,
+      "pivot": [
+        0.5,
+        0.9959
+      ]
+    },
+    "pew": {
+      "src": "pew.webp",
+      "w": 378,
+      "h": 233,
+      "aspect": 1.6239,
+      "pivot": [
+        0.5,
+        0.9908
+      ]
+    },
+    "pew-guests": {
+      "src": "pew-guests.webp",
+      "w": 404,
+      "h": 329,
+      "aspect": 1.2274,
+      "pivot": [
+        0.5,
+        0.9931
+      ]
+    },
+    "pew-bouquet": {
+      "src": "pew-bouquet.webp",
+      "w": 69,
+      "h": 169,
+      "aspect": 0.4075,
+      "pivot": [
+        0.4236,
+        0.0071
+      ]
+    },
+    "kodi": {
+      "src": "kodi.webp",
+      "w": 153,
+      "h": 189,
+      "aspect": 0.8104,
+      "pivot": [
+        0.5,
+        0
+      ]
+    },
+    "flame-1": {
+      "src": "flame-1.webp",
+      "w": 30,
+      "h": 94,
+      "aspect": 0.3197,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "flame-2": {
+      "src": "flame-2.webp",
+      "w": 30,
+      "h": 95,
+      "aspect": 0.3151,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "flame-3": {
+      "src": "flame-3.webp",
+      "w": 30,
+      "h": 96,
+      "aspect": 0.3129,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-white-1": {
+      "src": "petal-white-1.webp",
+      "w": 36,
+      "h": 40,
+      "aspect": 0.9022,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-white-2": {
+      "src": "petal-white-2.webp",
+      "w": 36,
+      "h": 43,
+      "aspect": 0.8444,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-white-3": {
+      "src": "petal-white-3.webp",
+      "w": 36,
+      "h": 40,
+      "aspect": 0.8989,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-white-4": {
+      "src": "petal-white-4.webp",
+      "w": 36,
+      "h": 43,
+      "aspect": 0.8384,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-pink-1": {
+      "src": "petal-pink-1.webp",
+      "w": 36,
+      "h": 42,
+      "aspect": 0.866,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-pink-2": {
+      "src": "petal-pink-2.webp",
+      "w": 36,
+      "h": 40,
+      "aspect": 0.9053,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-pink-3": {
+      "src": "petal-pink-3.webp",
+      "w": 36,
+      "h": 40,
+      "aspect": 0.9022,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-pink-4": {
+      "src": "petal-pink-4.webp",
+      "w": 36,
+      "h": 46,
+      "aspect": 0.7789,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "gyp-1": {
+      "src": "gyp-1.webp",
+      "w": 48,
+      "h": 76,
+      "aspect": 0.6328,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "gyp-2": {
+      "src": "gyp-2.webp",
+      "w": 48,
+      "h": 65,
+      "aspect": 0.7368,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "gyp-3": {
+      "src": "gyp-3.webp",
+      "w": 48,
+      "h": 92,
+      "aspect": 0.522,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "leaf-gold-1": {
+      "src": "leaf-gold-1.webp",
+      "w": 36,
+      "h": 57,
+      "aspect": 0.6279,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "leaf-gold-2": {
+      "src": "leaf-gold-2.webp",
+      "w": 36,
+      "h": 40,
+      "aspect": 0.9104,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "leaf-gold-3": {
+      "src": "leaf-gold-3.webp",
+      "w": 36,
+      "h": 53,
+      "aspect": 0.6786,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "leaf-gold-4": {
+      "src": "leaf-gold-4.webp",
+      "w": 36,
+      "h": 57,
+      "aspect": 0.631,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-1": {
+      "src": "sparkle-1.webp",
+      "w": 42,
+      "h": 52,
+      "aspect": 0.8105,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-2": {
+      "src": "sparkle-2.webp",
+      "w": 42,
+      "h": 51,
+      "aspect": 0.8172,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-3": {
+      "src": "sparkle-3.webp",
+      "w": 42,
+      "h": 52,
+      "aspect": 0.8105,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-4": {
+      "src": "sparkle-4.webp",
+      "w": 42,
+      "h": 51,
+      "aspect": 0.828,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "master": "master.webp"
+}

@@ -53,7 +53,7 @@ export const invitation = {
   /**
    * `mood` (optional) recolours the whole page while that event is on screen —
    * see src/config/moods.ts. Only "haldi" exists for now.
-   * `scene`: the illustrated scene under the event — "mehndi" / "haldi" / "hindu-wedding" (src/components/scenes/*Scene),
+   * `scene`: the illustrated scene under the event — "mehndi" / "haldi" / "hindu-wedding" / "church-wedding" (src/components/scenes/*Scene),
    *   or "soon": a placeholder ("Images coming soon") of the same size, until that event's art is ready.
    * `icons`: gold line icons drawn beside the event (mehndi, haldi, mandap, church, cheers).
    * `flower`: what the travelling rose turns into on this event —
@@ -103,7 +103,7 @@ export const invitation = {
       month: "May",
       weekday: "Tuesday",
       title: "Church Wedding & Reception", // PLACEHOLDER
-      scene: "soon",
+      scene: "church-wedding", // "The Aisle"
       time: "4:00 PM onwards", // PLACEHOLDER
       place: "St. Mary's Church", // PLACEHOLDER
       note: "Formal / Gowns & Suits", // PLACEHOLDER

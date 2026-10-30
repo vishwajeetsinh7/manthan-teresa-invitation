@@ -1,0 +1,427 @@
+{
+  "//": "Stage layout in % of the stage (x, y = the piece's pivot; w = width). Back to front by z. Made by --fit, tweak freely.",
+  "aspect": 1.65,
+  "items": [
+    {
+      "id": "backdrop",
+      "piece": "backdrop",
+      "x": 50,
+      "y": 100,
+      "w": 100,
+      "z": 0
+    },
+    {
+      "id": "window-l",
+      "piece": "window",
+      "x": 16.8,
+      "y": 37.8,
+      "w": 12.5,
+      "z": 1
+    },
+    {
+      "id": "window-r",
+      "piece": "window",
+      "x": 83.2,
+      "y": 37.8,
+      "w": 12.5,
+      "z": 1
+    },
+    {
+      "id": "runner",
+      "piece": "runner",
+      "x": 50,
+      "y": 100,
+      "w": 78.13,
+      "h": 47.82,
+      "z": 1.5
+    },
+    {
+      "id": "scatter-1",
+      "piece": "petal-white-1",
+      "x": 41.99,
+      "y": 86.03,
+      "w": 3,
+      "z": 1.6,
+      "rot": 20
+    },
+    {
+      "id": "scatter-2",
+      "piece": "petal-pink-2",
+      "x": 58.59,
+      "y": 87.81,
+      "w": 3,
+      "z": 1.6,
+      "rot": -50
+    },
+    {
+      "id": "scatter-3",
+      "piece": "petal-white-3",
+      "x": 37.11,
+      "y": 93.13,
+      "w": 3,
+      "z": 1.6,
+      "rot": 0
+    },
+    {
+      "id": "scatter-4",
+      "piece": "petal-pink-4",
+      "x": 63.48,
+      "y": 94.32,
+      "w": 3,
+      "z": 1.6,
+      "rot": 80
+    },
+    {
+      "id": "scatter-5",
+      "piece": "petal-white-2",
+      "x": 45.9,
+      "y": 96.69,
+      "w": 3,
+      "z": 1.6,
+      "rot": -110
+    },
+    {
+      "id": "scatter-6",
+      "piece": "petal-pink-1",
+      "x": 54.69,
+      "y": 97.87,
+      "w": 3,
+      "z": 1.6,
+      "rot": 30
+    },
+    {
+      "id": "scatter-7",
+      "piece": "petal-white-4",
+      "x": 32.23,
+      "y": 97.87,
+      "w": 3,
+      "z": 1.6,
+      "rot": 140
+    },
+    {
+      "id": "scatter-8",
+      "piece": "petal-pink-3",
+      "x": 68.36,
+      "y": 97.28,
+      "w": 3,
+      "z": 1.6,
+      "rot": -20
+    },
+    {
+      "id": "scatter-9",
+      "piece": "petal-white-1",
+      "x": 50.78,
+      "y": 91.36,
+      "w": 3,
+      "z": 1.6,
+      "rot": 60
+    },
+    {
+      "id": "scatter-10",
+      "piece": "petal-pink-2",
+      "x": 43.95,
+      "y": 89.58,
+      "w": 3,
+      "z": 1.6,
+      "rot": -70
+    },
+    {
+      "id": "altar-back",
+      "piece": "altar-back",
+      "x": 51.46,
+      "y": 38.67,
+      "w": 42.7,
+      "z": 2
+    },
+    {
+      "id": "priest",
+      "piece": "priest",
+      "x": 48.87,
+      "y": 50.9,
+      "w": 21.71,
+      "z": 2.5
+    },
+    {
+      "id": "altar-table",
+      "piece": "altar-table",
+      "x": 50.04,
+      "y": 52.34,
+      "w": 45.56,
+      "z": 3
+    },
+    {
+      "id": "stand-l",
+      "piece": "flower-stand",
+      "x": 6.05,
+      "y": 45.19,
+      "w": 12.89,
+      "z": 3.4
+    },
+    {
+      "id": "stand-r",
+      "piece": "flower-stand",
+      "x": 93.95,
+      "y": 45.19,
+      "w": 12.89,
+      "z": 3.4,
+      "flip": true
+    },
+    {
+      "id": "arch",
+      "piece": "arch",
+      "x": 50,
+      "y": 11.81,
+      "w": 58.59,
+      "z": 3.5
+    },
+    {
+      "id": "bell-1",
+      "piece": "bell-1",
+      "x": 43.95,
+      "y": 16.31,
+      "w": 3.91,
+      "z": 3.6
+    },
+    {
+      "id": "bell-2",
+      "piece": "bell-2",
+      "x": 50,
+      "y": 16.31,
+      "w": 3.91,
+      "z": 3.6
+    },
+    {
+      "id": "bell-3",
+      "piece": "bell-3",
+      "x": 56.05,
+      "y": 16.31,
+      "w": 3.91,
+      "z": 3.6
+    },
+    {
+      "id": "couple-veil",
+      "piece": "couple-veil",
+      "x": 50,
+      "y": 54.66,
+      "w": 19.02,
+      "z": 3.7,
+      "flip": true
+    },
+    {
+      "id": "couple-kodi",
+      "piece": "couple-kodi",
+      "x": 51.02,
+      "y": 54.49,
+      "w": 18.41,
+      "z": 3.7,
+      "flip": true
+    },
+    {
+      "id": "groom",
+      "piece": "groom",
+      "x": 47.36,
+      "y": 54.66,
+      "w": 9.89,
+      "z": 3.7,
+      "flip": true
+    },
+    {
+      "id": "kodi",
+      "piece": "kodi",
+      "x": 54.69,
+      "y": 36.91,
+      "w": 11.79,
+      "z": 3.75
+    },
+    {
+      "id": "candle-l1",
+      "piece": "candle-tall",
+      "x": 25.59,
+      "y": 52.77,
+      "w": 4.49,
+      "z": 3.8
+    },
+    {
+      "id": "candle-r1",
+      "piece": "candle-tall",
+      "x": 74.41,
+      "y": 52.77,
+      "w": 4.49,
+      "z": 3.8
+    },
+    {
+      "id": "candle-l2",
+      "piece": "candle-short",
+      "x": 31.05,
+      "y": 53.01,
+      "w": 3.91,
+      "z": 3.8
+    },
+    {
+      "id": "candle-r2",
+      "piece": "candle-short",
+      "x": 68.95,
+      "y": 53.01,
+      "w": 3.91,
+      "z": 3.8
+    },
+    {
+      "id": "pew-l1",
+      "piece": "pew-guests",
+      "x": 22.85,
+      "y": 60.11,
+      "w": 29.3,
+      "z": 3.9
+    },
+    {
+      "id": "pew-r1",
+      "piece": "pew-guests",
+      "x": 77.15,
+      "y": 60.11,
+      "w": 29.3,
+      "z": 3.9,
+      "flip": true
+    },
+    {
+      "id": "bouquet-l1",
+      "piece": "pew-bouquet",
+      "x": 35.74,
+      "y": 48.83,
+      "w": 4.98,
+      "z": 3.9499999999999997
+    },
+    {
+      "id": "bouquet-r1",
+      "piece": "pew-bouquet",
+      "x": 64.26,
+      "y": 48.83,
+      "w": 4.98,
+      "z": 3.9499999999999997,
+      "flip": true
+    },
+    {
+      "id": "bridesmaid-pink",
+      "piece": "bridesmaid-pink",
+      "x": 13.28,
+      "y": 75.26,
+      "w": 35.35,
+      "z": 4.2
+    },
+    {
+      "id": "bridesmaid-kerala",
+      "piece": "bridesmaid-kerala",
+      "x": 87.79,
+      "y": 76.74,
+      "w": 27.34,
+      "z": 4.2
+    },
+    {
+      "id": "pew-l2",
+      "piece": "pew-guests",
+      "x": 16.21,
+      "y": 71,
+      "w": 31.25,
+      "z": 4.5
+    },
+    {
+      "id": "pew-r2",
+      "piece": "pew-guests",
+      "x": 83.79,
+      "y": 71,
+      "w": 31.25,
+      "z": 4.5,
+      "flip": true
+    },
+    {
+      "id": "bouquet-l2",
+      "piece": "pew-bouquet",
+      "x": 29.96,
+      "y": 58.96,
+      "w": 5.31,
+      "z": 4.55
+    },
+    {
+      "id": "bouquet-r2",
+      "piece": "pew-bouquet",
+      "x": 70.04,
+      "y": 58.96,
+      "w": 5.31,
+      "z": 4.55,
+      "flip": true
+    },
+    {
+      "id": "pew-l3",
+      "piece": "pew",
+      "x": 11.52,
+      "y": 83.78,
+      "w": 29.3,
+      "z": 5.5
+    },
+    {
+      "id": "pew-r3",
+      "piece": "pew",
+      "x": 88.48,
+      "y": 83.78,
+      "w": 29.3,
+      "z": 5.5,
+      "flip": true
+    },
+    {
+      "id": "bouquet-l3",
+      "piece": "pew-bouquet",
+      "x": 24.41,
+      "y": 75.25,
+      "w": 4.98,
+      "z": 5.55
+    },
+    {
+      "id": "bouquet-r3",
+      "piece": "pew-bouquet",
+      "x": 75.59,
+      "y": 75.25,
+      "w": 4.98,
+      "z": 5.55,
+      "flip": true
+    },
+    {
+      "id": "couple-walk",
+      "piece": "couple-walk",
+      "x": 55.08,
+      "y": 85.12,
+      "w": 56.25,
+      "z": 6
+    },
+    {
+      "id": "bride-father",
+      "piece": "bride-father",
+      "x": 54.69,
+      "y": 97.87,
+      "w": 58.22,
+      "z": 6.5
+    },
+    {
+      "id": "girl-back",
+      "piece": "girl-back",
+      "x": 48.83,
+      "y": 97.87,
+      "w": 28.68,
+      "z": 6.6
+    },
+    {
+      "id": "girl-front",
+      "piece": "girl-front",
+      "x": 20.51,
+      "y": 95.27,
+      "w": 25.39,
+      "z": 7
+    },
+    {
+      "id": "ring-boy",
+      "piece": "ring-boy",
+      "x": 82.23,
+      "y": 94.57,
+      "w": 15.23,
+      "z": 7
+    }
+  ]
+}
