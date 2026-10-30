@@ -227,7 +227,13 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
           startIdle();
           if (performance.now() - lastRun > S.girlEvery * 1000) runGirl();
         },
-        onLeaveBack: () => (assembled = false),
+        onLeaveBack: () => {
+          // going back up: stop the idle (it restarts once the scene has assembled again)
+          assembled = false;
+          idle.clear();
+          idleStarted = false;
+          gate.run();
+        },
       });
       return () => gate.dispose();
     },

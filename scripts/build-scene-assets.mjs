@@ -390,6 +390,47 @@ for (const V of cfg.variants ?? []) {
   console.log(`variant ${V.out}: aligned (${DX - gx}, ${DY - gy}) px; ${info.length} region(s): ${regions.map((R) => `${R.name} ${R.list.length}px`).join(" / ")}`);
 }
 
+/* ── 5b. pairs: two poses of one figure (A / B) overlap exactly ─────────
+   B is aligned to A on the rows given (torso + legs: arms, garlands and
+   thalis left out); the offset is saved so they can cross-fade in place. */
+for (const pr of cfg.pairs ?? []) {
+  const A = pieces[pr.a] ?? fail(`pair: no piece ${pr.a}`);
+  const B = pieces[pr.b] ?? fail(`pair: no piece ${pr.b}`);
+  const at = (pc, x, y) => {
+    if (x < 0 || y < 0 || x >= pc.w || y >= pc.h) return [0, 0, 0, 0];
+    const o = (y * pc.w + x) * 4;
+    return [pc.px[o], pc.px[o + 1], pc.px[o + 2], pc.px[o + 3]];
+  };
+  const [r0, r1] = pr.rows ?? [0.55, 1];
+  const [c0, c1] = pr.cols ?? [0, 1];
+  const score = (dx, dy, step) => {
+    let s = 0;
+    for (let y = Math.round(A.h * r0); y < A.h * r1; y += step)
+      for (let x = Math.round(A.w * c0); x < A.w * c1; x += step) {
+        const p = at(A, x, y);
+        const q = at(B, x + dx, y + dy);
+        s += Math.abs(p[0] - q[0]) + Math.abs(p[1] - q[1]) + Math.abs(p[2] - q[2]) + Math.abs(p[3] - q[3]);
+      }
+    return s;
+  };
+  const gx = Math.round((B.w - A.w) / 2);
+  const gy = B.h - A.h; // feet on feet
+  let best = [Infinity, gx, gy];
+  for (let dy = gy - 40; dy <= gy + 40; dy += 2) for (let dx = gx - 60; dx <= gx + 60; dx += 2) {
+    const s = score(dx, dy, 4);
+    if (s < best[0]) best = [s, dx, dy];
+  }
+  let fine = best;
+  for (let dy = best[2] - 2; dy <= best[2] + 2; dy++) for (let dx = best[1] - 2; dx <= best[1] + 2; dx++) {
+    const s = score(dx, dy, 1);
+    if (s < fine[0]) fine = [s, dx, dy];
+  }
+  const [, DX, DY] = fine;
+  // B's top-left in A's frame, and B's size, as shares of A
+  B.extra.align = { to: pr.a, x: +(-DX / A.w).toFixed(4), y: +(-DY / A.h).toFixed(4), w: +(B.w / A.w).toFixed(4), h: +(B.h / A.h).toFixed(4) };
+  console.log(`pair ${pr.a} ↔ ${pr.b}: offset (${DX - gx}, ${DY - gy}) px from feet-on-feet`);
+}
+
 /* ── 6. pivots ──────────────────────────────────────────────────────── */
 for (const p of Object.values(pieces)) {
   const kind = p.spec.pivot ?? "bottom";
@@ -555,11 +596,13 @@ async function fitLayout() {
     });
     console.log(`fit ${g.id ?? g.piece}: ${(best.s).toFixed(0)} avg diff`);
   }
+  const extras = typeof F.extra === "function" ? F.extra(items, pieces) : F.extra;
   const doc = {
     "//": "Stage layout in % of the stage (x, y = the piece's pivot; w = width). Back to front by z. Made by --fit, tweak freely.",
     aspect: F.stage.aspect,
     ...(F.groups ? { groups: F.groups } : {}),
-    items: [...items, ...(typeof F.extra === "function" ? F.extra(items, pieces) : F.extra)].sort((a, b) => a.z - b.z),
+    items: [...items, ...extras.filter((e) => !e.meta)].sort((a, b) => a.z - b.z),
+    ...(extras.some((e) => e.meta) ? { meta: Object.fromEntries(extras.filter((e) => e.meta).map(({ id, meta, ...rest }) => (void meta, [id, rest]))) } : {}),
   };
   mkdirSync(path.dirname(layoutPath), { recursive: true });
   writeFileSync(layoutPath, JSON.stringify(doc, null, 2) + "\n");

@@ -1,0 +1,782 @@
+{
+  "name": "hindu-wedding",
+  "pieces": {
+    "groom-a": {
+      "src": "groom-a.webp",
+      "w": 320,
+      "h": 962,
+      "aspect": 0.3326,
+      "pivot": [
+        0.5,
+        0.9958
+      ],
+      "points": {
+        "hands": [
+          0.7813,
+          0.316
+        ]
+      }
+    },
+    "groom-b": {
+      "src": "groom-b.webp",
+      "w": 296,
+      "h": 962,
+      "aspect": 0.3077,
+      "pivot": [
+        0.5,
+        0.9958
+      ],
+      "align": {
+        "to": "groom-a",
+        "x": 0.0125,
+        "y": 0,
+        "w": 0.925,
+        "h": 1
+      },
+      "points": {
+        "neck": [
+          0.6182,
+          0.2037
+        ]
+      }
+    },
+    "bride-a": {
+      "src": "bride-a.webp",
+      "w": 390,
+      "h": 865,
+      "aspect": 0.4509,
+      "pivot": [
+        0.5,
+        0.9954
+      ],
+      "points": {
+        "hands": [
+          0.1821,
+          0.2728
+        ]
+      }
+    },
+    "bride-b": {
+      "src": "bride-b.webp",
+      "w": 367,
+      "h": 866,
+      "aspect": 0.4238,
+      "pivot": [
+        0.5,
+        0.9954
+      ],
+      "align": {
+        "to": "bride-a",
+        "x": 0.0128,
+        "y": -0.0035,
+        "w": 0.941,
+        "h": 1.0012
+      },
+      "points": {
+        "neck": [
+          0.3869,
+          0.1686
+        ]
+      }
+    },
+    "couple-walk": {
+      "src": "couple-walk.webp",
+      "w": 816,
+      "h": 901,
+      "aspect": 0.9057,
+      "pivot": [
+        0.5,
+        0.9956
+      ],
+      "points": {
+        "knot": [
+          0.5429,
+          0.515
+        ]
+      }
+    },
+    "couple-final": {
+      "src": "couple-final.webp",
+      "w": 596,
+      "h": 927,
+      "aspect": 0.6429,
+      "pivot": [
+        0.5,
+        0.9957
+      ],
+      "points": {
+        "knot": [
+          0.4849,
+          0.5793
+        ]
+      }
+    },
+    "gujarati-a": {
+      "src": "gujarati-a.webp",
+      "w": 403,
+      "h": 886,
+      "aspect": 0.4549,
+      "pivot": [
+        0.5,
+        0.9955
+      ],
+      "points": {
+        "hand": [
+          0.9529,
+          0.0214
+        ]
+      }
+    },
+    "gujarati-b": {
+      "src": "gujarati-b.webp",
+      "w": 426,
+      "h": 824,
+      "aspect": 0.517,
+      "pivot": [
+        0.5,
+        0.9951
+      ],
+      "align": {
+        "to": "gujarati-a",
+        "x": -0.0695,
+        "y": 0.0677,
+        "w": 1.0571,
+        "h": 0.93
+      },
+      "points": {
+        "thali": [
+          0.662,
+          0.3447
+        ]
+      }
+    },
+    "kerala-a": {
+      "src": "kerala-a.webp",
+      "w": 383,
+      "h": 880,
+      "aspect": 0.4352,
+      "pivot": [
+        0.5,
+        0.9955
+      ],
+      "points": {
+        "hand": [
+          0.0366,
+          0.0193
+        ]
+      }
+    },
+    "kerala-b": {
+      "src": "kerala-b.webp",
+      "w": 299,
+      "h": 823,
+      "aspect": 0.3633,
+      "pivot": [
+        0.5,
+        0.9951
+      ],
+      "align": {
+        "to": "kerala-a",
+        "x": 0.1775,
+        "y": 0.0716,
+        "w": 0.7807,
+        "h": 0.9352
+      },
+      "points": {
+        "thali": [
+          0.3144,
+          0.3439
+        ]
+      }
+    },
+    "pandit": {
+      "src": "pandit.webp",
+      "w": 454,
+      "h": 431,
+      "aspect": 1.0535,
+      "pivot": [
+        0.5,
+        0.9946
+      ],
+      "points": {
+        "ladle": [
+          0.0178,
+          0.4766
+        ]
+      }
+    },
+    "havan-kund": {
+      "src": "havan-kund.webp",
+      "w": 389,
+      "h": 224,
+      "aspect": 1.7398,
+      "pivot": [
+        0.5,
+        0.9898
+      ],
+      "points": {
+        "fire": [
+          0.5059,
+          0.2194
+        ]
+      }
+    },
+    "kalash": {
+      "src": "kalash.webp",
+      "w": 333,
+      "h": 367,
+      "aspect": 0.9071,
+      "pivot": [
+        0.5,
+        0.9902
+      ]
+    },
+    "thali": {
+      "src": "thali.webp",
+      "w": 278,
+      "h": 165,
+      "aspect": 1.6832,
+      "pivot": [
+        0.5,
+        0.9802
+      ]
+    },
+    "varmala-loose": {
+      "src": "varmala-loose.webp",
+      "w": 217,
+      "h": 507,
+      "aspect": 0.428,
+      "pivot": [
+        0.5046,
+        0.0079
+      ]
+    },
+    "antarpat": {
+      "src": "antarpat.webp",
+      "w": 376,
+      "h": 545,
+      "aspect": 0.6899,
+      "pivot": [
+        0.5623,
+        0.0073
+      ],
+      "points": {
+        "rodL": [
+          0.0293,
+          0.0239
+        ],
+        "rodR": [
+          0.9734,
+          0.0239
+        ]
+      }
+    },
+    "platform": {
+      "src": "platform.webp",
+      "w": 929,
+      "h": 206,
+      "aspect": 4.5046,
+      "pivot": [
+        0.5,
+        0.9877
+      ]
+    },
+    "diya": {
+      "src": "diya.webp",
+      "w": 80,
+      "h": 82,
+      "aspect": 0.9731,
+      "pivot": [
+        0.5,
+        0.9943
+      ],
+      "points": {
+        "wick": [
+          0.5226,
+          0.017
+        ]
+      }
+    },
+    "canopy": {
+      "src": "canopy.webp",
+      "w": 1047,
+      "h": 254,
+      "aspect": 4.1217,
+      "pivot": [
+        0.5,
+        0.9884
+      ],
+      "points": {
+        "capL": [
+          0.0197,
+          0.5855
+        ],
+        "capR": [
+          0.981,
+          0.5855
+        ]
+      }
+    },
+    "pillar": {
+      "src": "pillar.webp",
+      "w": 93,
+      "h": 434,
+      "aspect": 0.2142,
+      "pivot": [
+        0.5,
+        0.9941
+      ],
+      "points": {
+        "top": [
+          0.5034,
+          0.0103
+        ],
+        "base": [
+          0.5034,
+          0.9852
+        ]
+      }
+    },
+    "swag-wide": {
+      "src": "swag-wide.webp",
+      "w": 888,
+      "h": 205,
+      "aspect": 4.3317,
+      "pivot": [
+        0.5,
+        0
+      ]
+    },
+    "swag-narrow": {
+      "src": "swag-narrow.webp",
+      "w": 734,
+      "h": 178,
+      "aspect": 4.1236,
+      "pivot": [
+        0.5,
+        0
+      ]
+    },
+    "pot-1": {
+      "src": "pot-1.webp",
+      "w": 147,
+      "h": 160,
+      "aspect": 0.9213,
+      "pivot": [
+        0.5,
+        0.985
+      ]
+    },
+    "pot-2": {
+      "src": "pot-2.webp",
+      "w": 124,
+      "h": 137,
+      "aspect": 0.9039,
+      "pivot": [
+        0.5,
+        0.9825
+      ]
+    },
+    "pot-3": {
+      "src": "pot-3.webp",
+      "w": 109,
+      "h": 121,
+      "aspect": 0.901,
+      "pivot": [
+        0.5,
+        0.9802
+      ]
+    },
+    "pot-4": {
+      "src": "pot-4.webp",
+      "w": 89,
+      "h": 100,
+      "aspect": 0.8916,
+      "pivot": [
+        0.5,
+        0.9759
+      ]
+    },
+    "pot-5": {
+      "src": "pot-5.webp",
+      "w": 78,
+      "h": 89,
+      "aspect": 0.8784,
+      "pivot": [
+        0.5,
+        0.973
+      ]
+    },
+    "pot-6": {
+      "src": "pot-6.webp",
+      "w": 110,
+      "h": 125,
+      "aspect": 0.88,
+      "pivot": [
+        0.5,
+        0.968
+      ]
+    },
+    "pot-7": {
+      "src": "pot-7.webp",
+      "w": 80,
+      "h": 125,
+      "aspect": 0.6381,
+      "pivot": [
+        0.5,
+        0.981
+      ]
+    },
+    "fire-1": {
+      "src": "fire-1.webp",
+      "w": 210,
+      "h": 288,
+      "aspect": 0.7289,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "fire-2": {
+      "src": "fire-2.webp",
+      "w": 210,
+      "h": 339,
+      "aspect": 0.6197,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "fire-3": {
+      "src": "fire-3.webp",
+      "w": 210,
+      "h": 272,
+      "aspect": 0.7714,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "diya-flame-1": {
+      "src": "diya-flame-1.webp",
+      "w": 48,
+      "h": 122,
+      "aspect": 0.3927,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "diya-flame-2": {
+      "src": "diya-flame-2.webp",
+      "w": 48,
+      "h": 122,
+      "aspect": 0.3931,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "diya-flame-3": {
+      "src": "diya-flame-3.webp",
+      "w": 48,
+      "h": 131,
+      "aspect": 0.3661,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "spark-1": {
+      "src": "spark-1.webp",
+      "w": 21,
+      "h": 26,
+      "aspect": 0.8039,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "spark-2": {
+      "src": "spark-2.webp",
+      "w": 21,
+      "h": 44,
+      "aspect": 0.4737,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "spark-3": {
+      "src": "spark-3.webp",
+      "w": 21,
+      "h": 25,
+      "aspect": 0.8333,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "spark-4": {
+      "src": "spark-4.webp",
+      "w": 21,
+      "h": 35,
+      "aspect": 0.6038,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "spark-5": {
+      "src": "spark-5.webp",
+      "w": 21,
+      "h": 26,
+      "aspect": 0.814,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ghee-drop": {
+      "src": "ghee-drop.webp",
+      "w": 27,
+      "h": 53,
+      "aspect": 0.5101,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-red-1": {
+      "src": "petal-red-1.webp",
+      "w": 42,
+      "h": 51,
+      "aspect": 0.8276,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-red-2": {
+      "src": "petal-red-2.webp",
+      "w": 42,
+      "h": 50,
+      "aspect": 0.8376,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-red-3": {
+      "src": "petal-red-3.webp",
+      "w": 42,
+      "h": 50,
+      "aspect": 0.8364,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-red-4": {
+      "src": "petal-red-4.webp",
+      "w": 42,
+      "h": 48,
+      "aspect": 0.8704,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-pink-1": {
+      "src": "petal-pink-1.webp",
+      "w": 42,
+      "h": 55,
+      "aspect": 0.7634,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-pink-2": {
+      "src": "petal-pink-2.webp",
+      "w": 42,
+      "h": 53,
+      "aspect": 0.7937,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-pink-3": {
+      "src": "petal-pink-3.webp",
+      "w": 42,
+      "h": 47,
+      "aspect": 0.8843,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-pink-4": {
+      "src": "petal-pink-4.webp",
+      "w": 42,
+      "h": 65,
+      "aspect": 0.6462,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "tuberose-1": {
+      "src": "tuberose-1.webp",
+      "w": 48,
+      "h": 42,
+      "aspect": 1.1507,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "tuberose-2": {
+      "src": "tuberose-2.webp",
+      "w": 48,
+      "h": 50,
+      "aspect": 0.9595,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "tuberose-3": {
+      "src": "tuberose-3.webp",
+      "w": 48,
+      "h": 43,
+      "aspect": 1.1224,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "tuberose-4": {
+      "src": "tuberose-4.webp",
+      "w": 48,
+      "h": 50,
+      "aspect": 0.9524,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-1": {
+      "src": "petal-marigold-1.webp",
+      "w": 42,
+      "h": 48,
+      "aspect": 0.8839,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-2": {
+      "src": "petal-marigold-2.webp",
+      "w": 42,
+      "h": 33,
+      "aspect": 1.2791,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-3": {
+      "src": "petal-marigold-3.webp",
+      "w": 42,
+      "h": 35,
+      "aspect": 1.197,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "akshat-1": {
+      "src": "akshat-1.webp",
+      "w": 42,
+      "h": 33,
+      "aspect": 1.2762,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "akshat-2": {
+      "src": "akshat-2.webp",
+      "w": 42,
+      "h": 27,
+      "aspect": 1.5315,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "akshat-3": {
+      "src": "akshat-3.webp",
+      "w": 42,
+      "h": 30,
+      "aspect": 1.3942,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "akshat-4": {
+      "src": "akshat-4.webp",
+      "w": 42,
+      "h": 30,
+      "aspect": 1.3929,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-1": {
+      "src": "sparkle-1.webp",
+      "w": 42,
+      "h": 50,
+      "aspect": 0.8417,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-2": {
+      "src": "sparkle-2.webp",
+      "w": 42,
+      "h": 46,
+      "aspect": 0.9216,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-3": {
+      "src": "sparkle-3.webp",
+      "w": 42,
+      "h": 49,
+      "aspect": 0.8636,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-4": {
+      "src": "sparkle-4.webp",
+      "w": 42,
+      "h": 52,
+      "aspect": 0.8067,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "master": "master.webp"
+}

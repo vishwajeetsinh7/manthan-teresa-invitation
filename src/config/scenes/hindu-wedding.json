@@ -1,0 +1,478 @@
+{
+  "//": "Stage layout in % of the stage (x, y = the piece's pivot; w = width). Back to front by z. Made by --fit, tweak freely.",
+  "aspect": 1.65,
+  "items": [
+    {
+      "id": "pillar-back-l",
+      "piece": "pillar",
+      "x": 25,
+      "y": 68.88,
+      "w": 5.6,
+      "h": 50.19,
+      "z": 1,
+      "tone": 0.9
+    },
+    {
+      "id": "pillar-back-r",
+      "piece": "pillar",
+      "x": 75,
+      "y": 68.88,
+      "w": 5.6,
+      "h": 50.19,
+      "z": 1,
+      "tone": 0.9
+    },
+    {
+      "id": "platform",
+      "piece": "platform",
+      "x": 49.8,
+      "y": 78.9,
+      "w": 72,
+      "z": 2
+    },
+    {
+      "id": "scatter-11",
+      "piece": "petal-marigold-1",
+      "x": 28,
+      "y": 70,
+      "w": 3.4,
+      "z": 2.5,
+      "rot": 10
+    },
+    {
+      "id": "scatter-12",
+      "piece": "tuberose-1",
+      "x": 40,
+      "y": 71.5,
+      "w": 3.4,
+      "z": 2.5,
+      "rot": 95
+    },
+    {
+      "id": "scatter-13",
+      "piece": "petal-pink-1",
+      "x": 62,
+      "y": 70.4,
+      "w": 3.4,
+      "z": 2.5,
+      "rot": -35
+    },
+    {
+      "id": "scatter-14",
+      "piece": "akshat-4",
+      "x": 72,
+      "y": 72,
+      "w": 4,
+      "z": 2.5,
+      "rot": 50
+    },
+    {
+      "id": "pillar-l",
+      "piece": "pillar",
+      "x": 11,
+      "y": 83.08,
+      "w": 7.2,
+      "h": 65.39,
+      "z": 3
+    },
+    {
+      "id": "pillar-r",
+      "piece": "pillar",
+      "x": 89,
+      "y": 83.08,
+      "w": 7.2,
+      "h": 65.39,
+      "z": 3
+    },
+    {
+      "id": "swag-narrow",
+      "piece": "swag-narrow",
+      "x": 50,
+      "y": 21.19,
+      "w": 60,
+      "z": 3.4
+    },
+    {
+      "id": "swag-wide",
+      "piece": "swag-wide",
+      "x": 50,
+      "y": 18.89,
+      "w": 72,
+      "z": 3.5
+    },
+    {
+      "id": "canopy",
+      "piece": "canopy",
+      "x": 49.97,
+      "y": 21.5,
+      "w": 81.14,
+      "z": 4
+    },
+    {
+      "id": "couple-final",
+      "piece": "couple-final",
+      "x": 50.2,
+      "y": 73.29,
+      "w": 48.83,
+      "z": 5
+    },
+    {
+      "id": "couple-walk",
+      "piece": "couple-walk",
+      "x": 50,
+      "y": 73.29,
+      "w": 66.85,
+      "z": 5.5
+    },
+    {
+      "id": "gujarati-a",
+      "piece": "gujarati-a",
+      "x": 14.93,
+      "y": 78.11,
+      "w": 34.81,
+      "z": 5.8
+    },
+    {
+      "id": "kerala-a",
+      "piece": "kerala-a",
+      "x": 85.95,
+      "y": 79.47,
+      "w": 34.58,
+      "z": 5.8
+    },
+    {
+      "id": "gujarati-b",
+      "piece": "gujarati-b",
+      "x": 13.5,
+      "y": 78,
+      "w": 36.8,
+      "z": 6
+    },
+    {
+      "id": "kerala-b",
+      "piece": "kerala-b",
+      "x": 88.3,
+      "y": 79.8,
+      "w": 27,
+      "z": 6
+    },
+    {
+      "id": "antarpat",
+      "piece": "antarpat",
+      "x": 50,
+      "y": 40.38,
+      "w": 40,
+      "z": 6.2
+    },
+    {
+      "id": "groom-a",
+      "piece": "groom-a",
+      "x": 20,
+      "y": 73.29,
+      "w": 26.22,
+      "z": 6.6
+    },
+    {
+      "id": "bride-a",
+      "piece": "bride-a",
+      "x": 80,
+      "y": 73.29,
+      "w": 31.95,
+      "z": 6.6
+    },
+    {
+      "id": "groom-b",
+      "piece": "groom-b",
+      "x": 19.34,
+      "y": 73.29,
+      "w": 24.25,
+      "z": 6.6
+    },
+    {
+      "id": "bride-b",
+      "piece": "bride-b",
+      "x": 79.47,
+      "y": 73.19,
+      "w": 30.06,
+      "z": 6.6
+    },
+    {
+      "id": "varmala-1",
+      "piece": "varmala-loose",
+      "x": 20,
+      "y": 40,
+      "w": 17.78,
+      "z": 6.9
+    },
+    {
+      "id": "varmala-2",
+      "piece": "varmala-loose",
+      "x": 80,
+      "y": 40,
+      "w": 17.78,
+      "z": 6.9
+    },
+    {
+      "id": "pot-l1",
+      "piece": "pot-1",
+      "x": 8,
+      "y": 84.58,
+      "w": 11.36,
+      "z": 7
+    },
+    {
+      "id": "pot-r1",
+      "piece": "pot-1",
+      "x": 92,
+      "y": 84.58,
+      "w": 11.36,
+      "z": 7
+    },
+    {
+      "id": "pot-l2",
+      "piece": "pot-2",
+      "x": 8,
+      "y": 78.15,
+      "w": 9.56,
+      "z": 7.01
+    },
+    {
+      "id": "pot-r2",
+      "piece": "pot-2",
+      "x": 92,
+      "y": 78.15,
+      "w": 9.56,
+      "z": 7.01
+    },
+    {
+      "id": "pot-l3",
+      "piece": "pot-3",
+      "x": 8,
+      "y": 72.63,
+      "w": 8.41,
+      "z": 7.02
+    },
+    {
+      "id": "pot-r3",
+      "piece": "pot-3",
+      "x": 92,
+      "y": 72.63,
+      "w": 8.41,
+      "z": 7.02
+    },
+    {
+      "id": "pot-l4",
+      "piece": "pot-4",
+      "x": 8,
+      "y": 67.77,
+      "w": 6.84,
+      "z": 7.03
+    },
+    {
+      "id": "pot-r4",
+      "piece": "pot-4",
+      "x": 92,
+      "y": 67.77,
+      "w": 6.84,
+      "z": 7.03
+    },
+    {
+      "id": "pot-l5",
+      "piece": "pot-5",
+      "x": 8,
+      "y": 63.77,
+      "w": 6.01,
+      "z": 7.04
+    },
+    {
+      "id": "pot-r5",
+      "piece": "pot-5",
+      "x": 92,
+      "y": 63.77,
+      "w": 6.01,
+      "z": 7.04
+    },
+    {
+      "id": "pot-l6",
+      "piece": "pot-7",
+      "x": 8,
+      "y": 60.21,
+      "w": 6.19,
+      "z": 7.05
+    },
+    {
+      "id": "pot-r6",
+      "piece": "pot-7",
+      "x": 92,
+      "y": 60.21,
+      "w": 6.19,
+      "z": 7.05
+    },
+    {
+      "id": "havan-kund",
+      "piece": "havan-kund",
+      "x": 49.41,
+      "y": 86.64,
+      "w": 30.08,
+      "z": 8
+    },
+    {
+      "id": "pandit",
+      "piece": "pandit",
+      "x": 83.2,
+      "y": 88.29,
+      "w": 35.16,
+      "z": 10
+    },
+    {
+      "id": "kalash",
+      "piece": "kalash",
+      "x": 52.34,
+      "y": 95.33,
+      "w": 25.78,
+      "z": 11
+    },
+    {
+      "id": "thali",
+      "piece": "thali",
+      "x": 77.15,
+      "y": 95.82,
+      "w": 21.48,
+      "z": 11
+    },
+    {
+      "id": "diya-1",
+      "piece": "diya",
+      "x": 17,
+      "y": 82.25,
+      "w": 6.2,
+      "z": 11
+    },
+    {
+      "id": "diya-2",
+      "piece": "diya",
+      "x": 30,
+      "y": 82.25,
+      "w": 6.2,
+      "z": 11
+    },
+    {
+      "id": "diya-3",
+      "piece": "diya",
+      "x": 70,
+      "y": 82.25,
+      "w": 6.2,
+      "z": 11
+    },
+    {
+      "id": "diya-4",
+      "piece": "diya",
+      "x": 83,
+      "y": 82.25,
+      "w": 6.2,
+      "z": 11
+    },
+    {
+      "id": "scatter-1",
+      "piece": "petal-red-1",
+      "x": 6,
+      "y": 95,
+      "w": 3.4,
+      "z": 12,
+      "rot": 20
+    },
+    {
+      "id": "scatter-2",
+      "piece": "tuberose-2",
+      "x": 14,
+      "y": 98,
+      "w": 3.4,
+      "z": 12,
+      "rot": -50
+    },
+    {
+      "id": "scatter-3",
+      "piece": "akshat-1",
+      "x": 24,
+      "y": 96,
+      "w": 4,
+      "z": 12,
+      "rot": 0
+    },
+    {
+      "id": "scatter-4",
+      "piece": "petal-pink-2",
+      "x": 33,
+      "y": 99,
+      "w": 3.4,
+      "z": 12,
+      "rot": 80
+    },
+    {
+      "id": "scatter-5",
+      "piece": "petal-red-3",
+      "x": 43,
+      "y": 97.5,
+      "w": 3.4,
+      "z": 12,
+      "rot": -110
+    },
+    {
+      "id": "scatter-6",
+      "piece": "akshat-3",
+      "x": 57,
+      "y": 98.5,
+      "w": 4,
+      "z": 12,
+      "rot": 30
+    },
+    {
+      "id": "scatter-7",
+      "piece": "tuberose-4",
+      "x": 66,
+      "y": 96.2,
+      "w": 3.4,
+      "z": 12,
+      "rot": 140
+    },
+    {
+      "id": "scatter-8",
+      "piece": "petal-pink-4",
+      "x": 74,
+      "y": 99,
+      "w": 3.4,
+      "z": 12,
+      "rot": -20
+    },
+    {
+      "id": "scatter-9",
+      "piece": "petal-red-2",
+      "x": 85,
+      "y": 95.6,
+      "w": 3.4,
+      "z": 12,
+      "rot": 60
+    },
+    {
+      "id": "scatter-10",
+      "piece": "akshat-2",
+      "x": 94,
+      "y": 98.2,
+      "w": 4,
+      "z": 12,
+      "rot": -70
+    }
+  ],
+  "meta": {
+    "antarpatHold": {
+      "gujarati": {
+        "dx": 0.48,
+        "dy": 8.03
+      },
+      "kerala": {
+        "dx": -0.99,
+        "dy": 8.5
+      }
+    }
+  }
+}

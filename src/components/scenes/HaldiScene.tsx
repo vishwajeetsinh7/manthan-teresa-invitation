@@ -275,8 +275,13 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
           startIdle();
         },
         onLeaveBack: () => {
+          // going back up: stop the idle (it restarts once the scene has assembled again)
           assembled = false;
-          gsap.set(boy, { autoAlpha: 0 });
+          idle.clear();
+          idleStarted = false;
+          amp.v = S.swingAmp;
+          gsap.set(boy, { autoAlpha: 0, x: 0, scaleX: 1 });
+          gate.run();
         },
       });
       return () => gate.dispose();

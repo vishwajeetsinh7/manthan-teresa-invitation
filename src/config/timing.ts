@@ -223,6 +223,18 @@ export const timing = {
       boyFirst: 2,
       boyEvery: [20, 25] as [number, number],
     },
+    /** the Hindu wedding scene ("Four Rounds of Fire"): the story plays (timed) as its page arrives */
+    hindu: {
+      /** seconds for each act: mandap, pots + fire, antarpat, first sight, varmala, together (+ diyas), blessing */
+      acts: { mandap: 1.5, ritual: 1.6, antarpat: 2.1, sight: 1.3, varmala: 1.8, together: 2.4, blessing: 1.6 },
+      /** leaving back up rewinds this much faster */
+      reverseSpeed: 6,
+      startAt: "96%",
+      maxAmbient: 8,
+      /** the pandit's ghee offering and the friends' petal tosses (s between) */
+      offering: [5, 7] as [number, number],
+      toss: [3, 5] as [number, number],
+    },
     /** the one rose that travels down the vine to the event in focus */
     traveler: { pxPerSecond: 320, minDur: 0.7, maxDur: 1.6, roll: 0.6 },
   },

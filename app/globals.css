@@ -1548,6 +1548,7 @@ body {
 }
 
 /* ── Mehndi scene (src/components/scenes/MehndiScene.tsx) ──────────── */
+/* (scene layers: z-index = layout z × 10 — layout z can be fractional) */
 /* In the bottom part of the Mehndi page, right of the vine (which runs on
    past it): as big as fits under the Mehndi details on this screen (the
    page above it takes ~404u), up to 260u wide. Transparent over the paper. */
@@ -1601,7 +1602,7 @@ body {
   height: 13%;
   border-radius: 50%;
   background: radial-gradient(closest-side, rgb(120 60 25 / 0.32), rgb(150 80 30 / 0.12) 60%, rgb(150 80 30 / 0));
-  z-index: 1;
+  z-index: 10;
 }
 .ms-cord {
   position: absolute;
@@ -1665,7 +1666,7 @@ body {
   width: 40%;
   height: 22%;
   translate: -50% -50%;
-  z-index: 12;
+  z-index: 120;
 }
 .ms-burst img,
 .ms-spark,
@@ -1684,13 +1685,13 @@ body {
 }
 .ms-spark {
   width: 3.4%;
-  z-index: 12;
+  z-index: 120;
   translate: -50% -50%;
 }
 .ms-particles {
   position: absolute;
   inset: 0;
-  z-index: 11;
+  z-index: 110;
 }
 .ms-particle {
   left: 0;
@@ -1741,14 +1742,14 @@ body {
 }
 .hs-shadow {
   position: absolute;
-  z-index: 4;
+  z-index: 40;
   border-radius: 50%;
   background: radial-gradient(closest-side, rgb(150 95 20 / 0.3), rgb(170 110 30 / 0.12) 60%, rgb(170 110 30 / 0));
 }
 .hs-glow {
   position: absolute;
   inset: 0;
-  z-index: 29;
+  z-index: 290;
   background: radial-gradient(ellipse at 50% 45%, rgb(255 214 120 / 0.85), rgb(255 200 90 / 0.35) 45%, rgb(255 200 90 / 0) 75%);
   opacity: 0;
   pointer-events: none;
@@ -1784,7 +1785,7 @@ body {
   position: absolute;
   width: 0;
   height: 0;
-  z-index: 5;
+  z-index: 50;
 }
 .hs-pop img {
   position: absolute;
@@ -1796,14 +1797,14 @@ body {
   position: absolute;
   width: 34%;
   translate: -50% -50%;
-  z-index: 13;
+  z-index: 130;
   opacity: 0;
   pointer-events: none;
 }
 .hs-burst-spark {
   position: absolute;
   width: 4%;
-  z-index: 13;
+  z-index: 130;
   opacity: 0;
 }
 .hs-shower {
@@ -1812,7 +1813,7 @@ body {
   right: 0;
   top: -4%;
   height: 0;
-  z-index: 14;
+  z-index: 140;
 }
 .hs-shower img {
   position: absolute;
@@ -1824,6 +1825,105 @@ body {
   position: absolute;
   width: 18%;
   translate: -50% -50%;
-  z-index: 13;
+  z-index: 130;
+  opacity: 0;
+}
+
+/* ── Hindu wedding scene (src/components/scenes/HinduWeddingScene.tsx) ─ */
+/* centred and unclipped (like the Haldi scene) */
+.hw-scene {
+  left: calc(50% - var(--sw) / 2);
+}
+.ms-wrap[data-reduce] :is([data-id^="groom-"], [data-id^="bride-"], [data-id="gujarati-a"], [data-id="kerala-a"], [data-id="antarpat"], [data-id^="varmala-"], [data-id="couple-walk"]) {
+  display: none;
+}
+.hw-fire {
+  position: absolute;
+  z-index: 80;
+  aspect-ratio: 1;
+  translate: -50% -100%;
+  transform-origin: 50% 100%;
+  pointer-events: none;
+  will-change: transform;
+}
+.hw-scene [data-id="havan-kund"] {
+  z-index: 70 !important;
+}
+.hw-fire > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 100%;
+}
+.ms-wrap[data-reduce] .hw-fire > img:not(:first-child) {
+  display: none;
+}
+.hw-fire-glow {
+  position: absolute;
+  z-index: 70;
+  aspect-ratio: 1;
+  translate: -50% -58%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 190 90 / 0.55), rgb(255 150 60 / 0.22) 55%, rgb(255 150 60 / 0));
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.hw-smoke {
+  position: absolute;
+  bottom: 70%;
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(150 130 120 / 0.07), rgb(150 130 120 / 0));
+  opacity: 0;
+}
+.hw-diya-flame {
+  position: absolute;
+  height: 62%;
+  aspect-ratio: 0.42;
+  translate: -50% -100%;
+  transform-origin: 50% 100%;
+}
+.hw-diya-flame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hw-flame-glow {
+  position: absolute;
+  left: -120%;
+  right: -120%;
+  top: -40%;
+  bottom: -30%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 210 120 / 0.6), rgb(255 170 60 / 0.2) 55%, rgb(255 170 60 / 0));
+  mix-blend-mode: screen;
+}
+:is(.hw-sight, .hw-knot, .hw-bless) {
+  position: absolute;
+  z-index: 130;
+  width: 14%;
+  height: 7%;
+  translate: -50% -50%;
+}
+:is(.hw-sight, .hw-knot, .hw-bless) img {
+  position: absolute;
+  width: 34%;
+  opacity: 0;
+}
+.hw-shower {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  z-index: 140;
+}
+.hw-shower img {
+  position: absolute;
+  top: 0;
+  width: 3.4%;
   opacity: 0;
 }

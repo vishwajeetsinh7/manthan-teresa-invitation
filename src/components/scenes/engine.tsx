@@ -18,8 +18,22 @@ import { useEffect, useMemo, useState, type CSSProperties, type ReactNode, type 
 import { gsap, ScrollTrigger } from "@/src/lib/gsap";
 
 export type Piece = { src: string; w: number; h: number; aspect: number; pivot: number[]; [extra: string]: unknown };
-export type Item = { id: string; piece: string; x: number; y: number; w: number; z: number; flip?: boolean; rot?: number; group?: string };
-export type Layout = { aspect: number; items: Item[]; groups?: Record<string, { z?: number; pivot?: number[] }> };
+export type Item = {
+  id: string;
+  piece: string;
+  x: number;
+  y: number;
+  w: number;
+  z: number;
+  flip?: boolean;
+  rot?: number;
+  group?: string;
+  /** a set height (% of stage height) — stretches a tall piece like a pillar */
+  h?: number;
+  /** brightness (e.g. 0.9: a back pillar in shade) */
+  tone?: number;
+};
+export type Layout = { aspect: number; items: Item[]; groups?: Record<string, { z?: number; pivot?: number[] }>; meta?: Record<string, unknown> };
 export type Manifest = { name: string; master?: string; pieces: Record<string, unknown> };
 export type Region = { x: number; y: number; r: number; name?: string; piece?: string };
 
@@ -32,7 +46,7 @@ export function makeScene(manifest: Manifest, layout: Layout, headroom: number) 
   /** where an item sits: % of the stage, from its pivot */
   const box = (it: Item) => {
     const m = P[it.piece];
-    const h = it.w / m.aspect / ASPECT;
+    const h = it.h ?? it.w / m.aspect / ASPECT;
     const px = it.flip ? 1 - m.pivot[0] : m.pivot[0];
     return { left: it.x - px * it.w, top: it.y - m.pivot[1] * h, w: it.w, h, origin: `${px * 100}% ${m.pivot[1] * 100}%` };
   };
@@ -87,6 +101,9 @@ export function DebugMaster({ scene }: { scene: Scene }) {
   return <img className="ms-debug" src={scene.master} alt="" style={{ top: `${top}%`, height: `${(1.5 / scene.ASPECT) * 100}%` }} />;
 }
 
+/** CSS z-index for a layout z (layout z may be fractional, e.g. 5.5 → 55) */
+export const zOf = (z: number) => Math.round(z * 10);
+
 /** every layout item, back to front; items of a group (e.g. the swing) move as one */
 export function SceneItems({
   scene,
@@ -112,14 +129,15 @@ export function SceneItems({
     const imgStyle: CSSProperties = {};
     const t = [it.flip ? "scaleX(-1)" : "", it.rot ? `rotate(${it.rot}deg)` : ""].join(" ").trim();
     if (t) imgStyle.transform = t;
+    if (it.tone) imgStyle.filter = `brightness(${it.tone})`;
     return (
       <div
         key={it.id}
         className="ms-item"
         data-id={it.id}
-        style={{ left: `${b.left}%`, top: `${b.top}%`, width: `${b.w}%`, height: `${b.h}%`, zIndex: it.z, transformOrigin: b.origin }}
+        style={{ left: `${b.left}%`, top: `${b.top}%`, width: `${b.w}%`, height: `${b.h}%`, zIndex: zOf(it.z), transformOrigin: b.origin }}
       >
-        <img src={scene.url(it.piece)} alt="" draggable={false} style={t ? imgStyle : undefined} />
+        <img src={scene.url(it.piece)} alt="" draggable={false} style={t || it.tone ? imgStyle : undefined} />
         {extra?.(it)}
       </div>
     );
@@ -128,7 +146,7 @@ export function SceneItems({
     <>
       {loose.map(render)}
       {[...groups].map(([name, its]) => (
-        <div key={name} className="ms-group" data-group={name} style={{ zIndex: Math.min(...its.map((i) => i.z)) }}>
+        <div key={name} className="ms-group" data-group={name} style={{ zIndex: zOf(Math.min(...its.map((i) => i.z))) }}>
           {groupExtra?.(name)}
           {its.map(render)}
         </div>

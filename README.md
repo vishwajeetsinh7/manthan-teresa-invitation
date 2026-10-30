@@ -137,6 +137,15 @@ hands, clothes-spots), action `points` (pour spout, haldi fingertips, pichkari n
 `src/config/scenes/haldi.json` (the friends and beam are placed by hand there — their poses differ
 from the master). Both scenes run on `src/components/scenes/engine.tsx`.
 
+## Hindu wedding scene ("Four Rounds of Fire")
+
+Sources in `assets-src/hindu-wedding/`. `npm run scene:hindu-wedding` (add `-- --fit` to re-place from the
+master). Config `scripts/scenes/hindu-wedding.config.mjs`: the A/B poses (groom, bride, both friends)
+are aligned on torso + legs (`pairs`) so they swap in place; action points (garland in hands, neck,
+pinched hand, thali, ladle, fire anchor, wick, rod ends); pot stacks (`STACK`). The story plays
+(timed) as the page arrives: mandap, fire, friends unroll the antarpat, first sight, varmala, the
+couple come together hand in hand while the diyas light one by one, blessing. `timing.sections.hindu`.
+
 ## Performance notes
 
 - Images are served as-is (`unoptimized`), so there is no slow on-demand resizing on Vercel.

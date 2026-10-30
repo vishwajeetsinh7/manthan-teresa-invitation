@@ -11,8 +11,11 @@
  * Raise `lo` when the subject itself has colours close to the screen.
  *
  * `cap` (blue screen only): the subject is never bluer than cap × its green
- * (true of warm, white and green art). Where a pixel still is, it is screen
- * showing through: alpha is lowered until the blue is explained. cap 1 just
+ * (true of warm, white and green art). Where a blue-leaning pixel still is,
+ * it is screen showing through: alpha is lowered until the blue is explained.
+ * Only pixels whose blue is near their strongest channel AND clearly above
+ * their green are touched, so crimson, maroon and pink (far below red) and
+ * white-hot flame cores (blue below green) stay solid. cap 1 just
  * removes any blue/purple tint; a small cap (≈0.15) recovers half-transparent
  * warm haze (a turmeric puff over blue reads purple, not orange, otherwise).
  */
@@ -40,7 +43,10 @@ export function chromaKey(rgb, n, { lo, hi, screen = "green", bg, cap }) {
     c[1] = rgb[i * 3 + 1];
     c[2] = rgb[i * 3 + 2];
     let a = 1 - smooth(lo, hi, c[S] - Math.max(c[o1], c[o2]));
-    if (cap !== undefined && screen === "blue" && a > 0) {
+    // which pixels may be screen showing through: a warm-only piece (cap < 1) has
+    // no pinks or reds to protect, so any blue above green counts there
+    const bluish = c[2] > c[1] + 10 && (cap < 1 || c[2] > 0.85 * Math.max(c[0], c[1]));
+    if (cap !== undefined && screen === "blue" && a > 0 && bluish) {
       // solve F_b = cap · F_g for alpha; never raise it
       const a2 = 1 - (c[2] - cap * c[1]) / (BG[2] - cap * BG[1]);
       if (a2 < a) a = Math.max(0, a2);
