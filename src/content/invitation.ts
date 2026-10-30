@@ -53,7 +53,8 @@ export const invitation = {
   /**
    * `mood` (optional) recolours the whole page while that event is on screen —
    * see src/config/moods.ts. Only "haldi" exists for now.
-   * `scene`: an animated illustration under the event (public/<scene>/<scene>-sprite.webp).
+   * `scene`: the illustrated scene under the event — "mehndi" (src/components/scenes/MehndiScene),
+   *   or "soon": a placeholder ("Images coming soon") of the same size, until that event's art is ready.
    * `icons`: gold line icons drawn beside the event (mehndi, haldi, mandap, church, cheers).
    * `flower`: what the travelling rose turns into on this event —
    *   kind 0 burgundy · 1 blush · 2 ivory · 3 raspberry · 4 pale pink; tint "gold" warms it to turmeric.
@@ -69,7 +70,7 @@ export const invitation = {
       note: "Festive colours", // PLACEHOLDER
       icons: ["mehndi"],
       pattern: "mehndi", // henna mandala under this event, drawn by the henna cone
-      scene: "mehndi", // animated illustration: a friend applying henna to the bride
+      scene: "mehndi", // the assembled Mehndi scene
       flower: { kind: 3 }, // raspberry — henna red
     },
     {
@@ -77,6 +78,7 @@ export const invitation = {
       month: "May",
       weekday: "Monday",
       title: "Haldi",
+      scene: "soon",
       time: "10:00 AM onwards", // PLACEHOLDER
       place: "The Grand Palace", // PLACEHOLDER
       note: "Wear yellow",
@@ -89,6 +91,7 @@ export const invitation = {
       month: "May",
       weekday: "Monday",
       title: "Hindu Wedding", // PLACEHOLDER
+      scene: "soon",
       time: "6:00 PM onwards", // PLACEHOLDER
       place: "The Grand Palace", // PLACEHOLDER
       note: "Traditional Indian", // PLACEHOLDER
@@ -100,6 +103,7 @@ export const invitation = {
       month: "May",
       weekday: "Tuesday",
       title: "Church Wedding & Reception", // PLACEHOLDER
+      scene: "soon",
       time: "4:00 PM onwards", // PLACEHOLDER
       place: "St. Mary's Church", // PLACEHOLDER
       note: "Formal / Gowns & Suits", // PLACEHOLDER

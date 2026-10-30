@@ -59,18 +59,29 @@ function setBrowserChrome(color: string) {
 
 type EventFlower = { kind: number; tint?: string };
 const SCHEDULE = C.events;
-/** the event whose page shows the Mehndi scene (-1: none) */
-const SCENE_AT = SCHEDULE.findIndex((e) => "scene" in e && e.scene === "mehndi");
 const SC = timing.sections.scene;
+const sceneOf = (i: number) => ("scene" in SCHEDULE[i] ? (SCHEDULE[i] as { scene?: string }).scene : undefined);
 
 /** The vine: one node per event, a few vine-waves apart (continuous throughout). */
 function layoutThread() {
-  const thread = buildThread(SCHEDULE.length, timing.sections.wavesPerGap);
+  const thread = buildThread(SCHEDULE.length, timing.sections.wavesPerGap, undefined, timing.sections.tailWaves);
   /** node positions as a share of the vine height */
   const node = thread.nodes.map((n) => n / thread.height);
-  const sceneStyle: CSSProperties | null =
-    SCENE_AT >= 0 ? { top: `calc(${(node[SCENE_AT] * 100).toFixed(4)}% + var(--u) * ${SC.offset})` } : null;
+  /** each event's scene sits in the bottom part of its page, under its details */
+  const sceneStyle = (i: number): CSSProperties => ({ top: `calc(${(node[i] * 100).toFixed(4)}% + var(--u) * ${SC.offset})` });
   return { THREAD: thread, NODE: node, sceneStyle };
+}
+
+/** Same size and place as the Mehndi scene, until that event's illustrations are ready. */
+function SceneComingSoon({ page, style }: { page: string; style: CSSProperties }) {
+  return (
+    <div className="ms-wrap scene-soon" data-page={page} style={style}>
+      <div className="scene-soon-card">
+        <LotusDivider />
+        <p className="scene-soon-text">Images coming soon</p>
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -726,7 +737,13 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
               </article>
             );
           })}
-          {sceneStyle && <MehndiScene scrollerRef={scrollerRef} style={sceneStyle} reduce={reduceMotion} />}
+          {SCHEDULE.map((_, i) =>
+            sceneOf(i) === "mehndi" ? (
+              <MehndiScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} />
+            ) : sceneOf(i) === "soon" ? (
+              <SceneComingSoon key={`scene-${i}`} page={i === 0 ? "mehndi" : `event-${i}`} style={sceneStyle(i)} />
+            ) : null,
+          )}
         </div>
       </section>
 

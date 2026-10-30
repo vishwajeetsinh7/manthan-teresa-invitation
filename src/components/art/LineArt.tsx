@@ -167,7 +167,13 @@ export type Thread = {
  * @param scene  leave a vine-less gap of `units` after event `after`: the vine
  *               ends there in its flourish and starts again with its top curl
  */
-export function buildThread(count: number, wavesPerGap: number | readonly number[], scene?: { after: number; units: number }): Thread {
+export function buildThread(
+  count: number,
+  wavesPerGap: number | readonly number[],
+  scene?: { after: number; units: number },
+  /** extra waves after the last event (room for what hangs under it) */
+  tailWaves = 0,
+): Thread {
   /** waves between event i and i + 1 (a list sets each gap; the last value repeats) */
   const gap = (i: number) => (typeof wavesPerGap === "number" ? wavesPerGap : (wavesPerGap[i] ?? wavesPerGap[wavesPerGap.length - 1]));
   const paths: ThreadPath[] = [];
@@ -215,7 +221,14 @@ export function buildThread(count: number, wavesPerGap: number | readonly number
   for (let i = 0; i < count; i++) {
     node(y);
     y += 12;
-    if (i === count - 1) break;
+    if (i === count - 1) {
+      for (let w = 0; w < tailWaves; w++) {
+        wave(y, flip);
+        flip = !flip;
+        y += 188;
+      }
+      break;
+    }
     if (scene && scene.after === i) {
       // the vine ends in its flourish, leaves room for the scene, then curls in again
       flourish(y);

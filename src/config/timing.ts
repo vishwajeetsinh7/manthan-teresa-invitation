@@ -189,8 +189,9 @@ export const timing = {
     /** church: pause between champagne clinks while focused */
     cheers: { pause: 1.1 },
     /** distance between events on the vine, in vine "waves" (1 wave ≈ a quarter screen) */
-    /** vine waves between events (Mehndi → Haldi is longer: the Mehndi scene sits there) */
-    wavesPerGap: [4, 3, 3] as readonly number[],
+    /** vine waves between events (4: room for each event's scene under it), and after the last */
+    wavesPerGap: 4,
+    tailWaves: 3,
     /** the Mehndi scene, in the bottom part of the Mehndi page (u = design px of a 390-wide phone) */
     scene: {
       /** from the Mehndi node down to the stage's top */

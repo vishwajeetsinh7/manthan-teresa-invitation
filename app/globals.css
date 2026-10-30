@@ -1690,3 +1690,30 @@ body {
   top: 0;
   width: 4.2%;
 }
+
+/* "Images coming soon": same box as a scene (a soft gold-framed card) */
+.scene-soon-card {
+  width: 100%;
+  aspect-ratio: 1 / 1.65;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 10);
+  border: 1px dashed rgb(176 138 74 / 0.55);
+  border-radius: calc(var(--u) * 18);
+  background: radial-gradient(ellipse at 50% 45%, rgb(255 250 240 / 0.55), rgb(246 238 227 / 0));
+}
+.scene-soon-card .lotus-divider {
+  width: 70%;
+  height: auto;
+  aspect-ratio: 270 / 50.6;
+  opacity: 0.8;
+}
+.scene-soon-text {
+  font-family: var(--font-script);
+  font-size: calc(var(--u) * 26);
+  color: var(--gold-dark);
+  line-height: 1.2;
+  text-align: center;
+}
