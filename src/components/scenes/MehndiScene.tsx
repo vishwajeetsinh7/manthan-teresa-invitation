@@ -1,32 +1,40 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- pre-sized WebP cut-outs, decoded by hand before they show */
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
-import { gsap, useGSAP, ScrollTrigger } from "@/src/lib/gsap";
+import { useMemo, useRef, type CSSProperties, type RefObject } from "react";
+import { gsap, useGSAP } from "@/src/lib/gsap";
 import { timing } from "@/src/config/timing";
 import manifest from "@/public/scenes/mehndi/manifest.json";
 import layout from "@/src/config/scenes/mehndi.json";
+import {
+  DebugMaster,
+  ParticlePool,
+  Reveal,
+  SceneItems,
+  createIdle,
+  createParticles,
+  gateIdle,
+  makeScene,
+  playOnArrival,
+  revealTween,
+  stageVars,
+  useDebug,
+  useSceneAssets,
+  type Layout,
+  type Manifest,
+  type Region,
+} from "./engine";
 
 /**
- * The Mehndi scene: illustrated cut-outs that glide in and assemble as the
- * guest scrolls, then idle gently. Pieces, pivots, the lamp's flame anchors
- * and the henna palms come from scripts/build-scene-assets.mjs (manifest);
- * where everything sits is src/config/scenes/mehndi.json (stage %, tweakable).
- *
- * The stage sits in the bottom part of the Mehndi page, beside the vine. As
- * that page glides in (one swipe), the pieces come in one by one on a timer
- * (~3 s, no extra scrolling needed) and go back out if the guest returns up.
- * ?debug=1 shows the master art behind the stage.
+ * The Mehndi scene: illustrated cut-outs that assemble as the Mehndi page
+ * arrives (one swipe, ~3 s), then idle gently. Built on the shared scene
+ * engine (./engine). Pieces, pivots, the lamp's flame anchors and the henna
+ * palms come from scripts/build-scene-assets.mjs; where everything sits is
+ * src/config/scenes/mehndi.json (stage %, tweakable). ?debug=1 shows the master.
  */
-const DIR = "/scenes/mehndi/";
-type PieceName = keyof typeof manifest.pieces;
-type Piece = { src: string; w: number; h: number; aspect: number; pivot: number[] };
-type Item = { id: string; piece: string; x: number; y: number; w: number; z: number; flip?: boolean };
-const P = manifest.pieces as unknown as Record<string, Piece>;
-const ITEMS = layout.items as Item[];
-const ASPECT = layout.aspect; // stage height / width
+const SC = makeScene(manifest as unknown as Manifest, layout as Layout, 0.15);
+const { url, box, byId, ITEMS } = SC;
 const S = timing.sections.scene;
-const url = (name: string) => DIR + P[name].src;
 
 const PARTICLE_KINDS = {
   ambient: ["petal-marigold-1", "petal-marigold-2", "petal-marigold-3", "petal-marigold-4", "petal-rose-1", "petal-rose-2", "petal-rose-3", "petal-rose-4", "jasmine-1", "jasmine-2", "jasmine-3", "jasmine-4"],
@@ -35,49 +43,12 @@ const PARTICLE_KINDS = {
   sparkles: ["sparkle-1", "sparkle-2", "sparkle-3", "sparkle-4"],
 };
 /** everything the stage shows (bride-henna is only used to build the palms) */
-const RUNTIME = [...new Set([...ITEMS.map((i) => i.piece), "bride-palms", "flame-1", "flame-2", "flame-3", ...Object.values(PARTICLE_KINDS).flat()])];
-
-/** where an item sits: % of the stage, from its pivot */
-function box(it: Item) {
-  const m = P[it.piece];
-  const hPct = it.w / m.aspect / ASPECT;
-  const px = it.flip ? 1 - m.pivot[0] : m.pivot[0];
-  return {
-    left: it.x - px * it.w,
-    top: it.y - m.pivot[1] * hPct,
-    w: it.w,
-    h: hPct,
-    origin: `${px * 100}% ${m.pivot[1] * 100}%`,
-  };
-}
-const byId = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
+const RUNTIME = [...new Set([...ITEMS.map((i) => i.piece), "bride-palms", "flame-1", "flame-2", "flame-3", ...Object.values(PARTICLE_KINDS).flat()])].map(url);
 
 export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefObject<HTMLDivElement | null>; style: CSSProperties; reduce: boolean }) {
   const wrap = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
-  const debug = useMemo(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("debug") === "1", []);
-
-  // load + decode every piece as the scene approaches; nothing shows until then
-  useEffect(() => {
-    const el = wrap.current;
-    if (!el) return;
-    let started = false;
-    const load = () => {
-      if (started) return;
-      started = true;
-      io.disconnect();
-      Promise.all(
-        RUNTIME.map((n) => {
-          const im = new Image();
-          im.src = url(n);
-          return im.decode().catch(() => {});
-        }),
-      ).then(() => setReady(true));
-    };
-    const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && load(), { root: scrollerRef.current, rootMargin: "150% 0px" });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [scrollerRef]);
+  const ready = useSceneAssets(wrap, scrollerRef, RUNTIME);
+  const debug = useDebug();
 
   useGSAP(
     () => {
@@ -93,10 +64,9 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       const k = () => stage.clientWidth / 390; // px per design px
       const rnd = gsap.utils.random;
 
-      /* ── assembly, scrubbed by the scroll through the wrapper ───────── */
+      /* ── assembly ─────────────────────────────────────────────────────── */
       let assembled = false;
       let lastRun = -Infinity;
-      // built paused; linked to the scroll at the very end (after everything it calls exists)
       const tl = gsap.timeline({ paused: true, defaults: { ease: "power2.out" } });
       const T = 100; // the timeline is laid out in % of the assembly
 
@@ -111,9 +81,7 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       const strands = ITEMS.filter((i) => i.id.startsWith("toran-")).map((i) => item(i.id));
       tl.fromTo(q(".ms-cord-path"), { drawSVG: "50% 50%" }, { drawSVG: "0% 100%", duration: 9, ease: "power2.inOut" }, 14);
       tl.fromTo(q(".ms-cord-bead"), { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 3, ease: "back.out(3)", stagger: 0.8 }, 17);
-      strands.forEach((s, i) =>
-        tl.fromTo(s, { y: () => -H() * 0.32, opacity: 0 }, { y: 0, opacity: 1, duration: 8, ease: "back.out(1.7)" }, 16 + i * 2.2),
-      );
+      strands.forEach((s, i) => tl.fromTo(s, { y: () => -H() * 0.32, opacity: 0 }, { y: 0, opacity: 1, duration: 8, ease: "back.out(1.7)" }, 16 + i * 2.2));
 
       // 35–60 %: the friends glide in from the sides with a soft walking bob; banana plants grow
       const walk = (el: HTMLElement, from: number, at: number) => {
@@ -136,25 +104,7 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       tl.fromTo(q(".ms-flame"), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 6, ease: "back.out(2)", stagger: 0.7 }, 76);
 
       // 85–100 %: henna blooms on her palms (a radial wipe), petals and sparkles burst around her
-      q(".ms-palm").forEach((palm, i) => {
-        const wipe = palm.querySelector<HTMLElement>(".ms-palm-wipe")!;
-        const img = palm.querySelector<HTMLElement>("img")!;
-        const s = { v: 0.02 };
-        tl.fromTo(
-          s,
-          { v: 0.02 },
-          {
-            v: 1,
-            duration: 9,
-            ease: "power2.inOut",
-            onUpdate: () => {
-              gsap.set(wipe, { scale: s.v });
-              gsap.set(img, { scale: 1 / s.v });
-            },
-          },
-          86 + i * 1.5,
-        );
-      });
+      q(".ms-reveal").forEach((el, i) => revealTween(tl, el, 86 + i * 1.5, 9));
       q(".ms-burst img").forEach((p, i, all) => {
         const a = (i / all.length) * Math.PI * 2 + rnd(-0.3, 0.3);
         const r = rnd(0.12, 0.2);
@@ -176,53 +126,10 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       if (tl.duration() < T) tl.to({}, { duration: T - tl.duration() });
       gsap.set(item("flower-girl"), { opacity: 0 });
 
-      /* ── idle: alive but calm; paused off-screen or in a hidden tab ── */
-      const idle = gsap.timeline({ paused: true });
+      /* ── idle: alive but calm ─────────────────────────────────────────── */
+      const { idle, every } = createIdle();
+      const { spawn, setTicking, count } = createParticles(q(".ms-particle") as HTMLImageElement[], H, url);
       let idleStarted = false;
-      // particles: one shared ticker
-      const pool = q(".ms-particle") as HTMLImageElement[];
-      type Pt = { el: HTMLImageElement; on: boolean; ambient: boolean; x: number; y: number; vx: number; vy: number; r: number; vr: number; sw: number; f: number; ph: number; t: number; life: number; s: number; floor: number };
-      const parts: Pt[] = pool.map((el) => ({ el, on: false, ambient: false, x: 0, y: 0, vx: 0, vy: 0, r: 0, vr: 0, sw: 0, f: 0, ph: 0, t: 0, life: 0, s: 1, floor: 0 }));
-      const spawn = (src: string, x: number, y: number, o: Partial<Pt> = {}) => {
-        const p = parts.find((p) => !p.on);
-        if (!p) return;
-        Object.assign(p, { on: true, ambient: false, x, y, vx: 0, vy: 20, r: rnd(0, 360), vr: rnd(-40, 40), sw: rnd(6, 14), f: rnd(0.6, 1.2), ph: rnd(0, 6), t: 0, life: 6, s: rnd(0.75, 1.1), floor: H() * 0.97 }, o);
-        if (p.el.getAttribute("src") !== url(src)) p.el.src = url(src);
-      };
-      const tick = (_t: number, dms: number) => {
-        const dt = Math.min(0.05, dms / 1000);
-        for (const p of parts) {
-          if (!p.on) continue;
-          p.t += dt;
-          p.x += p.vx * dt;
-          p.y += p.vy * dt;
-          p.r += p.vr * dt;
-          const sway = Math.sin(p.t * p.f * Math.PI * 2 + p.ph) * p.sw;
-          const fadeIn = Math.min(1, p.t / 0.5);
-          const fadeOut = Math.min(1, (p.life - p.t) / 0.8, (p.floor - p.y) / (H() * 0.06));
-          const a = Math.max(0, Math.min(fadeIn, fadeOut));
-          p.el.style.transform = `translate3d(${(p.x + sway).toFixed(1)}px,${p.y.toFixed(1)}px,0) rotate(${p.r.toFixed(1)}deg) scale(${p.s})`;
-          p.el.style.opacity = a.toFixed(3);
-          if (p.t > p.life || p.y > p.floor) {
-            p.on = false;
-            p.el.style.opacity = "0";
-          }
-        }
-      };
-      let ticking = false;
-      const setTicking = (on: boolean) => {
-        if (on && !ticking) gsap.ticker.add(tick);
-        if (!on && ticking) gsap.ticker.remove(tick);
-        ticking = on;
-      };
-      // spawners (delayed calls inside the idle timeline, so they pause with it)
-      const every = (min: number, max: number, fn: () => void) => {
-        const loop = () => {
-          fn();
-          idle.add(gsap.delayedCall(rnd(min, max), loop), idle.time());
-        };
-        idle.add(gsap.delayedCall(rnd(min, max), loop), 0);
-      };
 
       const startIdle = () => {
         if (idleStarted) return;
@@ -247,8 +154,7 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
           });
         });
         // the Kerala friend lets petals fall from her fingers over the plate
-        const ker = byId["friend-kerala"];
-        const kb = box(ker);
+        const kb = box(byId["friend-kerala"]);
         every(3, 5, () => {
           const n = Math.round(rnd(1, 3));
           for (let i = 0; i < n; i++)
@@ -262,11 +168,9 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
         });
         // ambient: petals, jasmine buds, the odd marigold drift down (8 at most)
         every(1.2, 2.2, () => {
-          if (parts.filter((p) => p.on && p.ambient).length >= S.maxAmbient) return;
+          if (count("ambient") >= S.maxAmbient) return;
           const kind = Math.random() < 0.12 ? gsap.utils.random(PARTICLE_KINDS.rare) : gsap.utils.random(PARTICLE_KINDS.ambient);
-          spawn(kind, rnd(0.05, 0.95) * W(), -0.04 * H(), { vy: rnd(16, 26) * k(), vx: rnd(-4, 4), life: 14, s: rnd(0.5, 0.8) * (kind.startsWith("marigold") ? 0.8 : 1) });
-          const p = parts.find((p) => p.on && p.t === 0);
-          if (p) p.ambient = true;
+          spawn(kind, rnd(0.05, 0.95) * W(), -0.04 * H(), { tag: "ambient", vy: rnd(16, 26) * k(), vx: rnd(-4, 4), life: 14, s: rnd(0.5, 0.8) * (kind.startsWith("marigold") ? 0.8 : 1) });
         });
         // sparkles twinkle near the lamp and around the bride
         const sparks = q(".ms-spark");
@@ -274,12 +178,11 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
         every(1.2, 2.6, () => {
           const sp = sparks[si++ % sparks.length];
           const nearLamp = Math.random() < 0.5;
-          const it = byId[nearLamp ? "lamp" : "bride"];
-          const b = box(it);
+          const b = box(byId[nearLamp ? "lamp" : "bride"]);
           gsap.set(sp, { left: `${b.left + b.w * rnd(0.1, 0.9)}%`, top: `${b.top + b.h * (nearLamp ? rnd(0, 0.25) : rnd(0.05, 0.45))}%` });
           gsap.fromTo(sp, { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.45 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.5 }], ease: "sine.inOut" });
         });
-        run();
+        gate.run();
       };
 
       // the flower girl runs across the front, petals spilling from her basket
@@ -307,63 +210,38 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
         idle.add(dash, idle.time());
       };
 
-      // run only while on screen and the tab is visible
-      let onScreen = false;
-      const run = () => {
-        const go = idleStarted && onScreen && !document.hidden;
-        if (go) idle.play();
-        else idle.pause();
-        setTicking(go);
-      };
-      const io = new IntersectionObserver(([e]) => {
-        const was = onScreen;
-        onScreen = e.isIntersecting;
-        run();
-        // back in view after a while: the flower girl runs again (at most every 30 s)
-        if (!was && onScreen && assembled && performance.now() - lastRun > S.girlEvery * 1000) runGirl();
+      // idle only while on screen; back in view after a while → the flower girl runs again
+      const gate = gateIdle(stage, idle, setTicking, () => idleStarted, () => {
+        if (assembled && performance.now() - lastRun > S.girlEvery * 1000) runGirl();
       });
-      io.observe(stage);
-      const onVis = () => run();
-      document.addEventListener("visibilitychange", onVis);
-
-      // the whole assembly in S.assemble seconds as the page arrives; back out (faster) when leaving up
-      const speed = T / S.assemble;
-      tl.eventCallback("onComplete", () => {
-        assembled = true;
-        startIdle();
-        if (performance.now() - lastRun > S.girlEvery * 1000) runGirl();
-      });
-      const play = () => tl.timeScale(speed).play();
-      ScrollTrigger.create({
-        trigger: stage,
+      playOnArrival({
+        tl,
+        stage,
         scroller,
-        start: `top ${S.startAt}`,
-        onEnter: play,
-        onEnterBack: play,
-        onLeaveBack: () => {
-          assembled = false;
-          tl.timeScale(speed * S.reverseSpeed).reverse();
+        T,
+        seconds: S.assemble,
+        reverseSpeed: S.reverseSpeed,
+        startAt: S.startAt,
+        onComplete: () => {
+          assembled = true;
+          startIdle();
+          if (performance.now() - lastRun > S.girlEvery * 1000) runGirl();
         },
+        onLeaveBack: () => (assembled = false),
       });
-      return () => {
-        io.disconnect();
-        document.removeEventListener("visibilitychange", onVis);
-        setTicking(false);
-        idle.kill();
-      };
+      return () => gate.dispose();
     },
     { dependencies: [ready, reduce], scope: wrap },
   );
 
   const bride = byId["bride"];
   const bb = box(bride);
-  const brideAspect = P[bride.piece].aspect; // w / h
-  const palms = (manifest.pieces["bride-plain"] as unknown as { palms: { x: number; y: number; r: number }[] }).palms;
+  const brideAspect = SC.P[bride.piece].aspect; // w / h
+  const palms = (manifest.pieces["bride-plain"] as unknown as { palms: Region[] }).palms;
   const flames = (manifest.pieces.lamp as unknown as { flames: { x: number; y: number; h: number }[] }).flames;
-  const toran = ITEMS.filter((i) => i.id.startsWith("toran-"));
   const cord = useMemo(() => {
     // the gold cord through every strand's loop, sagging a little between them
-    const pts = toran.map((t) => [t.x, t.y * ASPECT] as const);
+    const pts = ITEMS.filter((i) => i.id.startsWith("toran-")).map((t) => [t.x, t.y * SC.ASPECT] as const);
     let d = `M0 ${(pts[0][1] - 1.2).toFixed(2)}`;
     let prev: readonly [number, number] = [0, pts[0][1] - 1.2];
     for (const p of [...pts, [100, pts[pts.length - 1][1] - 1.2] as const]) {
@@ -371,77 +249,38 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       prev = p;
     }
     return { d, pts };
-  }, [toran]);
+  }, []);
 
   return (
-    <div ref={wrap} className="ms-wrap" data-page="mehndi" data-reduce={reduce || undefined} style={style} aria-hidden>
+    <div ref={wrap} className="ms-wrap" data-page="mehndi" data-reduce={reduce || undefined} style={{ ...style, ...stageVars(SC.ASPECT) }} aria-hidden>
       <div className="ms-stage" data-ready={ready || undefined}>
-        {debug && (
-          <img
-            className="ms-debug"
-            src={DIR + manifest.master}
-            alt=""
-            style={{ top: `${(layout.aspect - 1.5) / layout.aspect * 100}%`, height: `${(1.5 / layout.aspect) * 100}%` }}
-          />
-        )}
+        {debug && <DebugMaster scene={SC} />}
         {ready && (
           <>
             <div className="ms-shadow" />
-            <svg className="ms-cord" viewBox={`0 0 100 ${100 * ASPECT}`} preserveAspectRatio="none">
+            <svg className="ms-cord" viewBox={`0 0 100 ${100 * SC.ASPECT}`} preserveAspectRatio="none">
               <path className="ms-cord-path" d={cord.d} />
               {cord.pts.map(([x, y], i) => (
                 <circle key={i} className="ms-cord-bead" cx={x} cy={y} r={0.7} />
               ))}
             </svg>
-            {ITEMS.map((it) => {
-              const b = box(it);
-              return (
-                <div
-                  key={it.id}
-                  className="ms-item"
-                  data-id={it.id}
-                  style={{ left: `${b.left}%`, top: `${b.top}%`, width: `${b.w}%`, height: `${b.h}%`, zIndex: it.z, transformOrigin: b.origin }}
-                >
-                  <img src={url(it.piece)} alt="" draggable={false} style={it.flip ? { transform: "scaleX(-1)" } : undefined} />
-                  {it.id === "bride" &&
-                    palms.map((p, i) => (
-                      <div
-                        key={i}
-                        className="ms-palm"
-                        style={{
-                          left: `${(p.x - p.r) * 100}%`,
-                          top: `${(p.y - p.r * brideAspect) * 100}%`,
-                          width: `${2 * p.r * 100}%`,
-                          height: `${2 * p.r * brideAspect * 100}%`,
-                        }}
-                      >
-                        <div className="ms-palm-wipe">
-                          <img
-                            src={url("bride-palms")}
-                            alt=""
-                            style={{
-                              width: `${100 / (2 * p.r)}%`,
-                              height: `${100 / (2 * p.r * brideAspect)}%`,
-                              left: `${(-(p.x - p.r) / (2 * p.r)) * 100}%`,
-                              top: `${(-(p.y - p.r * brideAspect) / (2 * p.r * brideAspect)) * 100}%`,
-                              transformOrigin: `${p.x * 100}% ${p.y * 100}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  {it.id === "lamp" &&
-                    flames.map((f, i) => (
-                      <div key={i} className="ms-flame" style={{ left: `${f.x * 100}%`, top: `${f.y * 100}%`, height: `${f.h * 140}%` }}>
-                        <span className="ms-glow" />
-                        {["flame-1", "flame-2", "flame-3"].map((n, j) => (
-                          <img key={n} src={url(n)} alt="" style={{ opacity: j === 0 ? 1 : 0 }} />
-                        ))}
-                      </div>
-                    ))}
-                </div>
-              );
-            })}
+            <SceneItems
+              scene={SC}
+              extra={(it) =>
+                it.id === "bride" ? (
+                  palms.map((p, i) => <Reveal key={i} src={url("bride-palms")} region={p} aspect={brideAspect} />)
+                ) : it.id === "lamp" ? (
+                  flames.map((f, i) => (
+                    <div key={i} className="ms-flame" style={{ left: `${f.x * 100}%`, top: `${f.y * 100}%`, height: `${f.h * 140}%` }}>
+                      <span className="ms-glow" />
+                      {["flame-1", "flame-2", "flame-3"].map((n, j) => (
+                        <img key={n} src={url(n)} alt="" style={{ opacity: j === 0 ? 1 : 0 }} />
+                      ))}
+                    </div>
+                  ))
+                ) : null
+              }
+            />
             {/* henna burst around the bride */}
             <div className="ms-burst" style={{ left: `${bride.x}%`, top: `${bb.top + bb.h * 0.32}%` }}>
               {Array.from({ length: 9 }, (_, i) => (
@@ -455,17 +294,10 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
             {[0, 1, 2].map((i) => (
               <img key={`sp${i}`} className="ms-spark" src={url(PARTICLE_KINDS.sparkles[i + 1])} alt="" />
             ))}
-            <div className="ms-particles">
-              {Array.from({ length: 22 }, (_, i) => (
-                <img key={i} className="ms-particle" alt="" />
-              ))}
-            </div>
+            <ParticlePool />
           </>
         )}
       </div>
     </div>
   );
 }
-
-export { RUNTIME as MEHNDI_PIECES };
-export type { PieceName };

@@ -72,16 +72,20 @@ const config = {
   },
 
   /** henna palms: the henna bride aligned to the plain one, the two palms masked */
-  henna: {
-    plain: "bride-plain",
-    henna: "bride-henna",
-    out: "bride-palms",
-    /** roughly where the two raised palms are on the plain bride (sheet px) */
-    palms: [
-      [225, 300],
-      [615, 300],
-    ],
-  },
+  variants: [
+    {
+      base: "bride-plain",
+      variant: "bride-henna",
+      out: "bride-palms",
+      key: "palms",
+      detect: { kind: "diff", threshold: 34, blur: 4 },
+      // roughly where the two raised palms are on the plain bride (sheet px)
+      regions: [
+        { name: "left", at: [[225, 300]] },
+        { name: "right", at: [[615, 300]] },
+      ],
+    },
+  ],
 
   /**
    * --fit: place each piece by matching it against master.png (1024 × 1536).

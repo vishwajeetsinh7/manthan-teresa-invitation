@@ -120,6 +120,23 @@ part of the Mehndi page, beside the vine; as that page arrives the pieces come i
 (~3 s, `timing.sections.scene`), go back out if the guest returns up, and otherwise idle (sway,
 breathing, flames, petals, the flower girl).
 
+## Haldi scene ("The Golden Swing")
+
+Sources in `assets-src/haldi/` (master + blue-screen sheets; `curtain-new.png` is the closed
+curtain panel used for the opening; the banana plant is reused from the Mehndi sheet).
+
+```bash
+npm run scene:haldi            # cut-outs, couple haldi regions, action points, manifest, contact sheet
+npm run scene:haldi -- --fit   # also re-place pieces from the master (overwrites the layout)
+```
+
+Config: `scripts/scenes/haldi.config.mjs` — piece names, `gather` (a powder puff's loose flecks,
+an umbrella's tassels), `warm` (re-keys warm-only pieces so half-transparent haze stays orange,
+never purple), the couple's haldi `regions` (bride-cheek, groom-cheek, bride-arm, groom-arm,
+hands, clothes-spots), action `points` (pour spout, haldi fingertips, pichkari nozzle). Layout:
+`src/config/scenes/haldi.json` (the friends and beam are placed by hand there — their poses differ
+from the master). Both scenes run on `src/components/scenes/engine.tsx`.
+
 ## Performance notes
 
 - Images are served as-is (`unoptimized`), so there is no slow on-demand resizing on Vercel.

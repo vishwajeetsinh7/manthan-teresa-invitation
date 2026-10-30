@@ -1,0 +1,343 @@
+{
+  "//": "Stage layout in % of the stage (x, y = the piece's pivot; w = width). Back to front by z. Made by --fit, tweak freely.",
+  "aspect": 1.6,
+  "groups": {
+    "swing": {
+      "z": 5
+    }
+  },
+  "items": [
+    {
+      "id": "curtain-left",
+      "piece": "curtain-left",
+      "x": -11,
+      "y": 0,
+      "w": 48,
+      "z": 1
+    },
+    {
+      "id": "curtain-right",
+      "piece": "curtain-right",
+      "x": 111,
+      "y": 0,
+      "w": 48,
+      "z": 1
+    },
+    {
+      "id": "banana-left",
+      "piece": "banana",
+      "x": 6,
+      "y": 74,
+      "w": 34,
+      "z": 2
+    },
+    {
+      "id": "banana-right",
+      "piece": "banana",
+      "x": 94,
+      "y": 74,
+      "w": 34,
+      "z": 2,
+      "flip": true
+    },
+    {
+      "id": "pookalam",
+      "piece": "pookalam",
+      "x": 54.88,
+      "y": 79.61,
+      "w": 70.7,
+      "z": 3
+    },
+    {
+      "id": "strand-1x",
+      "piece": "strand-1",
+      "x": 8.5,
+      "y": 9.08,
+      "w": 5.6,
+      "z": 3.5
+    },
+    {
+      "id": "strand-2x",
+      "piece": "strand-4",
+      "x": 22,
+      "y": 9.08,
+      "w": 5.6,
+      "z": 3.5
+    },
+    {
+      "id": "strand-3x",
+      "piece": "strand-2",
+      "x": 36.5,
+      "y": 9.08,
+      "w": 5.6,
+      "z": 3.5
+    },
+    {
+      "id": "strand-4x",
+      "piece": "strand-2",
+      "x": 63.5,
+      "y": 9.08,
+      "w": 5.6,
+      "z": 3.5,
+      "flip": true
+    },
+    {
+      "id": "strand-5x",
+      "piece": "strand-4",
+      "x": 78,
+      "y": 9.08,
+      "w": 5.6,
+      "z": 3.5,
+      "flip": true
+    },
+    {
+      "id": "strand-6x",
+      "piece": "strand-1",
+      "x": 91.5,
+      "y": 9.08,
+      "w": 5.6,
+      "z": 3.5,
+      "flip": true
+    },
+    {
+      "id": "umbrella-yellow",
+      "piece": "umbrella-yellow",
+      "x": 18.88,
+      "y": 10.99,
+      "w": 20.31,
+      "z": 4
+    },
+    {
+      "id": "umbrella-palm",
+      "piece": "umbrella-palm",
+      "x": 50.64,
+      "y": 11.96,
+      "w": 23.05,
+      "z": 4
+    },
+    {
+      "id": "umbrella-orange",
+      "piece": "umbrella-orange",
+      "x": 82.89,
+      "y": 13.17,
+      "w": 17.58,
+      "z": 4
+    },
+    {
+      "id": "rope-1",
+      "piece": "rope-1",
+      "x": 28.71,
+      "y": 26.73,
+      "w": 7.11,
+      "z": 5,
+      "group": "swing"
+    },
+    {
+      "id": "rope-2",
+      "piece": "rope-2",
+      "x": 75.2,
+      "y": 26.69,
+      "w": 7.11,
+      "z": 5,
+      "group": "swing"
+    },
+    {
+      "id": "beam",
+      "piece": "beam",
+      "x": 51.3,
+      "y": 9.7,
+      "w": 80,
+      "z": 6
+    },
+    {
+      "id": "couple",
+      "piece": "couple-clean",
+      "x": 51.73,
+      "y": 57.34,
+      "w": 54.69,
+      "z": 6,
+      "group": "swing"
+    },
+    {
+      "id": "friend-gujarati",
+      "piece": "friend-gujarati",
+      "x": 11.9,
+      "y": 77.4,
+      "w": 51.9,
+      "z": 8
+    },
+    {
+      "id": "friend-kerala",
+      "piece": "friend-kerala",
+      "x": 81.8,
+      "y": 74.3,
+      "w": 34.5,
+      "z": 8
+    },
+    {
+      "id": "matkis",
+      "piece": "matkis",
+      "x": 2.73,
+      "y": 85.93,
+      "w": 14.06,
+      "z": 9
+    },
+    {
+      "id": "basket",
+      "piece": "basket",
+      "x": 22.07,
+      "y": 89.61,
+      "w": 23.83,
+      "z": 10
+    },
+    {
+      "id": "urli",
+      "piece": "urli",
+      "x": 55.08,
+      "y": 95.44,
+      "w": 33.59,
+      "z": 10
+    },
+    {
+      "id": "haldi-bowl",
+      "piece": "haldi-bowl",
+      "x": 76.95,
+      "y": 94.95,
+      "w": 25.78,
+      "z": 10
+    },
+    {
+      "id": "scatter-1",
+      "piece": "marigold-1",
+      "x": 3.5,
+      "y": 96.6,
+      "w": 5.4,
+      "z": 11,
+      "rot": 12
+    },
+    {
+      "id": "scatter-2",
+      "piece": "petal-marigold-1",
+      "x": 11,
+      "y": 98.6,
+      "w": 3.4,
+      "z": 11,
+      "rot": -40
+    },
+    {
+      "id": "scatter-3",
+      "piece": "petal-white-2",
+      "x": 19.5,
+      "y": 96.2,
+      "w": 3.4,
+      "z": 11,
+      "rot": 75
+    },
+    {
+      "id": "scatter-4",
+      "piece": "marigold-2",
+      "x": 28,
+      "y": 98.2,
+      "w": 5.4,
+      "z": 11,
+      "rot": -8
+    },
+    {
+      "id": "scatter-5",
+      "piece": "petal-marigold-3",
+      "x": 37,
+      "y": 97.4,
+      "w": 3.4,
+      "z": 11,
+      "rot": 130
+    },
+    {
+      "id": "scatter-6",
+      "piece": "petal-white-1",
+      "x": 45.5,
+      "y": 99,
+      "w": 3.4,
+      "z": 11,
+      "rot": -60
+    },
+    {
+      "id": "scatter-7",
+      "piece": "marigold-3",
+      "x": 54,
+      "y": 96.8,
+      "w": 5.4,
+      "z": 11,
+      "rot": 20
+    },
+    {
+      "id": "scatter-8",
+      "piece": "petal-marigold-2",
+      "x": 62.5,
+      "y": 98.4,
+      "w": 3.4,
+      "z": 11,
+      "rot": 95
+    },
+    {
+      "id": "scatter-9",
+      "piece": "petal-white-3",
+      "x": 70.5,
+      "y": 97,
+      "w": 3.4,
+      "z": 11,
+      "rot": -120
+    },
+    {
+      "id": "scatter-10",
+      "piece": "marigold-1",
+      "x": 79,
+      "y": 98.9,
+      "w": 5.4,
+      "z": 11,
+      "rot": 40
+    },
+    {
+      "id": "scatter-11",
+      "piece": "petal-marigold-4",
+      "x": 87.5,
+      "y": 96.5,
+      "w": 3.4,
+      "z": 11,
+      "rot": -15
+    },
+    {
+      "id": "scatter-12",
+      "piece": "petal-white-4",
+      "x": 96,
+      "y": 98.3,
+      "w": 3.4,
+      "z": 11,
+      "rot": 60
+    },
+    {
+      "id": "boy",
+      "piece": "boy",
+      "x": 89.45,
+      "y": 82.76,
+      "w": 27.34,
+      "z": 12
+    },
+    {
+      "id": "panel-left",
+      "piece": "curtain-panel",
+      "x": 28.8,
+      "y": 0,
+      "w": 57.6,
+      "z": 30
+    },
+    {
+      "id": "panel-right",
+      "piece": "curtain-panel",
+      "x": 71.2,
+      "y": 0,
+      "w": 57.6,
+      "z": 30,
+      "flip": true
+    }
+  ]
+}

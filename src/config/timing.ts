@@ -209,6 +209,20 @@ export const timing = {
       fingers: [0.13, 0.33] as [number, number],
       basket: [0.85, 0.56] as [number, number],
     },
+    /** the Haldi scene ("The Golden Swing"), same placement as the Mehndi scene */
+    haldi: {
+      /** the whole assembly plays in this long (s) as the Haldi page arrives; reverses faster */
+      assemble: 4.2,
+      reverseSpeed: 1.8,
+      startAt: "96%",
+      maxAmbient: 8,
+      /** the swing: a pendulum about the beam (± degrees, seconds per full swing) */
+      swingAmp: 2.2,
+      swingPeriod: 3.2,
+      /** the little boy with the pichkari: first visit after assembly, then every … while in view (s) */
+      boyFirst: 2,
+      boyEvery: [20, 25] as [number, number],
+    },
     /** the one rose that travels down the vine to the event in focus */
     traveler: { pxPerSecond: 320, minDur: 0.7, maxDur: 1.6, roll: 0.6 },
   },

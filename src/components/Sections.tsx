@@ -12,6 +12,7 @@ import { EVENT_ICONS, HENNA_CONE, LotusDivider, MEHNDI_MANDALA, SvgArt, type Eve
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 import { SOFT_BLUR } from "@/src/lib/device";
 import { MehndiScene } from "./scenes/MehndiScene";
+import { HaldiScene } from "./scenes/HaldiScene";
 
 function Countdown() {
   const target = new Date(C.countdownTo).getTime();
@@ -740,6 +741,8 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           {SCHEDULE.map((_, i) =>
             sceneOf(i) === "mehndi" ? (
               <MehndiScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} />
+            ) : sceneOf(i) === "haldi" ? (
+              <HaldiScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
             ) : sceneOf(i) === "soon" ? (
               <SceneComingSoon key={`scene-${i}`} page={i === 0 ? "mehndi" : `event-${i}`} style={sceneStyle(i)} />
             ) : null,

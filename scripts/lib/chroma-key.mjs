@@ -9,6 +9,12 @@
  * left on light edges such as ivory sarees, white flowers or gold trim.
  *
  * Raise `lo` when the subject itself has colours close to the screen.
+ *
+ * `cap` (blue screen only): the subject is never bluer than cap × its green
+ * (true of warm, white and green art). Where a pixel still is, it is screen
+ * showing through: alpha is lowered until the blue is explained. cap 1 just
+ * removes any blue/purple tint; a small cap (≈0.15) recovers half-transparent
+ * warm haze (a turmeric puff over blue reads purple, not orange, otherwise).
  */
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const smooth = (e0, e1, x) => {
@@ -19,10 +25,10 @@ const smooth = (e0, e1, x) => {
 /**
  * @param {Buffer} rgb   raw RGB pixels
  * @param {number} n     pixel count
- * @param {{ lo: number, hi: number, screen?: "green" | "blue", bg?: [number, number, number] }} key
+ * @param {{ lo: number, hi: number, screen?: "green" | "blue", bg?: [number, number, number], cap?: number }} key
  * @returns {{ rgba: Buffer, alpha: Float32Array }}
  */
-export function chromaKey(rgb, n, { lo, hi, screen = "green", bg }) {
+export function chromaKey(rgb, n, { lo, hi, screen = "green", bg, cap }) {
   const S = screen === "blue" ? 2 : 1; // the screen's channel
   const [o1, o2] = screen === "blue" ? [0, 1] : [0, 2]; // the other two
   const BG = bg ?? (screen === "blue" ? [0, 0, 255] : [0, 255, 0]);
@@ -33,7 +39,12 @@ export function chromaKey(rgb, n, { lo, hi, screen = "green", bg }) {
     c[0] = rgb[i * 3];
     c[1] = rgb[i * 3 + 1];
     c[2] = rgb[i * 3 + 2];
-    const a = 1 - smooth(lo, hi, c[S] - Math.max(c[o1], c[o2]));
+    let a = 1 - smooth(lo, hi, c[S] - Math.max(c[o1], c[o2]));
+    if (cap !== undefined && screen === "blue" && a > 0) {
+      // solve F_b = cap · F_g for alpha; never raise it
+      const a2 = 1 - (c[2] - cap * c[1]) / (BG[2] - cap * BG[1]);
+      if (a2 < a) a = Math.max(0, a2);
+    }
     alpha[i] = a;
     if (a > 0 && a < 1) {
       // un-mix the screen: C = a·F + (1 − a)·BG  →  F

@@ -1,0 +1,678 @@
+{
+  "name": "haldi",
+  "pieces": {
+    "couple-clean": {
+      "src": "couple-clean.webp",
+      "w": 706,
+      "h": 839,
+      "aspect": 0.8414,
+      "pivot": [
+        0.4959,
+        0.6161
+      ],
+      "dabs": [
+        {
+          "name": "bride-cheek",
+          "piece": "couple-haldi-bride-cheek",
+          "x": 0.3741,
+          "y": 0.1697,
+          "r": 0.1257
+        },
+        {
+          "name": "groom-cheek",
+          "piece": "couple-haldi-groom-cheek",
+          "x": 0.6089,
+          "y": 0.1367,
+          "r": 0.0671
+        },
+        {
+          "name": "bride-arm",
+          "piece": "couple-haldi-bride-arm",
+          "x": 0.2893,
+          "y": 0.438,
+          "r": 0.1996
+        },
+        {
+          "name": "groom-arm",
+          "piece": "couple-haldi-groom-arm",
+          "x": 0.6576,
+          "y": 0.484,
+          "r": 0.3005
+        },
+        {
+          "name": "hands",
+          "piece": "couple-haldi-hands",
+          "x": 0.5615,
+          "y": 0.5542,
+          "r": 0.2325
+        },
+        {
+          "name": "clothes-spots",
+          "piece": "couple-haldi-clothes-spots",
+          "x": 0.5604,
+          "y": 0.5564,
+          "r": 0.616
+        }
+      ]
+    },
+    "couple-haldi": {
+      "src": "couple-haldi.webp",
+      "w": 729,
+      "h": 870,
+      "aspect": 0.8379,
+      "pivot": [
+        0.4925,
+        0.6161
+      ]
+    },
+    "friend-gujarati": {
+      "src": "friend-gujarati.webp",
+      "w": 634,
+      "h": 943,
+      "aspect": 0.6723,
+      "pivot": [
+        0.5,
+        0.9958
+      ],
+      "points": {
+        "hand": [
+          0.9685,
+          0.1538
+        ]
+      }
+    },
+    "friend-kerala": {
+      "src": "friend-kerala.webp",
+      "w": 442,
+      "h": 937,
+      "aspect": 0.4717,
+      "pivot": [
+        0.5,
+        0.9957
+      ],
+      "points": {
+        "pour": [
+          0.0385,
+          0.2433
+        ]
+      }
+    },
+    "boy": {
+      "src": "boy.webp",
+      "w": 353,
+      "h": 513,
+      "aspect": 0.6879,
+      "pivot": [
+        0.5,
+        0.9938
+      ],
+      "points": {
+        "nozzle": [
+          0.0181,
+          0.2174
+        ]
+      }
+    },
+    "beam": {
+      "src": "beam.webp",
+      "w": 1032,
+      "h": 126,
+      "aspect": 8.1784,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "rope-1": {
+      "src": "rope-1.webp",
+      "w": 92,
+      "h": 657,
+      "aspect": 0.14,
+      "pivot": [
+        0.4955,
+        0.005
+      ]
+    },
+    "rope-2": {
+      "src": "rope-2.webp",
+      "w": 92,
+      "h": 658,
+      "aspect": 0.1398,
+      "pivot": [
+        0.4688,
+        0.005
+      ]
+    },
+    "strand-1": {
+      "src": "strand-1.webp",
+      "w": 73,
+      "h": 444,
+      "aspect": 0.1642,
+      "pivot": [
+        0.4912,
+        0.0058
+      ]
+    },
+    "strand-2": {
+      "src": "strand-2.webp",
+      "w": 73,
+      "h": 384,
+      "aspect": 0.19,
+      "pivot": [
+        0.5049,
+        0.0074
+      ]
+    },
+    "strand-3": {
+      "src": "strand-3.webp",
+      "w": 100,
+      "h": 485,
+      "aspect": 0.2062,
+      "pivot": [
+        0.505,
+        0.0082
+      ]
+    },
+    "strand-4": {
+      "src": "strand-4.webp",
+      "w": 73,
+      "h": 288,
+      "aspect": 0.2535,
+      "pivot": [
+        0.467,
+        0.0111
+      ]
+    },
+    "curtain-left": {
+      "src": "curtain-left.webp",
+      "w": 310,
+      "h": 998,
+      "aspect": 0.3106,
+      "pivot": [
+        0.5,
+        0
+      ]
+    },
+    "curtain-right": {
+      "src": "curtain-right.webp",
+      "w": 309,
+      "h": 998,
+      "aspect": 0.3096,
+      "pivot": [
+        0.5,
+        0
+      ]
+    },
+    "curtain-panel": {
+      "src": "curtain-panel.webp",
+      "w": 551,
+      "h": 1495,
+      "aspect": 0.3686,
+      "pivot": [
+        0.5,
+        0
+      ]
+    },
+    "umbrella-palm": {
+      "src": "umbrella-palm.webp",
+      "w": 298,
+      "h": 272,
+      "aspect": 1.0968,
+      "pivot": [
+        0.5025,
+        0.0074
+      ]
+    },
+    "umbrella-yellow": {
+      "src": "umbrella-yellow.webp",
+      "w": 262,
+      "h": 309,
+      "aspect": 0.8477,
+      "pivot": [
+        0.5254,
+        0.0066
+      ]
+    },
+    "umbrella-orange": {
+      "src": "umbrella-orange.webp",
+      "w": 227,
+      "h": 268,
+      "aspect": 0.846,
+      "pivot": [
+        0.4932,
+        0.0066
+      ]
+    },
+    "urli": {
+      "src": "urli.webp",
+      "w": 434,
+      "h": 272,
+      "aspect": 1.5968,
+      "pivot": [
+        0.5,
+        0.9871
+      ]
+    },
+    "matkis": {
+      "src": "matkis.webp",
+      "w": 182,
+      "h": 411,
+      "aspect": 0.4429,
+      "pivot": [
+        0.5,
+        0.9921
+      ]
+    },
+    "basket": {
+      "src": "basket.webp",
+      "w": 308,
+      "h": 219,
+      "aspect": 1.4078,
+      "pivot": [
+        0.5,
+        0.9871
+      ]
+    },
+    "haldi-bowl": {
+      "src": "haldi-bowl.webp",
+      "w": 333,
+      "h": 233,
+      "aspect": 1.4317,
+      "pivot": [
+        0.5,
+        0.9852
+      ]
+    },
+    "pookalam": {
+      "src": "pookalam.webp",
+      "w": 913,
+      "h": 268,
+      "aspect": 3.4058,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "banana": {
+      "src": "banana.webp",
+      "w": 439,
+      "h": 796,
+      "aspect": 0.5517,
+      "pivot": [
+        0.5,
+        0.9958
+      ]
+    },
+    "puff-1": {
+      "src": "puff-1.webp",
+      "w": 138,
+      "h": 147,
+      "aspect": 0.9416,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "puff-2": {
+      "src": "puff-2.webp",
+      "w": 138,
+      "h": 143,
+      "aspect": 0.9635,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "puff-3": {
+      "src": "puff-3.webp",
+      "w": 138,
+      "h": 152,
+      "aspect": 0.9061,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "splat-1": {
+      "src": "splat-1.webp",
+      "w": 66,
+      "h": 85,
+      "aspect": 0.7733,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "splat-2": {
+      "src": "splat-2.webp",
+      "w": 66,
+      "h": 74,
+      "aspect": 0.89,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "splat-3": {
+      "src": "splat-3.webp",
+      "w": 66,
+      "h": 114,
+      "aspect": 0.5795,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "splat-4": {
+      "src": "splat-4.webp",
+      "w": 66,
+      "h": 82,
+      "aspect": 0.8081,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "drop-1": {
+      "src": "drop-1.webp",
+      "w": 30,
+      "h": 50,
+      "aspect": 0.6,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "drop-2": {
+      "src": "drop-2.webp",
+      "w": 30,
+      "h": 46,
+      "aspect": 0.6585,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "drop-3": {
+      "src": "drop-3.webp",
+      "w": 30,
+      "h": 31,
+      "aspect": 0.9571,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "drop-4": {
+      "src": "drop-4.webp",
+      "w": 30,
+      "h": 72,
+      "aspect": 0.415,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "drop-5": {
+      "src": "drop-5.webp",
+      "w": 22,
+      "h": 23,
+      "aspect": 0.9565,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "drop-6": {
+      "src": "drop-6.webp",
+      "w": 30,
+      "h": 31,
+      "aspect": 0.9565,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-white-1": {
+      "src": "petal-white-1.webp",
+      "w": 48,
+      "h": 87,
+      "aspect": 0.5523,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-white-2": {
+      "src": "petal-white-2.webp",
+      "w": 48,
+      "h": 54,
+      "aspect": 0.8859,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-white-3": {
+      "src": "petal-white-3.webp",
+      "w": 48,
+      "h": 48,
+      "aspect": 1.007,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-white-4": {
+      "src": "petal-white-4.webp",
+      "w": 48,
+      "h": 58,
+      "aspect": 0.8255,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-1": {
+      "src": "petal-marigold-1.webp",
+      "w": 48,
+      "h": 62,
+      "aspect": 0.7692,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-2": {
+      "src": "petal-marigold-2.webp",
+      "w": 48,
+      "h": 44,
+      "aspect": 1.0946,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-3": {
+      "src": "petal-marigold-3.webp",
+      "w": 48,
+      "h": 53,
+      "aspect": 0.9057,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-4": {
+      "src": "petal-marigold-4.webp",
+      "w": 48,
+      "h": 52,
+      "aspect": 0.9195,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "marigold-1": {
+      "src": "marigold-1.webp",
+      "w": 66,
+      "h": 60,
+      "aspect": 1.092,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "marigold-2": {
+      "src": "marigold-2.webp",
+      "w": 66,
+      "h": 61,
+      "aspect": 1.0889,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "marigold-3": {
+      "src": "marigold-3.webp",
+      "w": 66,
+      "h": 62,
+      "aspect": 1.0719,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "leaf-1": {
+      "src": "leaf-1.webp",
+      "w": 66,
+      "h": 32,
+      "aspect": 2.0382,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "leaf-2": {
+      "src": "leaf-2.webp",
+      "w": 66,
+      "h": 35,
+      "aspect": 1.8676,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "leaf-3": {
+      "src": "leaf-3.webp",
+      "w": 66,
+      "h": 39,
+      "aspect": 1.6759,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-1": {
+      "src": "sparkle-1.webp",
+      "w": 48,
+      "h": 61,
+      "aspect": 0.7842,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-2": {
+      "src": "sparkle-2.webp",
+      "w": 48,
+      "h": 51,
+      "aspect": 0.9464,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-3": {
+      "src": "sparkle-3.webp",
+      "w": 48,
+      "h": 51,
+      "aspect": 0.9464,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-4": {
+      "src": "sparkle-4.webp",
+      "w": 48,
+      "h": 51,
+      "aspect": 0.9464,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "couple-haldi-bride-cheek": {
+      "src": "couple-haldi-bride-cheek.webp",
+      "w": 706,
+      "h": 839,
+      "aspect": 0.8414,
+      "pivot": [
+        0.5,
+        0.2322
+      ]
+    },
+    "couple-haldi-groom-cheek": {
+      "src": "couple-haldi-groom-cheek.webp",
+      "w": 706,
+      "h": 839,
+      "aspect": 0.8414,
+      "pivot": [
+        0.5,
+        0.1747
+      ]
+    },
+    "couple-haldi-bride-arm": {
+      "src": "couple-haldi-bride-arm.webp",
+      "w": 706,
+      "h": 839,
+      "aspect": 0.8414,
+      "pivot": [
+        0.5,
+        0.5816
+      ]
+    },
+    "couple-haldi-groom-arm": {
+      "src": "couple-haldi-groom-arm.webp",
+      "w": 706,
+      "h": 839,
+      "aspect": 0.8414,
+      "pivot": [
+        0.5,
+        0.5862
+      ]
+    },
+    "couple-haldi-hands": {
+      "src": "couple-haldi-hands.webp",
+      "w": 706,
+      "h": 839,
+      "aspect": 0.8414,
+      "pivot": [
+        0.5,
+        0.6586
+      ]
+    },
+    "couple-haldi-clothes-spots": {
+      "src": "couple-haldi-clothes-spots.webp",
+      "w": 706,
+      "h": 839,
+      "aspect": 0.8414,
+      "pivot": [
+        0.5,
+        0.9218
+      ]
+    }
+  },
+  "master": "master.webp"
+}

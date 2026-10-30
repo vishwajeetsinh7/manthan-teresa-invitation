@@ -8,10 +8,14 @@
  *    bigger one join it (a strand's bell, the lamp's flames, rug tassels);
  *    tiny specks are dropped
  * 3. names each piece from the config (`at`: a point inside it on its sheet)
+ *    (a piece with `gather` also takes in loose specks that near it: a
+ *    powder puff's flecks, an umbrella's tassels)
  * 4. lamp: records each baked wick flame as an anchor, then erases it
- * 5. henna: aligns the henna bride to the plain one and masks just the palms
+ * 5. variants: aligns a second version of a piece (henna bride, haldi couple)
+ *    to the first and masks just what changed, as named reveal regions
  * 6. pivots: strands hang from their top loop; everything else stands on its
- *    bottom centre (particles turn about their centre)
+ *    bottom centre (particles turn about their centre); or a point from the
+ *    config; plus named action points (a pour spout, a nozzle…)
  * 7. exports each piece as WebP at ~3× its largest on-screen size (never up)
  * 8. writes manifest.json, and contact.html to check every cut-out
  *
@@ -80,7 +84,7 @@ for (const [id, file] of Object.entries(cfg.sheets)) {
     for (const g of groups.values()) {
       if (g.area < b.area * 5) continue;
       const d = gap(b, g);
-      if (d <= cfg.attachGap && (!host || d < host.d)) host = { g, d };
+      if (d <= (cfg.attachGapBySheet?.[id] ?? cfg.attachGap) && (!host || d < host.d)) host = { g, d };
     }
     if (host) {
       const g = host.g;
@@ -92,23 +96,48 @@ for (const [id, file] of Object.entries(cfg.sheets)) {
       g.y1 = Math.max(g.y1, b.y1);
     } else if (b.area >= cfg.minBlob) groups.set(b.id, { ...b, parts: [b.id] });
   }
-  sheets[id] = { W, H, rgba, alpha, label, owner, groups: [...groups.values()] };
+  sheets[id] = { W, H, rgb: data, rgba, alpha, label, owner, blobs, groups: [...groups.values()] };
   console.log(`${id}: ${groups.size} pieces (${blobs.length} blobs)`);
 }
 
 /* ── 3. name the pieces ─────────────────────────────────────────────── */
 const pieces = {};
 const used = new Set();
+const picks = [];
 for (const spec of cfg.pieces) {
   const sh = sheets[spec.sheet] ?? fail(`unknown sheet ${spec.sheet}`);
   const [px, py] = spec.at;
-  const hit = sh.groups
-    .filter((g) => px >= g.x0 && px <= g.x1 && py >= g.y0 && py <= g.y1)
-    .sort((a, b) => b.area - a.area)[0];
-  if (!hit) fail(`${spec.name}: no piece at ${px},${py} on ${spec.sheet}`);
-  const key = `${spec.sheet}:${hit.id}`;
+  // the piece whose own pixels are under the point; else the biggest box around it
+  const lab = sh.label[py * sh.W + px];
+  const found =
+    (lab >= 0 && sh.groups.find((g) => g.id === sh.owner[lab])) ||
+    sh.groups.filter((g) => px >= g.x0 && px <= g.x1 && py >= g.y0 && py <= g.y1).sort((a, b) => b.area - a.area)[0];
+  if (!found) fail(`${spec.name}: no piece at ${px},${py} on ${spec.sheet}`);
+  const key = `${spec.sheet}:${found.id}`;
   if (used.has(key)) fail(`${spec.name}: that piece is already named`);
   used.add(key);
+  picks.push({ spec, sh, hit: { ...found, parts: [...found.parts] } });
+}
+// gather: loose specks near a piece (that belong to no other named piece) join it
+for (const pk of picks) {
+  const g = pk.spec.gather;
+  if (!g) continue;
+  const taken = new Set(picks.filter((o) => o.sh === pk.sh).flatMap((o) => o.hit.parts));
+  const h = pk.hit;
+  const box0 = { x0: h.x0, y0: h.y0, x1: h.x1, y1: h.y1 };
+  for (const b of pk.sh.blobs) {
+    if (taken.has(b.id) || b.area >= h.area) continue;
+    const d = Math.max(0, box0.x0 - b.x1, b.x0 - box0.x1, box0.y0 - b.y1, b.y0 - box0.y1);
+    if (d > g) continue;
+    h.parts.push(b.id);
+    taken.add(b.id);
+    h.x0 = Math.min(h.x0, b.x0);
+    h.y0 = Math.min(h.y0, b.y0);
+    h.x1 = Math.max(h.x1, b.x1);
+    h.y1 = Math.max(h.y1, b.y1);
+  }
+}
+for (const { spec, sh, hit } of picks) {
   // cut out: this piece's blobs plus the soft (unlabelled) edge around them
   const x0 = Math.max(0, hit.x0 - cfg.pad);
   const y0 = Math.max(0, hit.y0 - cfg.pad);
@@ -118,13 +147,15 @@ for (const spec of cfg.pieces) {
   const h = y1 - y0 + 1;
   const own = new Set(hit.parts);
   const px4 = Buffer.alloc(w * h * 4);
+  // a warm-only piece (powder, gold) is re-keyed with a stronger cap (see chroma-key)
+  const warm = spec.warm !== undefined ? chromaKey(sh.rgb.subarray(0), sh.W * sh.H, { ...cfg.key, cap: spec.warm }) : null;
   for (let y = 0; y < h; y++)
     for (let x = 0; x < w; x++) {
       const i = (y0 + y) * sh.W + (x0 + x);
       const lab = sh.label[i];
       if (lab !== -1 && !own.has(lab)) continue;
       if (lab === -1 && sh.alpha[i] <= 0) continue;
-      sh.rgba.copy(px4, (y * w + x) * 4, i * 4, i * 4 + 4);
+      (warm ? warm.rgba : sh.rgba).copy(px4, (y * w + x) * 4, i * 4, i * 4 + 4);
     }
   pieces[spec.name] = { spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} };
 }
@@ -193,68 +224,78 @@ if (cfg.lampFlames) {
   console.log(`lamp: ${keep.length} flame anchors`);
 }
 
-/* ── 5. henna palms ─────────────────────────────────────────────────── */
-if (cfg.henna) {
-  const P = pieces[cfg.henna.plain];
-  const Hn = pieces[cfg.henna.henna];
+/* ── 5. variants: what changed between two versions of a piece ───────
+   The variant (henna bride, haldi couple) is aligned to the base on a part
+   that never changes, the changes are found (any difference, or turmeric
+   yellow being added), grouped by the config's region hints and exported
+   as overlays in the base's frame, with a soft feathered mask. */
+for (const V of cfg.variants ?? []) {
+  const P = pieces[V.base] ?? fail(`variant: no piece ${V.base}`);
+  const Hn = pieces[V.variant] ?? fail(`variant: no piece ${V.variant}`);
   const lumA = (pc, x, y) => {
     if (x < 0 || y < 0 || x >= pc.w || y >= pc.h) return [0, 0, 0, 0];
     const o = (y * pc.w + x) * 4;
     return [pc.px[o], pc.px[o + 1], pc.px[o + 2], pc.px[o + 3]];
   };
-  // align on the saree and cushion (the lower half), never on the palms
-  const y0 = Math.round(P.h * 0.55);
+  const [ar0, ar1] = V.alignRows ?? [0.55, 1];
+  const ay0 = Math.round(P.h * ar0);
+  const ay1 = Math.round(P.h * ar1);
   const score = (dx, dy, step) => {
-    let s = 0;
-    for (let y = y0; y < P.h; y += step)
+    let sc = 0;
+    for (let y = ay0; y < ay1; y += step)
       for (let x = 0; x < P.w; x += step) {
-        const a = lumA(P, x, y);
-        const b = lumA(Hn, x + dx, y + dy);
-        s += Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) + Math.abs(a[3] - b[3]);
+        const pa = lumA(P, x, y);
+        const pb = lumA(Hn, x + dx, y + dy);
+        sc += Math.abs(pa[0] - pb[0]) + Math.abs(pa[1] - pb[1]) + Math.abs(pa[2] - pb[2]) + Math.abs(pa[3] - pb[3]);
       }
-    return s;
+    return sc;
   };
   const gx = Math.round((Hn.w - P.w) / 2);
   const gy = Hn.h - P.h;
   let best = [Infinity, gx, gy];
   for (let dy = gy - 30; dy <= gy + 30; dy += 2) for (let dx = gx - 30; dx <= gx + 30; dx += 2) {
-    const s = score(dx, dy, 4);
-    if (s < best[0]) best = [s, dx, dy];
+    const sc = score(dx, dy, 4);
+    if (sc < best[0]) best = [sc, dx, dy];
   }
   let fine = best;
   for (let dy = best[2] - 2; dy <= best[2] + 2; dy++) for (let dx = best[1] - 2; dx <= best[1] + 2; dx++) {
-    const s = score(dx, dy, 1);
-    if (s < fine[0]) fine = [s, dx, dy];
+    const sc = score(dx, dy, 1);
+    if (sc < fine[0]) fine = [sc, dx, dy];
   }
   const [, DX, DY] = fine;
-  // where the two differ (henna lines), in the upper body only
+  // what changed
+  const D = V.detect ?? { kind: "diff", threshold: 34, blur: 4 };
+  const [dr0, dr1] = V.rows ?? [0, 0.6];
   const diff = new Float32Array(P.w * P.h);
-  for (let y = 0; y < Math.round(P.h * 0.6); y++)
+  for (let y = Math.round(P.h * dr0); y < Math.round(P.h * dr1); y++)
     for (let x = 0; x < P.w; x++) {
-      const a = lumA(P, x, y);
-      const b = lumA(Hn, x + DX, y + DY);
-      if (a[3] < 128 || b[3] < 128) continue;
-      diff[y * P.w + x] = Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+      const pa = lumA(P, x, y);
+      const pb = lumA(Hn, x + DX, y + DY);
+      if (pa[3] < 128 || pb[3] < 128) continue;
+      if (D.kind === "yellow") {
+        // turmeric: blue drops while the pixel turns warm yellow
+        const gain = pa[2] - pb[2];
+        if (pb[0] > 150 && pb[1] > 105 && pb[0] - pb[2] > 90 && gain > 0) diff[y * P.w + x] = gain * 2;
+      } else diff[y * P.w + x] = Math.hypot(pa[0] - pb[0], pa[1] - pb[1], pa[2] - pb[2]);
     }
   const blurred = await sharp(Buffer.from(diff.map((v) => clamp(v, 0, 255))), { raw: { width: P.w, height: P.h, channels: 1 } })
-    .blur(4)
+    .blur(D.blur)
     .extractChannel(0)
     .raw()
     .toBuffer();
-  // the two biggest regions of difference are the palms
   const lab = new Int32Array(P.w * P.h).fill(-1);
   const regs = [];
-  for (let s = 0; s < P.w * P.h; s++) {
-    if (lab[s] !== -1 || blurred[s] < 34) continue;
+  for (let st0 = 0; st0 < P.w * P.h; st0++) {
+    if (lab[st0] !== -1 || blurred[st0] < D.threshold) continue;
     const r = { id: regs.length, list: [] };
-    const st = [s];
-    lab[s] = r.id;
+    const st = [st0];
+    lab[st0] = r.id;
     while (st.length) {
       const q = st.pop();
       r.list.push(q);
       const x = q % P.w;
       for (const u of [q - 1, q + 1, q - P.w, q + P.w]) {
-        if (u < 0 || u >= P.w * P.h || lab[u] !== -1 || blurred[u] < 34) continue;
+        if (u < 0 || u >= P.w * P.h || lab[u] !== -1 || blurred[u] < D.threshold) continue;
         if ((u === q - 1 && x === 0) || (u === q + 1 && x === P.w - 1)) continue;
         lab[u] = r.id;
         st.push(u);
@@ -262,8 +303,6 @@ if (cfg.henna) {
     }
     regs.push(r);
   }
-  // the palms: for each hint, the biggest region of difference near it (the
-  // rest — a jasmine drawn a little differently — is ignored)
   const near = (r, hx, hy) => {
     let d = Infinity;
     for (let k = 0; k < r.list.length; k += 7) {
@@ -272,57 +311,85 @@ if (cfg.henna) {
     }
     return d;
   };
-  const palms = cfg.henna.palms.map(([sx, sy]) => {
-    const hx = sx - P.x0;
-    const hy = sy - P.y0;
-    const cand = regs.filter((r) => r.list.length > 60 && near(r, hx, hy) < P.w * 0.12);
-    if (!cand.length) fail(`henna: no palm found near ${sx},${sy}`);
-    // merge every nearby region: a palm's henna can break into a few pieces
-    return { list: cand.flatMap((r) => r.list) };
-  });
-  const mask = Buffer.alloc(P.w * P.h);
-  const palmInfo = [];
-  for (const r of palms) {
+  const minArea = V.minArea ?? 60;
+  const reach = (V.near ?? 0.12) * P.w;
+  const hints = V.regions.map((R) => R.at.map(([sx, sy]) => [sx - P.x0, sy - P.y0]));
+  const regions = V.regions.map((R) => ({ name: R.name, list: [] }));
+  if (V.split) {
+    // each change goes to its nearest region (or the catch-all `rest` region)
+    const rest = V.rest ? { name: V.rest, list: [] } : null;
+    for (const r of regs) {
+      if (r.list.length < minArea) continue;
+      let bestR = -1;
+      let bestD = reach;
+      hints.forEach((hs, k) => hs.forEach(([hx, hy]) => {
+        const d = near(r, hx, hy);
+        if (d < bestD) (bestD = d), (bestR = k);
+      }));
+      if (bestR >= 0) regions[bestR].list.push(...r.list);
+      else if (rest) rest.list.push(...r.list);
+    }
+    if (rest) regions.push(rest);
+  } else {
+    // every change near a hint belongs to that region (one overlay for all)
+    hints.forEach((hs, k) => {
+      const cand = regs.filter((r) => r.list.length > minArea && hs.some(([hx, hy]) => near(r, hx, hy) < reach));
+      if (!cand.length) fail(`variant ${V.out}: nothing found for ${V.regions[k].name}`);
+      regions[k].list = cand.flatMap((r) => r.list);
+    });
+  }
+  const info = [];
+  const overlay = async (list) => {
+    const mask = Buffer.alloc(P.w * P.h);
+    for (const q of list) mask[q] = 255;
+    const F = V.feather ?? { blur: 7, gain: 3.2 };
+    const soft = await sharp(mask, { raw: { width: P.w, height: P.h, channels: 1 } }).blur(F.blur).extractChannel(0).raw().toBuffer();
+    const out = Buffer.alloc(P.w * P.h * 4);
+    for (let y = 0; y < P.h; y++)
+      for (let x = 0; x < P.w; x++) {
+        const pb = lumA(Hn, x + DX, y + DY);
+        const m = clamp(soft[y * P.w + x] * F.gain, 0, 255) / 255; // dilated + feathered
+        const o = (y * P.w + x) * 4;
+        out[o] = pb[0];
+        out[o + 1] = pb[1];
+        out[o + 2] = pb[2];
+        out[o + 3] = Math.round(Math.min(pb[3], lumA(P, x, y)[3]) * m);
+      }
+    return out;
+  };
+  for (const R of regions) {
+    if (!R.list.length) {
+      console.warn(`! variant ${V.out}: region ${R.name} is empty`);
+      continue;
+    }
     let sx = 0;
     let sy = 0;
-    for (const q of r.list) {
-      mask[q] = 255;
-      sx += q % P.w;
-      sy += Math.floor(q / P.w);
-    }
-    const cx = sx / r.list.length;
-    const cy = sy / r.list.length;
+    for (const q of R.list) (sx += q % P.w), (sy += Math.floor(q / P.w));
+    const cx = sx / R.list.length;
+    const cy = sy / R.list.length;
     let rad = 0;
-    for (const q of r.list) rad = Math.max(rad, Math.hypot((q % P.w) - cx, Math.floor(q / P.w) - cy));
-    palmInfo.push({ x: +(cx / P.w).toFixed(4), y: +(cy / P.h).toFixed(4), r: +((rad + 10) / P.w).toFixed(4) });
+    for (const q of R.list) rad = Math.max(rad, Math.hypot((q % P.w) - cx, Math.floor(q / P.w) - cy));
+    const it = { x: +(cx / P.w).toFixed(4), y: +(cy / P.h).toFixed(4), r: +((rad + 10) / P.w).toFixed(4) };
+    if (V.split) {
+      const name = `${V.out}-${R.name}`;
+      pieces[name] = { spec: { name }, x0: 0, y0: 0, w: P.w, h: P.h, px: await overlay(R.list), extra: {}, sameAs: V.base };
+      info.push({ name: R.name, piece: name, ...it });
+    } else info.push(it);
   }
-  // close the gaps between henna lines (dilate), then feather
-  const soft = await sharp(mask, { raw: { width: P.w, height: P.h, channels: 1 } })
-    .blur(7)
-    .extractChannel(0)
-    .raw()
-    .toBuffer();
-  const out = Buffer.alloc(P.w * P.h * 4);
-  for (let y = 0; y < P.h; y++)
-    for (let x = 0; x < P.w; x++) {
-      const b = lumA(Hn, x + DX, y + DY);
-      const m = clamp(soft[y * P.w + x] * 3.2, 0, 255) / 255; // dilated + feathered
-      const o = (y * P.w + x) * 4;
-      out[o] = b[0];
-      out[o + 1] = b[1];
-      out[o + 2] = b[2];
-      out[o + 3] = Math.round(Math.min(b[3], lumA(P, x, y)[3]) * m);
-    }
-  palmInfo.sort((a, b) => a.x - b.x);
-  pieces[cfg.henna.out] = { spec: { name: cfg.henna.out }, x0: 0, y0: 0, w: P.w, h: P.h, px: out, extra: { palms: palmInfo }, sameAs: cfg.henna.plain };
-  P.extra.palms = palmInfo;
-  console.log(`henna: aligned (${DX - gx}, ${DY - gy}) px; palms at ${palmInfo.map((p) => `${p.x},${p.y}`).join(" / ")}`);
+  if (!V.split) {
+    info.sort((m, n) => m.x - n.x);
+    pieces[V.out] = { spec: { name: V.out }, x0: 0, y0: 0, w: P.w, h: P.h, px: await overlay(regions.flatMap((R) => R.list)), extra: { [V.key]: info }, sameAs: V.base };
+  }
+  P.extra[V.key] = info;
+  console.log(`variant ${V.out}: aligned (${DX - gx}, ${DY - gy}) px; ${info.length} region(s): ${regions.map((R) => `${R.name} ${R.list.length}px`).join(" / ")}`);
 }
 
 /* ── 6. pivots ──────────────────────────────────────────────────────── */
 for (const p of Object.values(pieces)) {
   const kind = p.spec.pivot ?? "bottom";
-  if (kind === "center") p.pivot = [0.5, 0.5];
+  if (p.spec.pivotAt) p.pivot = [+((p.spec.pivotAt[0] - p.x0) / p.w).toFixed(4), +((p.spec.pivotAt[1] - p.y0) / p.h).toFixed(4)];
+  else if (kind === "center") p.pivot = [0.5, 0.5];
+  else if (kind === "topcenter") p.pivot = [0.5, 0];
   else if (kind === "top") {
     // the hanging loop: centre of the top-most solid pixels
     let ty = 0;
@@ -346,6 +413,14 @@ for (const p of Object.values(pieces)) {
     while (by > 0 && !solid(by)) by--;
     p.pivot = [0.5, +((by + 1) / p.h).toFixed(4)];
   }
+}
+
+// named action points (a pour spout, fingertips, a nozzle), as a share of the piece
+for (const p of Object.values(pieces)) {
+  if (!p.spec.points) continue;
+  p.extra.points = Object.fromEntries(
+    Object.entries(p.spec.points).map(([k, [x, y]]) => [k, [+((x - p.x0) / p.w).toFixed(4), +((y - p.y0) / p.h).toFixed(4)]]),
+  );
 }
 
 /* ── fit: place pieces by matching them against the master scene ───── */
@@ -414,6 +489,11 @@ async function fitLayout() {
   const items = [];
   for (const g of F.items) {
     const p = pieces[g.piece];
+    if (g.fixed) {
+      // placed by hand (measured from the master) — the matcher can't follow a different pose
+      items.push({ id: g.id ?? g.piece, piece: g.piece, ...g.fixed, z: g.z, ...(g.flip ? { flip: true } : {}), ...(g.group ? { group: g.group } : {}) });
+      continue;
+    }
     // guess: the piece's box in master px [x0, y0, x1, y1]; search scale and position around it
     const [gx0, , gx1, gy1] = g.box;
     const guessW = (gx1 - gx0) * k;
@@ -465,13 +545,15 @@ async function fitLayout() {
       w: +toX(best.w).toFixed(2),
       z: g.z,
       ...(g.flip ? { flip: true } : {}),
+      ...(g.group ? { group: g.group } : {}),
     });
     console.log(`fit ${g.id ?? g.piece}: ${(best.s).toFixed(0)} avg diff`);
   }
   const doc = {
     "//": "Stage layout in % of the stage (x, y = the piece's pivot; w = width). Back to front by z. Made by --fit, tweak freely.",
     aspect: F.stage.aspect,
-    items: [...items, ...F.extra].sort((a, b) => a.z - b.z),
+    ...(F.groups ? { groups: F.groups } : {}),
+    items: [...items, ...(typeof F.extra === "function" ? F.extra(items, pieces) : F.extra)].sort((a, b) => a.z - b.z),
   };
   mkdirSync(path.dirname(layoutPath), { recursive: true });
   writeFileSync(layoutPath, JSON.stringify(doc, null, 2) + "\n");
