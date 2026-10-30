@@ -98,13 +98,26 @@ the top of the script. Check the loop at `/doves/preview.html` (normal and half 
 allows (up to 110 px), keeping 8 px from every letter in every frame (it uses the bird's real
 outline and the text's ink). Timings are in `timing.doves`.
 
-## Mehndi ceremony scene
+## Mehndi scene (assembled cut-outs)
 
-`assets-src/mehndi-sheet-1-green.webp` + `-2-` (12 frames each on green, 4 × 3 grids; 24 frames) → `npm run mehndi` →
-`public/mehndi/mehndi-sprite.webp` + `.json` (+ `preview.html`). Same green-screen key as the doves
-(`scripts/lib/chroma-key.mjs`, set strict here because the bride's blouse is olive green); frames
-are aligned on the cushion and bowl, laid out as a 6 × 4 grid. On the page two CSS step animations walk the grid; they
-run only while Mehndi is in focus. Speed: `FPS` in the script.
+Sources in `assets-src/mehndi/` (the master composition plus five blue-screen sheets). Build:
+
+```bash
+npm run scene:mehndi            # cut-outs, manifest, contact sheet
+npm run scene:mehndi -- --fit   # also re-place every piece by matching the master (overwrites the layout)
+```
+
+`scripts/build-scene-assets.mjs` is reusable for other events: a config in `scripts/scenes/` names
+each piece by a point on its sheet. It keys out the blue (soft alpha + despill), cuts each item
+(joining a strand's bell, the lamp's flames…), records the lamp's 5 flame anchors and erases the
+baked flames, aligns the henna bride to the plain one and masks just the palms, sets pivots, and
+exports WebP at ~3× on-screen size to `public/scenes/mehndi/` with `manifest.json`.
+Check every cut-out at `/scenes/mehndi/contact.html`.
+
+Layout: `src/config/scenes/mehndi.json` (stage %, x/y = the piece's pivot, w = width, z = order) —
+tweak freely; `?debug=1` shows the master at 40% behind the stage. The stage holds still
+(sticky) while the scroll assembles it (`timing.sections.scene`); the pager stops once where it
+settles and once when it has finished, then idles (sway, breathing, flames, petals, the flower girl).
 
 ## Performance notes
 

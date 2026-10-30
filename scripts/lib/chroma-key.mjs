@@ -1,13 +1,14 @@
 /**
- * Green-screen key shared by the sprite builders.
+ * Green- or blue-screen key shared by the sprite / asset builders.
  *
- * Alpha ramps smoothly from 1 → 0 as green dominance, g − max(r, b), goes
- * lo → hi, so soft edges (feathers, hair) stay soft. Semi-transparent pixels
- * are un-mixed from the green screen, then despilled (green may never exceed
- * the brighter of red / blue), so no green fringe is left on light edges.
+ * Alpha ramps smoothly from 1 → 0 as the screen colour's dominance —
+ * g − max(r, b) for green, b − max(r, g) for blue — goes lo → hi, so soft
+ * edges (feathers, hair, jasmine) stay soft. Semi-transparent pixels are
+ * un-mixed from the screen colour, then despilled (the screen channel may
+ * never exceed the brighter of the other two), so no coloured fringe is
+ * left on light edges such as ivory sarees, white flowers or gold trim.
  *
- * Raise `lo` when the subject itself has greenish colours (an olive blouse
- * has a dominance of ~20–40; the screen ~245).
+ * Raise `lo` when the subject itself has colours close to the screen.
  */
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const smooth = (e0, e1, x) => {
@@ -18,31 +19,30 @@ const smooth = (e0, e1, x) => {
 /**
  * @param {Buffer} rgb   raw RGB pixels
  * @param {number} n     pixel count
- * @param {{ lo: number, hi: number }} key
+ * @param {{ lo: number, hi: number, screen?: "green" | "blue", bg?: [number, number, number] }} key
  * @returns {{ rgba: Buffer, alpha: Float32Array }}
  */
-export function chromaKey(rgb, n, { lo, hi }) {
+export function chromaKey(rgb, n, { lo, hi, screen = "green", bg }) {
+  const S = screen === "blue" ? 2 : 1; // the screen's channel
+  const [o1, o2] = screen === "blue" ? [0, 1] : [0, 2]; // the other two
+  const BG = bg ?? (screen === "blue" ? [0, 0, 255] : [0, 255, 0]);
   const rgba = Buffer.alloc(n * 4);
   const alpha = new Float32Array(n);
+  const c = [0, 0, 0];
   for (let i = 0; i < n; i++) {
-    const r = rgb[i * 3];
-    const g = rgb[i * 3 + 1];
-    const b = rgb[i * 3 + 2];
-    const a = 1 - smooth(lo, hi, g - Math.max(r, b));
+    c[0] = rgb[i * 3];
+    c[1] = rgb[i * 3 + 1];
+    c[2] = rgb[i * 3 + 2];
+    const a = 1 - smooth(lo, hi, c[S] - Math.max(c[o1], c[o2]));
     alpha[i] = a;
-    let R = r;
-    let G = g;
-    let B = b;
     if (a > 0 && a < 1) {
-      // un-mix the green screen: C = a·F + (1 − a)·(0, 255, 0)  →  F
-      R = clamp(r / a, 0, 255);
-      B = clamp(b / a, 0, 255);
-      G = clamp((g - (1 - a) * 255) / a, 0, 255);
+      // un-mix the screen: C = a·F + (1 − a)·BG  →  F
+      for (let k = 0; k < 3; k++) c[k] = clamp((c[k] - (1 - a) * BG[k]) / a, 0, 255);
     }
-    G = Math.min(G, Math.max(R, B)); // despill
-    rgba[i * 4] = R;
-    rgba[i * 4 + 1] = G;
-    rgba[i * 4 + 2] = B;
+    c[S] = Math.min(c[S], Math.max(c[o1], c[o2])); // despill
+    rgba[i * 4] = c[0];
+    rgba[i * 4 + 1] = c[1];
+    rgba[i * 4 + 2] = c[2];
     rgba[i * 4 + 3] = Math.round(a * 255);
   }
   return { rgba, alpha };

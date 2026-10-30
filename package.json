@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "doves": "node scripts/build-dove-sprite.mjs",
-    "mehndi": "node scripts/build-mehndi-sprite.mjs"
+    "scene:mehndi": "node scripts/build-scene-assets.mjs scripts/scenes/mehndi.config.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

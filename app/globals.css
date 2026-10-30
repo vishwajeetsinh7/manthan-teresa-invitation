@@ -1240,54 +1240,6 @@ body {
   height: 100%;
 }
 
-/* Mehndi ceremony scene just under the mandala (touching its lower ring, like a
-   rug behind them). Sized to fit the page: smaller on short screens. */
-.t-scene {
-  position: absolute;
-  z-index: 0;
-  /* starts just right of the vine */
-  left: calc(var(--u) * -16);
-  top: calc(100% + var(--u) * 180);
-  width: clamp(calc(var(--u) * 200), calc((100cqh - var(--u) * 600) * 1.3), calc(var(--u) * 270));
-  pointer-events: none;
-}
-/* frames: the background walks across the columns (fast) and down the rows
-   (slow), in steps; runs only while Mehndi is focused */
-.t-scene-art {
-  width: 100%;
-  height: 100%;
-  background-repeat: no-repeat;
-  background-size: calc(var(--cols) * 100%) calc(var(--rows) * 100%);
-  background-position: 0 0;
-  animation:
-    t-scene-x var(--x-dur) steps(var(--cols), jump-none) infinite paused,
-    t-scene-y var(--y-dur) steps(var(--rows), jump-none) infinite paused;
-}
-.t-event.is-focus .t-scene-art {
-  animation-play-state: running;
-}
-@keyframes t-scene-x {
-  from {
-    background-position-x: 0%;
-  }
-  to {
-    background-position-x: 100%;
-  }
-}
-@keyframes t-scene-y {
-  from {
-    background-position-y: 0%;
-  }
-  to {
-    background-position-y: 100%;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .t-scene-art {
-    animation: none;
-  }
-}
-
 /* gold line icon(s) at the right of each event */
 .t-icons {
   position: absolute;
@@ -1591,4 +1543,152 @@ body {
   max-width: none;
   will-change: transform;
   user-select: none;
+}
+
+/* ── Mehndi scene (src/components/scenes/MehndiScene.tsx) ──────────── */
+/* A tall wrapper; the stage inside it stays put (sticky) while the scroll
+   through the wrapper assembles the scene. Transparent over the paper. */
+.ms-wrap {
+  position: absolute;
+  left: calc(50% - var(--u) * 195);
+  width: calc(var(--u) * 390);
+  pointer-events: none;
+}
+.ms-stage {
+  position: sticky;
+  /* centred on the screen while it holds still */
+  top: max(0px, calc((100cqh - var(--u) * 643.5) / 2));
+  width: 100%;
+  aspect-ratio: 1 / 1.65;
+  overflow: visible;
+}
+.ms-wrap[data-reduce] .ms-stage {
+  position: relative;
+  top: 0;
+}
+.ms-debug {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  opacity: 0.4;
+  z-index: 0;
+}
+.ms-item {
+  position: absolute;
+  will-change: transform, opacity;
+}
+.ms-item > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+.ms-wrap[data-reduce] [data-id="flower-girl"] {
+  display: none;
+}
+/* a warm contact shadow under the group */
+.ms-shadow {
+  position: absolute;
+  left: 8%;
+  width: 84%;
+  top: 83%;
+  height: 13%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(120 60 25 / 0.32), rgb(150 80 30 / 0.12) 60%, rgb(150 80 30 / 0));
+  z-index: 1;
+}
+.ms-cord {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  z-index: 0;
+}
+.ms-cord-path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 0.45;
+  stroke-linecap: round;
+}
+.ms-cord-bead {
+  fill: var(--gold-dark);
+}
+/* henna palms: a circle that grows (radial wipe) while the art inside counter-scales */
+.ms-palm {
+  position: absolute;
+}
+.ms-palm-wipe {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 82%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side, #000 82%, transparent 100%);
+  will-change: transform;
+}
+.ms-palm-wipe img {
+  position: absolute;
+  max-width: none;
+  will-change: transform;
+}
+/* lamp flames: stand on their wick (bottom centre), glow behind */
+.ms-flame {
+  position: absolute;
+  aspect-ratio: 0.5;
+  translate: -50% -100%;
+  transform-origin: 50% 100%;
+}
+.ms-flame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ms-glow {
+  position: absolute;
+  left: -160%;
+  right: -160%;
+  top: -70%;
+  bottom: -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 210 120 / 0.75), rgb(255 170 60 / 0.25) 55%, rgb(255 170 60 / 0));
+  mix-blend-mode: screen;
+  opacity: 0.8;
+}
+.ms-burst {
+  position: absolute;
+  width: 40%;
+  height: 22%;
+  translate: -50% -50%;
+  z-index: 12;
+}
+.ms-burst img,
+.ms-spark,
+.ms-particle {
+  position: absolute;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.ms-burst img {
+  left: 46%;
+  top: 46%;
+  width: 11%;
+}
+.ms-burst img.ms-burst-spark {
+  width: 8%;
+}
+.ms-spark {
+  width: 3.4%;
+  z-index: 12;
+  translate: -50% -50%;
+}
+.ms-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+}
+.ms-particle {
+  left: 0;
+  top: 0;
+  width: 4.2%;
 }

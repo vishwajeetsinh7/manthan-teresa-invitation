@@ -1,0 +1,487 @@
+{
+  "name": "mehndi",
+  "pieces": {
+    "bride-plain": {
+      "src": "bride-plain.webp",
+      "w": 740,
+      "h": 861,
+      "aspect": 0.8595,
+      "pivot": [
+        0.5,
+        0.9954
+      ],
+      "palms": [
+        {
+          "x": 0.2806,
+          "y": 0.3061,
+          "r": 0.1916
+        },
+        {
+          "x": 0.7439,
+          "y": 0.3301,
+          "r": 0.3799
+        }
+      ]
+    },
+    "bride-henna": {
+      "src": "bride-henna.webp",
+      "w": 745,
+      "h": 861,
+      "aspect": 0.8653,
+      "pivot": [
+        0.5,
+        0.9954
+      ]
+    },
+    "friend-gujarati": {
+      "src": "friend-gujarati.webp",
+      "w": 595,
+      "h": 962,
+      "aspect": 0.6185,
+      "pivot": [
+        0.5,
+        0.9958
+      ]
+    },
+    "friend-kerala": {
+      "src": "friend-kerala.webp",
+      "w": 417,
+      "h": 960,
+      "aspect": 0.4344,
+      "pivot": [
+        0.5,
+        0.9958
+      ]
+    },
+    "flower-girl": {
+      "src": "flower-girl.webp",
+      "w": 310,
+      "h": 473,
+      "aspect": 0.655,
+      "pivot": [
+        0.5,
+        0.9939
+      ]
+    },
+    "uruli": {
+      "src": "uruli.webp",
+      "w": 550,
+      "h": 290,
+      "aspect": 1.8987,
+      "pivot": [
+        0.5,
+        0.9873
+      ]
+    },
+    "lamp": {
+      "src": "lamp.webp",
+      "w": 192,
+      "h": 589,
+      "aspect": 0.326,
+      "pivot": [
+        0.5,
+        0.9937
+      ],
+      "flames": [
+        {
+          "x": 0.0743,
+          "y": 0.2283,
+          "h": 0.0283
+        },
+        {
+          "x": 0.1975,
+          "y": 0.2283,
+          "h": 0.0315
+        },
+        {
+          "x": 0.3765,
+          "y": 0.2236,
+          "h": 0.0315
+        },
+        {
+          "x": 0.7786,
+          "y": 0.2283,
+          "h": 0.0362
+        },
+        {
+          "x": 0.9286,
+          "y": 0.2283,
+          "h": 0.0283
+        }
+      ]
+    },
+    "cone-basket": {
+      "src": "cone-basket.webp",
+      "w": 257,
+      "h": 232,
+      "aspect": 1.11,
+      "pivot": [
+        0.5,
+        0.9871
+      ]
+    },
+    "dholak": {
+      "src": "dholak.webp",
+      "w": 308,
+      "h": 186,
+      "aspect": 1.6599,
+      "pivot": [
+        0.5,
+        0.9865
+      ]
+    },
+    "bolster": {
+      "src": "bolster.webp",
+      "w": 358,
+      "h": 149,
+      "aspect": 2.4015,
+      "pivot": [
+        0.5,
+        0.9848
+      ]
+    },
+    "rug": {
+      "src": "rug.webp",
+      "w": 1181,
+      "h": 322,
+      "aspect": 3.6677,
+      "pivot": [
+        0.5,
+        0.9876
+      ]
+    },
+    "strand-1": {
+      "src": "strand-1.webp",
+      "w": 97,
+      "h": 650,
+      "aspect": 0.1492,
+      "pivot": [
+        0.4861,
+        0.0041
+      ]
+    },
+    "strand-2": {
+      "src": "strand-2.webp",
+      "w": 97,
+      "h": 594,
+      "aspect": 0.1634,
+      "pivot": [
+        0.5143,
+        0.0047
+      ]
+    },
+    "strand-3": {
+      "src": "strand-3.webp",
+      "w": 97,
+      "h": 511,
+      "aspect": 0.1898,
+      "pivot": [
+        0.5075,
+        0.0057
+      ]
+    },
+    "strand-4": {
+      "src": "strand-4.webp",
+      "w": 133,
+      "h": 576,
+      "aspect": 0.2309,
+      "pivot": [
+        0.5113,
+        0.0069
+      ]
+    },
+    "strand-5": {
+      "src": "strand-5.webp",
+      "w": 97,
+      "h": 336,
+      "aspect": 0.2885,
+      "pivot": [
+        0.5038,
+        0.0088
+      ]
+    },
+    "banana": {
+      "src": "banana.webp",
+      "w": 434,
+      "h": 787,
+      "aspect": 0.5517,
+      "pivot": [
+        0.5,
+        0.9958
+      ]
+    },
+    "flame-1": {
+      "src": "flame-1.webp",
+      "w": 36,
+      "h": 84,
+      "aspect": 0.4277,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "flame-2": {
+      "src": "flame-2.webp",
+      "w": 36,
+      "h": 85,
+      "aspect": 0.4225,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "flame-3": {
+      "src": "flame-3.webp",
+      "w": 36,
+      "h": 75,
+      "aspect": 0.4821,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-1": {
+      "src": "petal-marigold-1.webp",
+      "w": 54,
+      "h": 48,
+      "aspect": 1.124,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-2": {
+      "src": "petal-marigold-2.webp",
+      "w": 54,
+      "h": 57,
+      "aspect": 0.9416,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-3": {
+      "src": "petal-marigold-3.webp",
+      "w": 54,
+      "h": 51,
+      "aspect": 1.062,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-marigold-4": {
+      "src": "petal-marigold-4.webp",
+      "w": 54,
+      "h": 55,
+      "aspect": 0.9848,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-rose-1": {
+      "src": "petal-rose-1.webp",
+      "w": 54,
+      "h": 48,
+      "aspect": 1.1299,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-rose-2": {
+      "src": "petal-rose-2.webp",
+      "w": 54,
+      "h": 51,
+      "aspect": 1.0692,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-rose-3": {
+      "src": "petal-rose-3.webp",
+      "w": 54,
+      "h": 49,
+      "aspect": 1.0993,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "petal-rose-4": {
+      "src": "petal-rose-4.webp",
+      "w": 54,
+      "h": 47,
+      "aspect": 1.1379,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "jasmine-1": {
+      "src": "jasmine-1.webp",
+      "w": 48,
+      "h": 76,
+      "aspect": 0.6357,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "jasmine-2": {
+      "src": "jasmine-2.webp",
+      "w": 48,
+      "h": 64,
+      "aspect": 0.7444,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "jasmine-3": {
+      "src": "jasmine-3.webp",
+      "w": 48,
+      "h": 95,
+      "aspect": 0.5032,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "jasmine-4": {
+      "src": "jasmine-4.webp",
+      "w": 48,
+      "h": 69,
+      "aspect": 0.6957,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "marigold-1": {
+      "src": "marigold-1.webp",
+      "w": 66,
+      "h": 60,
+      "aspect": 1.1053,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "marigold-2": {
+      "src": "marigold-2.webp",
+      "w": 66,
+      "h": 60,
+      "aspect": 1.0934,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "marigold-3": {
+      "src": "marigold-3.webp",
+      "w": 66,
+      "h": 60,
+      "aspect": 1.1005,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "leaf-1": {
+      "src": "leaf-1.webp",
+      "w": 66,
+      "h": 60,
+      "aspect": 1.105,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "leaf-2": {
+      "src": "leaf-2.webp",
+      "w": 66,
+      "h": 166,
+      "aspect": 0.3975,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "leaf-3": {
+      "src": "leaf-3.webp",
+      "w": 66,
+      "h": 68,
+      "aspect": 0.9639,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-1": {
+      "src": "sparkle-1.webp",
+      "w": 54,
+      "h": 66,
+      "aspect": 0.8189,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-2": {
+      "src": "sparkle-2.webp",
+      "w": 54,
+      "h": 60,
+      "aspect": 0.9038,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-3": {
+      "src": "sparkle-3.webp",
+      "w": 54,
+      "h": 71,
+      "aspect": 0.7643,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "sparkle-4": {
+      "src": "sparkle-4.webp",
+      "w": 54,
+      "h": 59,
+      "aspect": 0.9143,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "bride-palms": {
+      "src": "bride-palms.webp",
+      "w": 740,
+      "h": 861,
+      "aspect": 0.8595,
+      "pivot": [
+        0.5,
+        0.5993
+      ],
+      "palms": [
+        {
+          "x": 0.2806,
+          "y": 0.3061,
+          "r": 0.1916
+        },
+        {
+          "x": 0.7439,
+          "y": 0.3301,
+          "r": 0.3799
+        }
+      ]
+    }
+  },
+  "master": "master.webp"
+}

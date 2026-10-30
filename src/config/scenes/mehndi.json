@@ -1,0 +1,162 @@
+{
+  "//": "Stage layout in % of the stage (x, y = the piece's pivot; w = width). Back to front by z. Made by --fit, tweak freely.",
+  "aspect": 1.65,
+  "items": [
+    {
+      "id": "toran-1",
+      "piece": "strand-1",
+      "x": 6.5,
+      "y": 2.6,
+      "w": 7.5,
+      "z": 0
+    },
+    {
+      "id": "toran-2",
+      "piece": "strand-2",
+      "x": 20.5,
+      "y": 2.6,
+      "w": 7.5,
+      "z": 0
+    },
+    {
+      "id": "toran-3",
+      "piece": "strand-3",
+      "x": 35,
+      "y": 2.6,
+      "w": 7.5,
+      "z": 0
+    },
+    {
+      "id": "toran-4",
+      "piece": "strand-5",
+      "x": 50,
+      "y": 2.6,
+      "w": 7.5,
+      "z": 0
+    },
+    {
+      "id": "toran-5",
+      "piece": "strand-3",
+      "x": 65,
+      "y": 2.6,
+      "w": 7.5,
+      "z": 0,
+      "flip": true
+    },
+    {
+      "id": "toran-6",
+      "piece": "strand-2",
+      "x": 79.5,
+      "y": 2.6,
+      "w": 7.5,
+      "z": 0,
+      "flip": true
+    },
+    {
+      "id": "toran-7",
+      "piece": "strand-1",
+      "x": 93.5,
+      "y": 2.6,
+      "w": 7.5,
+      "z": 0,
+      "flip": true
+    },
+    {
+      "id": "banana-left",
+      "piece": "banana",
+      "x": 13.67,
+      "y": 46.61,
+      "w": 27.34,
+      "z": 1
+    },
+    {
+      "id": "banana-right",
+      "piece": "banana",
+      "x": 86.72,
+      "y": 63.15,
+      "w": 33.59,
+      "z": 1,
+      "flip": true
+    },
+    {
+      "id": "rug",
+      "piece": "rug",
+      "x": 50,
+      "y": 93,
+      "w": 96,
+      "z": 2
+    },
+    {
+      "id": "friend-gujarati",
+      "piece": "friend-gujarati",
+      "x": 18.55,
+      "y": 78.47,
+      "w": 54.3,
+      "z": 3
+    },
+    {
+      "id": "friend-kerala",
+      "piece": "friend-kerala",
+      "x": 76.17,
+      "y": 75.63,
+      "w": 38.28,
+      "z": 3
+    },
+    {
+      "id": "bride",
+      "piece": "bride-plain",
+      "x": 51.76,
+      "y": 80.16,
+      "w": 58.98,
+      "z": 5
+    },
+    {
+      "id": "lamp",
+      "piece": "lamp",
+      "x": 91.8,
+      "y": 73.55,
+      "w": 14.84,
+      "z": 6
+    },
+    {
+      "id": "bolster",
+      "piece": "bolster",
+      "x": 86.13,
+      "y": 83.32,
+      "w": 27.73,
+      "z": 7
+    },
+    {
+      "id": "dholak",
+      "piece": "dholak",
+      "x": 16.21,
+      "y": 82.13,
+      "w": 23.83,
+      "z": 7
+    },
+    {
+      "id": "uruli",
+      "piece": "uruli",
+      "x": 48.24,
+      "y": 91.07,
+      "w": 42.58,
+      "z": 8
+    },
+    {
+      "id": "cone-basket",
+      "piece": "cone-basket",
+      "x": 81.45,
+      "y": 89.68,
+      "w": 19.92,
+      "z": 9
+    },
+    {
+      "id": "flower-girl",
+      "piece": "flower-girl",
+      "x": 50,
+      "y": 99,
+      "w": 24,
+      "z": 10
+    }
+  ]
+}

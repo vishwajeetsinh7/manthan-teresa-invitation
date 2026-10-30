@@ -154,23 +154,46 @@ export function NameFlourish({ className = "" }: { className?: string }) {
  * wave ≈ 188 units of the 120-wide drawing). Paths are in drawing order
  * (top → bottom) so a scroll-scrubbed draw-on grows it downward.
  */
-export type Thread = { paths: { d: string; node?: boolean }[]; height: number; nodes: number[] };
+export type ThreadPath = { d: string; node?: boolean; /** units of vine-less gap just before this path */ gapBefore?: number };
+export type Thread = {
+  paths: ThreadPath[];
+  height: number;
+  nodes: number[];
+  /** a stretch with no vine (for a full-width scene), in drawing units: [top, bottom] */
+  gap?: [number, number];
+};
 
-export function buildThread(count: number, wavesPerGap: number | readonly number[]): Thread {
+/**
+ * @param scene  leave a vine-less gap of `units` after event `after`: the vine
+ *               ends there in its flourish and starts again with its top curl
+ */
+export function buildThread(count: number, wavesPerGap: number | readonly number[], scene?: { after: number; units: number }): Thread {
   /** waves between event i and i + 1 (a list sets each gap; the last value repeats) */
   const gap = (i: number) => (typeof wavesPerGap === "number" ? wavesPerGap : (wavesPerGap[i] ?? wavesPerGap[wavesPerGap.length - 1]));
-  const paths: { d: string; node?: boolean }[] = [];
+  const paths: ThreadPath[] = [];
   const nodes: number[] = [];
-  // top curl + first stretch of stem down to the first node (y 144)
-  paths.push({ d: "M51.5 20 C53.5 22 51.5 25 48.5 24.2 C44.5 23 45.5 17 50 16.5 C56 16 60 22 60 34 C60 58 52 68 52 89 C52 110 60 120 60 144" });
-  paths.push({ d: "M52.2 83 C48.1 76 41.8 68.9 31.4 71 C35 78.8 43.6 83.8 52.2 83 C47.3 79.5 42.3 76.1 37.9 73.8" });
-  paths.push({ d: "M56 115.4 C61 113.5 66 110 70 105.5 C73.5 101.5 72.5 96.5 68.8 96.6 C65.6 96.7 65.2 100.6 67.6 101.2 C69 101.6 69.8 100.2 69.2 99.4" });
+  const r = (n: number) => +n.toFixed(1);
+  /** top curl + first stretch of stem, ending at y0 + 144 */
+  const curl = (y0: number, gapBefore?: number) => {
+    const t = (n: number) => r(y0 + n);
+    paths.push({ d: `M51.5 ${t(20)} C53.5 ${t(22)} 51.5 ${t(25)} 48.5 ${t(24.2)} C44.5 ${t(23)} 45.5 ${t(17)} 50 ${t(16.5)} C56 ${t(16)} 60 ${t(22)} 60 ${t(34)} C60 ${t(58)} 52 ${t(68)} 52 ${t(89)} C52 ${t(110)} 60 ${t(120)} 60 ${t(144)}`, gapBefore });
+    paths.push({ d: `M52.2 ${t(83)} C48.1 ${t(76)} 41.8 ${t(68.9)} 31.4 ${t(71)} C35 ${t(78.8)} 43.6 ${t(83.8)} 52.2 ${t(83)} C47.3 ${t(79.5)} 42.3 ${t(76.1)} 37.9 ${t(73.8)}` });
+    paths.push({ d: `M56 ${t(115.4)} C61 ${t(113.5)} 66 ${t(110)} 70 ${t(105.5)} C73.5 ${t(101.5)} 72.5 ${t(96.5)} 68.8 ${t(96.6)} C65.6 ${t(96.7)} 65.2 ${t(100.6)} 67.6 ${t(101.2)} C69 ${t(101.6)} 69.8 ${t(100.2)} 69.2 ${t(99.4)}` });
+  };
+  /** end flourish hanging from Y (about 130 units long) */
+  const flourish = (Y: number) => {
+    paths.push({
+      d: `M60 ${Y} C60 ${Y + 24} 68 ${Y + 34} 68 ${Y + 55} C68 ${Y + 76} 60 ${Y + 86} 60 ${Y + 110} C60 ${Y + 122} 64 ${Y + 128} 70 ${Y + 127.5} C74.5 ${Y + 127} 75.5 ${Y + 121} 71.5 ${Y + 119.8} C68.5 ${Y + 119} 66.5 ${Y + 122} 68.5 ${Y + 124}`,
+    });
+    paths.push({ d: `M67.8 ${Y + 49} C71.9 ${Y + 42} 78.2 ${Y + 34.9} 88.6 ${Y + 37} C85 ${Y + 44.8} 76.4 ${Y + 49.8} 67.8 ${Y + 49} C72.7 ${Y + 45.5} 77.7 ${Y + 42.1} 82.1 ${Y + 39.8}` });
+    paths.push({ d: `M64 ${Y + 81.4} C59.9 ${Y + 74.4} 53.6 ${Y + 67.3} 43.2 ${Y + 69.4} C46.8 ${Y + 77.2} 55.4 ${Y + 82.2} 64 ${Y + 81.4} C59.1 ${Y + 77.9} 54.1 ${Y + 74.5} 49.7 ${Y + 72.2}` });
+  };
+  curl(0);
 
   const node = (y: number) => {
     paths.push({ d: `M60 ${y} A6 6 0 1 1 60 ${y + 12} A6 6 0 1 1 60 ${y}`, node: true });
     nodes.push(y + 6);
   };
-  const r = (n: number) => +n.toFixed(1);
   const wave = (y: number, curlRight: boolean) => {
     paths.push({ d: `M60 ${r(y)} C60 ${r(y + 24)} 70 ${r(y + 39)} 70 ${r(y + 64)} C70 ${r(y + 92)} 50 ${r(y + 96)} 50 ${r(y + 124)} C50 ${r(y + 149)} 60 ${r(y + 164)} 60 ${r(y + 188)}` });
     paths.push({
@@ -188,24 +211,29 @@ export function buildThread(count: number, wavesPerGap: number | readonly number
 
   let y = 144;
   let flip = false;
+  let gapSpan: [number, number] | undefined;
   for (let i = 0; i < count; i++) {
     node(y);
     y += 12;
     if (i === count - 1) break;
+    if (scene && scene.after === i) {
+      // the vine ends in its flourish, leaves room for the scene, then curls in again
+      flourish(y);
+      const top = y;
+      y += scene.units;
+      gapSpan = [top, y];
+      curl(y, scene.units);
+      y += 144;
+      continue;
+    }
     for (let w = 0; w < gap(i); w++) {
       wave(y, flip);
       flip = !flip;
       y += 188;
     }
   }
-  // end flourish after the last node
-  const Y = y; // == last node bottom
-  paths.push({
-    d: `M60 ${Y} C60 ${Y + 24} 68 ${Y + 34} 68 ${Y + 55} C68 ${Y + 76} 60 ${Y + 86} 60 ${Y + 110} C60 ${Y + 122} 64 ${Y + 128} 70 ${Y + 127.5} C74.5 ${Y + 127} 75.5 ${Y + 121} 71.5 ${Y + 119.8} C68.5 ${Y + 119} 66.5 ${Y + 122} 68.5 ${Y + 124}`,
-  });
-  paths.push({ d: `M67.8 ${Y + 49} C71.9 ${Y + 42} 78.2 ${Y + 34.9} 88.6 ${Y + 37} C85 ${Y + 44.8} 76.4 ${Y + 49.8} 67.8 ${Y + 49} C72.7 ${Y + 45.5} 77.7 ${Y + 42.1} 82.1 ${Y + 39.8}` });
-  paths.push({ d: `M64 ${Y + 81.4} C59.9 ${Y + 74.4} 53.6 ${Y + 67.3} 43.2 ${Y + 69.4} C46.8 ${Y + 77.2} 55.4 ${Y + 82.2} 64 ${Y + 81.4} C59.1 ${Y + 77.9} 54.1 ${Y + 74.5} 49.7 ${Y + 72.2}` });
-  return { paths, height: Y + 144, nodes };
+  flourish(y);
+  return { paths, height: y + 144, nodes, gap: gapSpan };
 }
 
 export function ScheduleThread({ thread }: { thread: Thread }) {
@@ -213,7 +241,7 @@ export function ScheduleThread({ thread }: { thread: Thread }) {
     <svg className="thread" viewBox={`0 0 120 ${thread.height}`} aria-hidden>
       <g fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
         {thread.paths.map((p, i) => (
-          <path key={i} className={p.node ? "draw node" : "draw"} d={p.d} />
+          <path key={i} className={p.node ? "draw node" : "draw"} d={p.d} data-gap={p.gapBefore} />
         ))}
       </g>
     </svg>

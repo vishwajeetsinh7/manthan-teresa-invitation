@@ -55,6 +55,8 @@ export function usePager(scrollerRef: RefObject<HTMLDivElement | null>, active: 
     s.dataset.paged = "";
 
     let pages: number[] = [0];
+    /** a slower glide between page i − 1 and i (a pinned scene assembling) */
+    let slow: (number | undefined)[] = [];
     let index = 0;
     let gliding = false;
     let quietUntil = 0;
@@ -89,18 +91,29 @@ export function usePager(scrollerRef: RefObject<HTMLDivElement | null>, active: 
           groups.set(name, g ? { top: Math.min(g.top, b.top), bottom: Math.max(g.bottom, b.bottom) } : b);
         }
       });
-      const list: number[] = [];
+      const list: { y: number; dur?: number }[] = [];
       groups.forEach((g, name) => {
         let y = 0;
         if (name !== "hero") {
           const free = H - padTop - padBottom - (g.bottom - g.top);
           y = g.top - padTop - Math.max(0, free) * P.bias;
         }
-        list.push(clamp(0, max, Math.round(y)));
+        list.push({ y: clamp(0, max, Math.round(y)) });
       });
-      list.sort((a, b) => a - b);
-      pages = list.filter((y, i) => i === 0 || y - list[i - 1] > 40);
-      if (!pages.length) pages = [0];
+      // a pinned (sticky) scene: one stop where its stage settles into place,
+      // one where it has finished assembling — reached by a slower glide
+      s.querySelectorAll<HTMLElement>("[data-page-pin]").forEach((el) => {
+        const stage = el.firstElementChild as HTMLElement | null;
+        if (!stage) return;
+        const stick = parseFloat(getComputedStyle(stage).top) || 0;
+        const top = offsetIn(el, s);
+        list.push({ y: clamp(0, max, Math.round(top - stick)) });
+        list.push({ y: clamp(0, max, Math.round(top + el.offsetHeight - stage.offsetHeight - stick)), dur: Number(el.dataset.pageDur) || P.dur });
+      });
+      list.sort((a, b) => a.y - b.y);
+      const kept = list.filter((p, i) => i === 0 || p.y - list[i - 1].y > 40);
+      pages = kept.length ? kept.map((p) => p.y) : [0];
+      slow = kept.map((p) => p.dur);
     };
     const nearest = () =>
       pages.reduce((best, y, i) => (Math.abs(y - s.scrollTop) < Math.abs(pages[best] - s.scrollTop) ? i : best), 0);
@@ -118,13 +131,15 @@ export function usePager(scrollerRef: RefObject<HTMLDivElement | null>, active: 
       }
       // leaving / returning to the first screen is the grandest move; a finger
       // that already moved part of the way leaves less to glide
-      const base = to === from ? P.backDur : from === 0 || to === 0 ? P.firstDur : P.dur;
+      const seg = Math.abs(to - from) === 1 ? slow[Math.max(to, from)] : undefined;
+      const base = to === from ? P.backDur : (seg ?? (from === 0 || to === 0 ? P.firstDur : P.dur));
       const full = Math.abs(pages[to] - pages[from]) || s.clientHeight;
       gliding = true;
       gsap.to(s, {
         scrollTop: pages[to],
         duration: clamp(0.3, base, base * Math.sqrt(remaining / full)),
-        ease: P.ease,
+        // through an assembling scene: even pacing, so the build-up reads well
+        ease: seg ? "power2.inOut" : P.ease,
         overwrite: true,
         onComplete: () => {
           gliding = false;

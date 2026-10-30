@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { gsap, useGSAP, ScrollTrigger } from "@/src/lib/gsap";
 import { invitation as C } from "@/src/content/invitation";
 import { timing } from "@/src/config/timing";
@@ -11,7 +11,7 @@ import { FlowerOpenPlaceholder } from "./art/Placeholders";
 import { EVENT_ICONS, HENNA_CONE, LotusDivider, MEHNDI_MANDALA, SvgArt, type EventIconName } from "./art/svgArt";
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 import { SOFT_BLUR } from "@/src/lib/device";
-import mehndiSprite from "@/public/mehndi/mehndi-sprite.json";
+import { MehndiScene, MEHNDI_STAGE_H } from "./scenes/MehndiScene";
 
 function Countdown() {
   const target = new Date(C.countdownTo).getTime();
@@ -59,10 +59,30 @@ function setBrowserChrome(color: string) {
 
 type EventFlower = { kind: number; tint?: string };
 const SCHEDULE = C.events;
-/** the vine: one node per event, spaced a few vine-waves apart (about a screen) */
-const THREAD = buildThread(SCHEDULE.length, timing.sections.wavesPerGap);
-/** node positions as a share of the vine height */
-const NODE = THREAD.nodes.map((n) => n / THREAD.height);
+/** the event followed by the Mehndi scene (-1: none) */
+const SCENE_AT = SCHEDULE.findIndex((e) => "scene" in e && e.scene === "mehndi");
+const SC = timing.sections.scene;
+/** drawing units (the vine is drawn 120 wide) per u */
+const UNITS_PER_U = 120 / 104;
+
+/**
+ * The vine: one node per event, a few vine-waves apart (about a screen); after
+ * the Mehndi event it leaves a vine-less gap for the full-width scene: the
+ * stage plus the scroll through which it holds still while it assembles
+ * (none with reduced motion, where the scene is simply shown).
+ */
+function layoutThread(reduce: boolean) {
+  const pin = reduce ? 0 : SC.pin;
+  const scene = SCENE_AT >= 0 ? { after: SCENE_AT, units: (SC.clearance + MEHNDI_STAGE_H + pin + SC.bottom) * UNITS_PER_U - 6 } : undefined;
+  const thread = buildThread(SCHEDULE.length, timing.sections.wavesPerGap, scene);
+  /** node positions as a share of the vine height */
+  const node = thread.nodes.map((n) => n / thread.height);
+  const sceneStyle: CSSProperties | null =
+    SCENE_AT >= 0
+      ? { top: `calc(${(node[SCENE_AT] * 100).toFixed(4)}% + var(--u) * ${SC.clearance})`, height: `calc(var(--u) * ${(MEHNDI_STAGE_H + pin).toFixed(1)})` }
+      : null;
+  return { THREAD: thread, NODE: node, sceneStyle };
+}
 
 /**
  * One rose that travels down the vine to whichever event is in focus,
@@ -82,46 +102,6 @@ function TravellingRose() {
           );
         })}
       </div>
-    </div>
-  );
-}
-
-/**
- * The Mehndi ceremony: a friend applying henna to the bride, 24 frames laid
- * out in a grid (built by scripts/build-mehndi-sprite.mjs). Two CSS step
- * animations walk the background across the columns and down the rows; they
- * run only while Mehndi is in focus (.is-focus). Only this small box repaints
- * per frame (no huge GPU layer), and the sheet is decoded ahead of time so
- * the first glide onto the page never stutters.
- */
-const SCENE_SRC = "/mehndi/mehndi-sprite.webp";
-function MehndiScene() {
-  const m = mehndiSprite;
-  useEffect(() => {
-    // decode off the critical path, well before the guest reaches Mehndi
-    const id = window.setTimeout(() => {
-      const img = new Image();
-      img.src = SCENE_SRC;
-      img.decode?.().catch(() => {});
-    }, 2500);
-    return () => window.clearTimeout(id);
-  }, []);
-  return (
-    <div
-      className="t-scene"
-      data-page-part
-      aria-hidden
-      style={
-        {
-          aspectRatio: `${m.frameWidth} / ${m.frameHeight}`,
-          "--cols": m.cols,
-          "--rows": m.rows,
-          "--x-dur": `${m.cols / m.fps}s`,
-          "--y-dur": `${m.frameCount / m.fps}s`,
-        } as CSSProperties
-      }
-    >
-      <div className="t-scene-art" style={{ backgroundImage: `url(${SCENE_SRC})` }} />
     </div>
   );
 }
@@ -175,6 +155,9 @@ function EventDate({ day, weekday, month }: { day: string; weekday: string; mont
 
 export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTMLDivElement | null>; enabled: boolean }) {
   const root = useRef<HTMLDivElement>(null);
+  // client-only component (mounts after the opening tap), so matchMedia is safe here
+  const [reduceMotion] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const { THREAD, NODE, sceneStyle } = useMemo(() => layoutThread(reduceMotion), [reduceMotion]);
 
   // leaving (e.g. replay intro) always restores the normal top-bar colour
   useEffect(() => () => setBrowserChrome(defaultThemeColor), []);
@@ -434,18 +417,6 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           });
         }
 
-        // an event's illustration rises in the first time the event is focused
-        const scene = ev.querySelector<HTMLElement>(".t-scene-art");
-        if (scene && !reduce) {
-          let shown = false;
-          gsap.set(scene, { opacity: 0, y: 18 });
-          on.push(() => {
-            if (shown) return;
-            shown = true;
-            afterIntro(index, () => gsap.to(scene, { opacity: 1, y: 0, duration: 1.1, ease: "power2.out" }));
-          });
-        }
-
         // Haldi: a soft turmeric light that drifts around the event
         const halo = ev.querySelector<HTMLElement>(".t-halo");
         if (halo) {
@@ -678,7 +649,11 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         const grow = gsap.timeline({
           scrollTrigger: { trigger: timeline, scroller, start: "top 82%", end: "bottom 70%", scrub: 0.8 },
         });
-        strokes.forEach((p) => grow.to(p, { drawSVG: "100%", duration: p.getTotalLength(), ease: "none" }));
+        strokes.forEach((p) => {
+          // the scene's vine-less gap: the pen rests while the scroll passes it
+          if (p.dataset.gap) grow.to({}, { duration: Number(p.dataset.gap) });
+          grow.to(p, { drawSVG: "100%", duration: p.getTotalLength(), ease: "none" });
+        });
       }
 
       q(".reveal-up").forEach((el) => {
@@ -745,7 +720,6 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                 </div>
                 <div className="t-text" data-page={i === 0 ? "mehndi" : `event-${i}`}>
                   {mehndi && <SvgArt svg={MEHNDI_MANDALA} className="t-pattern" data-page-part="" />}
-                  {"scene" in e && e.scene === "mehndi" && <MehndiScene />}
                   {"mood" in e && e.mood === "haldi" && <span className="t-halo" aria-hidden />}
                   <EventDate day={e.day} weekday={e.weekday} month={e.month} />
                   <h3 className="t-title script">
@@ -763,6 +737,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
               </article>
             );
           })}
+          {sceneStyle && <MehndiScene scrollerRef={scrollerRef} style={sceneStyle} reduce={reduceMotion} />}
         </div>
       </section>
 
