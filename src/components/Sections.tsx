@@ -8,7 +8,7 @@ import { assets } from "@/src/config/assets";
 import { AssetImage } from "./AssetImage";
 import { Divider, ScheduleThread, buildThread } from "./art/LineArt";
 import { FlowerOpenPlaceholder } from "./art/Placeholders";
-import { EVENT_ICONS, LotusDivider, MEHNDI_MANDALA, SvgArt, type EventIconName } from "./art/svgArt";
+import { EVENT_ICONS, HENNA_CONE, LotusDivider, MEHNDI_MANDALA, SvgArt, type EventIconName } from "./art/svgArt";
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 import { SOFT_BLUR } from "@/src/lib/device";
 
@@ -85,6 +85,53 @@ function TravellingRose() {
   );
 }
 
+/**
+ * Every event's date, in one format: the day sits in a gold medallion and
+ * rolls up like a calendar reel; weekday and month are tracked in beside it.
+ * Without JS (or with reduced motion) the reels already show the right day.
+ */
+function EventDate({ day, weekday, month }: { day: string; weekday: string; month: string }) {
+  const digits = day.padStart(2, "0").split("").map(Number);
+  return (
+    <p className="t-when">
+      <span className="sr-only">
+        {weekday}, {day} {month} {C.dates.year}
+      </span>
+      <span className="t-medal" aria-hidden>
+        <svg className="t-ring" viewBox="0 0 44 44">
+          <circle className="t-ring-line" cx="22" cy="22" r="20.5" transform="rotate(-90 22 22)" />
+          <circle className="t-ring-dots" cx="22" cy="22" r="17.2" />
+          <g className="t-gem-orbit">
+            <path className="t-gem" d="M22 -0.6 L24.1 1.5 L22 3.6 L19.9 1.5 Z" />
+          </g>
+        </svg>
+        <span className="t-day">
+          {digits.map((d, k) => {
+            // tens: 0…d ; ones: a full turn 0…9 then 0…d, so it spins before landing
+            const list = k === 0 ? Array.from({ length: d + 1 }, (_, n) => n) : [...Array(10).keys(), ...Array.from({ length: d + 1 }, (_, n) => n)];
+            const to = list.length - 1;
+            return (
+              <span key={k} className="t-reel-mask">
+                <span className="t-reel" data-to={to} style={{ transform: `translateY(${(-to / list.length) * 100}%)` }}>
+                  {list.map((n, j) => (
+                    <span key={j}>{n}</span>
+                  ))}
+                </span>
+              </span>
+            );
+          })}
+        </span>
+      </span>
+      <span className="t-when-txt" aria-hidden>
+        <span className="t-wk">{weekday}</span>
+        <span className="t-mon">
+          {month} {C.dates.year}
+        </span>
+      </span>
+    </p>
+  );
+}
+
 export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTMLDivElement | null>; enabled: boolean }) {
   const root = useRef<HTMLDivElement>(null);
 
@@ -98,56 +145,251 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const q = gsap.utils.selector(root);
       const D = timing.sections;
+      const rnd = gsap.utils.random;
+      const unit = Math.min(root.current!.clientWidth, 430) / 390;
+      const events = q(".t-event") as HTMLElement[];
+      const cleanups: (() => void)[] = [];
+
+      /* ── Intros ────────────────────────────────────────────────────────
+         Each event introduces itself once: the date medallion draws and its
+         day rolls up, the title is handwritten, the gold icon draws itself,
+         then the details fade up. Mehndi's intro follows the "Celebrations"
+         heading, which is written when the corner flowers burst.          */
+      const intros: (gsap.core.Timeline | undefined)[] = [];
+      const waiting: (() => void)[][] = events.map(() => []);
+      /** run fn once event i has finished introducing itself */
+      const afterIntro = (i: number, fn: () => void) => {
+        const tl = intros[i];
+        if (!tl || tl.progress() === 1) fn();
+        else waiting[i].push(fn);
+      };
+
+      if (!reduce) {
+        events.forEach((ev, i) => {
+          const title = ev.querySelector(".t-title .wipe");
+          const lines = ev.querySelectorAll(".t-line");
+          const strokes = ev.querySelectorAll(".event-icon .draw");
+          const dots = ev.querySelectorAll(".event-icon .dot");
+          const ring = ev.querySelector(".t-ring-line");
+          const ringDots = ev.querySelector(".t-ring-dots");
+          const gem = ev.querySelector(".t-gem");
+          const reels = ev.querySelectorAll<HTMLElement>(".t-reel");
+          const words = ev.querySelectorAll(".t-wk, .t-mon");
+          gsap.set(title, { "--wipe": "60%" });
+          gsap.set(lines, { opacity: 0, y: 10, filter: SOFT_BLUR(3) });
+          gsap.set(strokes, { drawSVG: "0%" });
+          gsap.set(dots, { scale: 0, transformOrigin: "50% 50%" });
+          gsap.set(ring, { drawSVG: "0%" });
+          gsap.set(ringDots, { opacity: 0, rotation: -40, svgOrigin: "22 22" });
+          gsap.set(gem, { scale: 0, svgOrigin: "22 1.5" });
+          gsap.set(reels, { y: 0, yPercent: 0 });
+          gsap.set(words, { opacity: 0, letterSpacing: "0.6em" });
+          const Dd = D.date;
+          const tl = gsap
+            .timeline({
+              paused: true,
+              onComplete: () => {
+                waiting[i].splice(0).forEach((f) => f());
+              },
+            })
+            .to(ring, { drawSVG: "100%", duration: Dd.ring, ease: "power2.inOut" }, 0)
+            .to(ringDots, { opacity: 1, rotation: 0, svgOrigin: "22 22", duration: 1.1, ease: "power2.out" }, 0.25)
+            .to(gem, { scale: 1, svgOrigin: "22 1.5", duration: 0.45, ease: "back.out(3)" }, Dd.ring - 0.15)
+            .to(
+              reels,
+              {
+                yPercent: (_k: number, el: HTMLElement) => (-Number(el.dataset.to) / el.children.length) * 100,
+                duration: Dd.roll,
+                ease: "power3.out",
+                stagger: 0.14,
+              },
+              0.1,
+            )
+            .to(words, { opacity: 1, letterSpacing: "0.26em", duration: 0.9, ease: "power2.out", stagger: 0.12 }, 0.3)
+            .to(title, { "--wipe": "0%", duration: D.titleWrite, ease: "power1.inOut" }, 0.55)
+            .to(strokes, { drawSVG: "100%", duration: D.iconDraw, ease: "power1.inOut", stagger: D.iconDraw / Math.max(8, strokes.length) }, 0.7)
+            .to(dots, { scale: 1, duration: 0.3, ease: "back.out(3)", stagger: 0.04 }, 0.7 + D.iconDraw * 0.8)
+            .to(lines, { opacity: 1, y: 0, filter: SOFT_BLUR(0), duration: 0.7, ease: "power2.out", stagger: 0.1, clearProps: "filter" }, 0.9);
+          intros[i] = tl;
+          // the first event waits for the heading; the rest start as the vine reaches them
+          if (i > 0) ScrollTrigger.create({ trigger: ev, scroller, start: "top 76%", once: true, onEnter: () => void tl.play() });
+        });
+
+        /* "Celebrations": handwritten in as the corner flowers burst, the
+           lotus divider blooms out under it, then Mehndi writes itself. */
+        const head = q(".section-head")[0] as HTMLElement | undefined;
+        if (head) {
+          const H = D.heading;
+          const word = head.querySelector(".wipe");
+          const lotusStrokes = head.querySelectorAll(".draw");
+          const lotusDots = head.querySelectorAll(".dot");
+          gsap.set(word, { "--wipe": "60%" });
+          gsap.set(lotusStrokes, { drawSVG: "0%" });
+          gsap.set(lotusDots, { scale: 0, transformOrigin: "50% 50%" });
+          const headTl = gsap
+            .timeline({ paused: true })
+            .to(word, { "--wipe": "0%", duration: H.write, ease: "power1.inOut" }, 0)
+            .to(lotusStrokes, { drawSVG: "100%", duration: H.lotusDraw, ease: "power2.out", stagger: 0.05 }, H.write * 0.45)
+            .to(lotusDots, { scale: 1, duration: 0.35, ease: "back.out(3)", stagger: 0.05 }, H.write * 0.45 + H.lotusDraw * 0.7)
+            .add(() => void intros[0]?.play(), H.write * 0.8);
+          let started = false;
+          const start = () => {
+            if (started) return;
+            started = true;
+            headTl.play();
+          };
+          window.addEventListener("invite:blast", start);
+          cleanups.push(() => window.removeEventListener("invite:blast", start));
+          ScrollTrigger.create({ trigger: head, scroller, start: H.start, once: true, onEnter: start });
+        }
+      }
 
       /* ── Focus ─────────────────────────────────────────────────────────
          The event whose centre sits in the middle of the screen is "in
          focus". Focus drives everything:
            • the travelling rose rolls to that event's node and changes flower
            • the event is full strength, the others soften
+           • its date medallion's gem circles the ring
            • its mood (Haldi → turmeric glow + yellow phone bar) is on ONLY
              while it is focused
-           • its own animation plays (mandala / turmeric light / sacred fire /
-             clinking glasses) and stops when focus moves on               */
+           • its own animation plays (henna cone / turmeric light / sacred
+             fire / clinking glasses) and stops when focus moves on         */
       let currentTheme = defaultThemeColor;
       const setTheme = (c: string) => {
         if (c === currentTheme) return;
         currentTheme = c;
         setBrowserChrome(c);
       };
-      const rnd = gsap.utils.random;
-      const unit = Math.min(root.current!.clientWidth, 430) / 390;
-      const M = D.mandala;
 
       /** Per-event focus animations, built from what each event contains. */
-      const buildFx = (ev: HTMLElement) => {
+      const buildFx = (ev: HTMLElement, index: number) => {
         const on: (() => void)[] = [];
         const off: (() => void)[] = [];
 
-        // Mehndi: the henna mandala draws itself out from the centre
-        const pattern = ev.querySelector<HTMLElement>(".t-pattern");
-        if (pattern) {
-          const strokes = pattern.querySelectorAll(".draw");
-          const dots = pattern.querySelectorAll(".dot");
-          let tl: gsap.core.Timeline | undefined;
-          gsap.set(pattern, { opacity: 0, scale: 0.85 });
-          gsap.set(strokes, { drawSVG: reduce ? "100%" : "0%" });
-          gsap.set(dots, { opacity: reduce ? 1 : 0 });
-          if (!reduce) gsap.to(pattern, { rotation: 360, duration: M.spinSeconds, ease: "none", repeat: -1 });
+        // every date: the gem runs once around its ring, the medallion pulses
+        const orbit = ev.querySelector(".t-gem-orbit");
+        const medal = ev.querySelector(".t-medal");
+        if (orbit && medal && !reduce) {
           on.push(() => {
-            tl?.kill();
-            tl = gsap.timeline().to(pattern, { opacity: M.focusOpacity, scale: 1, duration: 0.8, ease: "power2.out" }, 0);
-            if (!reduce) {
-              tl.fromTo(strokes, { drawSVG: "0%" }, { drawSVG: "100%", duration: M.draw, ease: "power1.inOut", stagger: M.stagger }, 0).fromTo(
-                dots,
-                { opacity: 0, scale: 0 },
-                { opacity: 1, scale: 1, transformOrigin: "50% 50%", duration: 0.3, ease: "back.out(3)", stagger: 0.012 },
-                M.draw * 0.35,
-              );
+            gsap.fromTo(orbit, { rotation: 0 }, { rotation: 360, svgOrigin: "22 22", duration: 1.6, ease: "power2.inOut", overwrite: "auto" });
+            gsap.fromTo(medal, { scale: 1 }, { scale: 1.08, duration: 0.35, ease: "power2.out", yoyo: true, repeat: 1, overwrite: "auto" });
+          });
+        }
+
+        // Mehndi: a henna cone lifts out of the icon and draws the mandala
+        // under the text, stroke by stroke, in real time
+        const pattern = ev.querySelector<HTMLElement>(".t-pattern");
+        const patternSvg = pattern?.querySelector("svg");
+        const cone = ev.querySelector<HTMLElement>(".henna-cone");
+        const iconSvg = ev.querySelector<SVGSVGElement>(".event-icon svg");
+        if (pattern && patternSvg && cone && iconSvg) {
+          const N = D.henna;
+          const strokes = [...pattern.querySelectorAll<SVGPathElement>(".draw")];
+          const dots = [...pattern.querySelectorAll<SVGCircleElement>(".dot")];
+          // the icon's own cone (first 7 strokes + nozzle dots) dims while the pen is out
+          const iconCone = [...iconSvg.querySelectorAll("path")].slice(0, 7).concat([...iconSvg.querySelectorAll("circle")].slice(0, 3) as never[]);
+          const lens = strokes.map((p) => p.getTotalLength());
+          const total = lens.reduce((a, b) => a + b, 0) || 1;
+          // dots appear once the pen has drawn out as far as they sit (the design grows from the centre)
+          let reach = 0;
+          const strokeReach = strokes.map((p, k) => {
+            for (let s = 0; s <= 16; s++) {
+              const pt = p.getPointAtLength((lens[k] * s) / 16);
+              reach = Math.max(reach, Math.hypot(pt.x - 200, pt.y - 200));
             }
+            return reach;
+          });
+          const dotsAfter: SVGCircleElement[][] = strokes.map(() => []);
+          dots.forEach((d) => {
+            const r = Math.hypot(Number(d.getAttribute("cx")) - 200, Number(d.getAttribute("cy")) - 200);
+            const k = strokeReach.findIndex((m) => m >= r - 1);
+            dotsAfter[k < 0 ? strokes.length - 1 : k].push(d);
+          });
+
+          let tl: gsap.core.Timeline | undefined;
+          let spin: gsap.core.Tween | undefined;
+          let wobble: gsap.core.Tween | undefined;
+          let live = false;
+          gsap.set(pattern, { opacity: reduce ? N.restOpacity : 0 });
+          gsap.set(cone, { autoAlpha: 0 });
+          if (!reduce) {
+            gsap.set(strokes, { drawSVG: "0%" });
+            gsap.set(dots, { opacity: 0 });
+          }
+
+          const draw = () => {
+            if (!live) return;
+            tl?.kill();
+            spin?.kill();
+            wobble?.kill();
+            gsap.set(pattern, { rotation: 0, scale: 1 });
+            gsap.set(strokes, { drawSVG: "0%" });
+            gsap.set(dots, { opacity: 0, scale: 0, transformOrigin: "50% 50%" });
+            // map drawing coordinates into this event's box (measured once; they move together)
+            const er = ev.getBoundingClientRect();
+            const pr = patternSvg.getBoundingClientRect();
+            const ir = iconSvg.getBoundingClientRect();
+            const k = pr.width / 400;
+            const at = (p: SVGPathElement, l: number) => {
+              const pt = p.getPointAtLength(l);
+              return { x: pr.left - er.left + pt.x * k, y: pr.top - er.top + pt.y * k };
+            };
+            const dock = { x: ir.left - er.left + (39 * ir.width) / 80, y: ir.top - er.top + (41 * ir.width) / 80 };
+            const small = (26 * ir.width) / 80 / cone.offsetWidth; // the icon's cone size
+
+            tl = gsap.timeline();
+            tl.set(cone, { x: dock.x, y: dock.y, rotation: 0, scale: small, autoAlpha: 1 }, 0)
+              .to(iconCone, { opacity: 0.12, duration: 0.3 }, 0)
+              .to(pattern, { opacity: N.opacity, duration: 0.4 }, 0)
+              .to(cone, { ...at(strokes[0], 0), scale: 1, duration: N.fly, ease: "power2.inOut" }, 0)
+              .add(() => {
+                wobble = gsap.fromTo(cone, { rotation: -4 }, { rotation: 5, duration: 0.16, ease: "sine.inOut", yoyo: true, repeat: -1 });
+              }, N.fly);
+            let t = N.fly;
+            strokes.forEach((p, i) => {
+              if (i > 0) {
+                tl!.to(cone, { ...at(p, 0), duration: N.hop, ease: "power1.inOut" }, t);
+                t += N.hop;
+              }
+              const len = lens[i];
+              tl!.to(
+                p,
+                {
+                  drawSVG: "100%",
+                  duration: (N.drawSeconds * len) / total,
+                  ease: "none",
+                  onUpdate(this: gsap.core.Tween) {
+                    gsap.set(cone, at(p, this.progress() * len));
+                  },
+                },
+                t,
+              );
+              t += (N.drawSeconds * len) / total;
+              if (dotsAfter[i].length) {
+                tl!.to(dotsAfter[i], { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(3)", stagger: Math.min(0.02, 0.4 / dotsAfter[i].length) }, t - 0.05);
+              }
+            });
+            // back into the icon, then the finished design turns slowly
+            tl.add(() => wobble?.kill(), t)
+              .to(cone, { x: dock.x, y: dock.y, rotation: 0, scale: small, duration: N.fly, ease: "power2.inOut" }, t + 0.15)
+              .to(cone, { autoAlpha: 0, duration: 0.15 }, t + 0.1 + N.fly)
+              .to(iconCone, { opacity: 1, duration: 0.3 }, t + N.fly - 0.05)
+              .add(() => {
+                spin = gsap.to(pattern, { rotation: 360, duration: N.spinSeconds, ease: "none", repeat: -1 });
+              });
+          };
+          on.push(() => {
+            live = true;
+            if (!reduce) afterIntro(index, () => gsap.delayedCall(0.2, draw));
+            else gsap.to(pattern, { opacity: N.opacity, duration: 0.6 });
           });
           off.push(() => {
+            live = false;
             tl?.kill();
-            gsap.to(pattern, { opacity: M.restOpacity, scale: 0.92, duration: 0.8, ease: "power2.out" });
+            wobble?.kill();
+            gsap.to(cone, { autoAlpha: 0, scale: 0.6, duration: 0.3, overwrite: "auto" });
+            gsap.to(iconCone, { opacity: 1, duration: 0.3 });
+            gsap.to(pattern, { opacity: N.restOpacity, duration: 0.8, ease: "power2.out" });
           });
         }
 
@@ -302,7 +544,6 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
       const timeline = q(".timeline")[0] as HTMLElement | undefined;
       const traveler = q(".t-traveler")[0] as HTMLElement | undefined;
       if (timeline && traveler) {
-        const events = q(".t-event") as HTMLElement[];
         const fx = events.map(buildFx);
         const layers = q(".t-flower");
         const pop = q(".t-traveler-pop")[0];
@@ -380,39 +621,18 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         });
       }
 
-      if (reduce) return;
+      if (reduce) return () => cleanups.forEach((f) => f());
 
       /* Schedule: the gold vine grows downward with the scroll (scrubbed),
          stroke by stroke in drawing order, at a steady pen speed. */
-      const thread = q(".timeline")[0] as HTMLElement | undefined;
-      if (thread) {
-        const strokes = [...thread.querySelectorAll<SVGPathElement>(".thread .draw")];
+      if (timeline) {
+        const strokes = [...timeline.querySelectorAll<SVGPathElement>(".thread .draw")];
         gsap.set(strokes, { drawSVG: "0%" });
         const grow = gsap.timeline({
-          scrollTrigger: { trigger: thread, scroller, start: "top 82%", end: "bottom 70%", scrub: 0.8 },
+          scrollTrigger: { trigger: timeline, scroller, start: "top 82%", end: "bottom 70%", scrub: 0.8 },
         });
         strokes.forEach((p) => grow.to(p, { drawSVG: "100%", duration: p.getTotalLength(), ease: "none" }));
       }
-
-      /* Each event, as the vine reaches it: the title is written in, its gold
-         icon draws itself, then the details fade up. */
-      q(".t-event").forEach((ev) => {
-        const title = ev.querySelector(".t-title .wipe");
-        const lines = ev.querySelectorAll(".t-line");
-        const strokes = ev.querySelectorAll(".event-icon .draw");
-        const dots = ev.querySelectorAll(".event-icon .dot");
-        gsap.set(title, { "--wipe": "60%" });
-        gsap.set(lines, { opacity: 0, y: 10, filter: SOFT_BLUR(3) });
-        gsap.set(strokes, { drawSVG: "0%" });
-        gsap.set(dots, { scale: 0, transformOrigin: "50% 50%" });
-        gsap
-          .timeline({ scrollTrigger: { trigger: ev, scroller, start: "top 76%", once: true } })
-          .to(title, { "--wipe": "0%", duration: D.titleWrite, ease: "power1.inOut" }, 0)
-          .to(strokes, { drawSVG: "100%", duration: D.iconDraw, ease: "power1.inOut", stagger: D.iconDraw / Math.max(8, strokes.length) }, 0.15)
-          .to(dots, { scale: 1, duration: 0.3, ease: "back.out(3)", stagger: 0.04 }, 0.15 + D.iconDraw * 0.8)
-          .to(lines, { opacity: 1, y: 0, filter: SOFT_BLUR(0), duration: 0.7, ease: "power2.out", stagger: 0.1, clearProps: "filter" }, 0.35);
-
-      });
 
       q(".reveal-up").forEach((el) => {
         gsap.from(el, {
@@ -424,29 +644,23 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         });
       });
 
-      q(".divider").forEach((d) => {
+      // later dividers (the lotus under "Celebrations" is part of the heading)
+      q(".divider:not(.lotus-divider)").forEach((d) => {
         const st = { trigger: d, scroller, start: "top 92%", once: true };
-        const lotus = d.classList.contains("lotus-divider");
-        gsap.from(d.querySelectorAll(".draw"), {
-          drawSVG: "0%",
-          duration: lotus ? 1.6 : 1,
-          ease: "power2.out",
-          // lotus strokes start at the centre and grow outward one after another
-          stagger: lotus ? 0.05 : 0,
-          scrollTrigger: st,
-        });
+        gsap.from(d.querySelectorAll(".draw"), { drawSVG: "0%", duration: 1, ease: "power2.out", scrollTrigger: st });
         gsap.from(d.querySelectorAll(".dot"), {
           scale: 0,
           transformOrigin: "50% 50%",
           duration: 0.35,
           ease: "back.out(3)",
           stagger: 0.06,
-          delay: lotus ? 1.2 : 0.6,
+          delay: 0.6,
           scrollTrigger: st,
         });
       });
 
       ScrollTrigger.refresh();
+      return () => cleanups.forEach((f) => f());
     },
     { dependencies: [enabled], scope: root },
   );
@@ -454,9 +668,9 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
   return (
     <div ref={root} className="below">
       <section aria-labelledby="events-title">
-        <div className="section-head reveal-up" style={{ marginBottom: "calc(var(--u) * 22)" }}>
+        <div className="section-head" style={{ marginBottom: "calc(var(--u) * 22)" }}>
           <h2 id="events-title" className="section-title">
-            {C.eventsHeading}
+            <span className="wipe">{C.eventsHeading}</span>
           </h2>
           <LotusDivider />
         </div>
@@ -469,33 +683,39 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           {NODE.map((n, i) => (
             <span key={i} className="t-snap" style={{ top: `${n * 100}%` }} aria-hidden />
           ))}
-          {SCHEDULE.map((e, i) => (
-            <article
-              key={e.title}
-              className="t-event"
-              data-mood={"mood" in e ? e.mood : undefined}
-              style={{ top: `${NODE[i] * 100}%` }}
-            >
-              <div className="t-icons">
-                {("icons" in e ? (e.icons as readonly EventIconName[]) : []).map((name) => (
-                  <SvgArt key={name} svg={EVENT_ICONS[name]} className="event-icon" />
-                ))}
-              </div>
-              <div className="t-text">
-                {"pattern" in e && e.pattern === "mehndi" && <SvgArt svg={MEHNDI_MANDALA} className="t-pattern" />}
-                {"mood" in e && e.mood === "haldi" && <span className="t-halo" aria-hidden />}
-                <p className="t-line t-date">
-                  {e.weekday} · {e.day} {e.month}
-                </p>
-                <h3 className="t-title script">
-                  <span className="wipe">{e.title}</span>
-                </h3>
-                <p className="t-line t-time">{e.time}</p>
-                <p className="t-line t-place">{e.place}</p>
-                <p className="t-line t-note">{e.note}</p>
-              </div>
-            </article>
-          ))}
+          {SCHEDULE.map((e, i) => {
+            const mehndi = "pattern" in e && e.pattern === "mehndi";
+            return (
+              <article
+                key={e.title}
+                className="t-event"
+                data-mood={"mood" in e ? e.mood : undefined}
+                style={{ top: `${NODE[i] * 100}%` }}
+              >
+                <div className="t-icons">
+                  {("icons" in e ? (e.icons as readonly EventIconName[]) : []).map((name) => (
+                    <SvgArt key={name} svg={EVENT_ICONS[name]} className="event-icon" />
+                  ))}
+                </div>
+                <div className="t-text">
+                  {mehndi && <SvgArt svg={MEHNDI_MANDALA} className="t-pattern" />}
+                  {"mood" in e && e.mood === "haldi" && <span className="t-halo" aria-hidden />}
+                  <EventDate day={e.day} weekday={e.weekday} month={e.month} />
+                  <h3 className="t-title script">
+                    <span className="wipe">{e.title}</span>
+                  </h3>
+                  <p className="t-line t-time">{e.time}</p>
+                  <p className="t-line t-place">{e.place}</p>
+                  <p className="t-line t-note">{e.note}</p>
+                </div>
+                {mehndi && (
+                  <span className="henna-cone" aria-hidden>
+                    <SvgArt svg={HENNA_CONE} className="henna-cone-art" />
+                  </span>
+                )}
+              </article>
+            );
+          })}
         </div>
       </section>
 

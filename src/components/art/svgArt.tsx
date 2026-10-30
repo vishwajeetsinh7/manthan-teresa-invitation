@@ -33,6 +33,10 @@ export function SvgArt({ svg, className }: { svg: string; className?: string }) 
   return <span className={className} aria-hidden dangerouslySetInnerHTML={{ __html: svg }} />;
 }
 
+/** The henna cone from the Mehndi icon, filled, as a separate "pen" that
+ *  draws the mandala. Its nozzle tip is at (39, 41) of the icon drawing. */
+export const HENNA_CONE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="35 8 36 36"><path fill="#fbf1e0" stroke="#8a6a33" stroke-width="1.1" stroke-linejoin="round" d="M39 41 C43.9 31.6 49.4 22.7 55.5 14.5 C58 12 68 22 65.5 24.5 C57.3 30.6 48.4 36.1 39 41 Z"/><path fill="#f1dcb8" stroke="#8a6a33" stroke-width="1" stroke-linejoin="round" d="M57 14.1 C60 12.6 64.5 11.6 68 11.5 C67.4 15 66.8 19.5 65.8 22.9 C64.2 19 61 15.6 57 14.1 Z"/><path fill="none" stroke="#b08a4a" stroke-width="1" stroke-linecap="round" d="M52.5 19.3 C53.5 21.8 57.9 26.3 60.7 27.5 M51.2 21.4 C52.2 23.9 56.1 27.8 58.6 28.8"/><path fill="#a4421a" d="M39 41 C41 37 42.6 34.2 44.6 31.6 C45.6 33 44.6 34.4 43 35.6 C41.6 37 40.4 38.8 39 41 Z"/><circle fill="#a4421a" cx="39" cy="41" r="1"/></svg>`;
+
 export function LotusDivider({ className = "" }: { className?: string }) {
   return <SvgArt svg={LOTUS} className={`divider lotus-divider ${className}`} />;
 }

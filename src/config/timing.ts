@@ -125,8 +125,14 @@ export const timing = {
     titleWrite: 1.1,
     /** gold event icon draws itself in this long */
     iconDraw: 1.3,
-    /** henna mandala behind Mehndi: drawn out from the centre each time Mehndi is focused */
-    mandala: { draw: 1.4, stagger: 0.09, spinSeconds: 120, focusOpacity: 0.34, restOpacity: 0.1 },
+    /** "Celebrations" is handwritten in when the corner flowers burst
+     *  (or when the heading reaches this point of the screen, if sooner) */
+    heading: { write: 1.3, lotusDraw: 1.6, start: "top 55%" },
+    /** each event's date: the gold ring draws, the day rolls up like a reel */
+    date: { ring: 0.9, roll: 1.25 },
+    /** Mehndi: a henna cone leaves the icon and draws the mandala under the
+     *  text in real time (drawSeconds = pen time for the whole design) */
+    henna: { drawSeconds: 3.8, hop: 0.08, fly: 0.7, opacity: 0.85, restOpacity: 0.32, spinSeconds: 140 },
     /** church: pause between champagne clinks while focused */
     cheers: { pause: 1.1 },
     /** distance between events on the vine, in vine "waves" (1 wave ≈ a quarter screen) */

@@ -449,7 +449,11 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
             if (!it.blasted && y < H * B.zone && top > H * B.minScroll) toBlast.push(it);
             else if (it.blasted && (y > H * (B.zone + B.hysteresis) || top < H * B.backAtTop)) toBloom.push(it);
           }
-          if (toBlast.length) blast(toBlast.sort((a, b) => a.homeY - b.homeY));
+          if (toBlast.length) {
+            blast(toBlast.sort((a, b) => a.homeY - b.homeY));
+            // the schedule below starts writing its heading on the first blast
+            window.dispatchEvent(new Event("invite:blast"));
+          }
           if (toBloom.length) rebloom(toBloom);
           burstActive = items.some((it) => it.blasted);
         };

@@ -24,6 +24,7 @@
   --gold: #b08a4a;
   --gold-light: #dcc08a;
   --gold-dark: #8a6a33;
+  --henna: #a4421a;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-l: env(safe-area-inset-left, 0px);
@@ -135,15 +136,23 @@ body {
 .scroller::-webkit-scrollbar {
   display: none;
 }
-/* Scroll snapping: the page rests on the first screen, the Celebrations
-   heading, each event (centred, and a fast swipe cannot skip one), and
-   each later section, so every event gets its moment. */
+/* Scroll snapping: the page rests on the first screen, then each event
+   (centred, and a fast swipe cannot skip one), then each later section.
+   No stop on the "Celebrations" heading: from the first screen one swipe
+   glides straight to Mehndi, with the heading written above it. */
 .scroller[data-scroll="on"] {
   scroll-snap-type: y mandatory;
 }
-.card,
-.section-head {
+.card {
   scroll-snap-align: start;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .t-snap {
   position: absolute;
@@ -1049,9 +1058,13 @@ body {
 .t-event[data-mood="haldi"] .t-title {
   color: #a8650f;
 }
-.t-event[data-mood="haldi"] .t-date,
-.t-event[data-mood="haldi"] .t-note {
+.t-event[data-mood="haldi"] .t-wk,
+.t-event[data-mood="haldi"] .t-note,
+.t-event[data-mood="haldi"] .t-when {
   color: #c07d12;
+}
+.t-event[data-mood="haldi"] .t-day {
+  color: #a8650f;
 }
 
 /* ── Fixed controls ────────────────────────────────────────────────── */
@@ -1169,19 +1182,47 @@ body {
   flex-direction: column;
   gap: calc(var(--u) * 2);
 }
-/* faint henna mandala behind the Mehndi event, turning slowly */
+/* henna mandala under the Mehndi text, drawn live by the henna cone */
 .t-pattern {
   position: absolute;
   z-index: -1;
-  left: 42%;
-  top: 50%;
-  width: calc(var(--u) * 230);
-  height: calc(var(--u) * 230);
-  margin: calc(var(--u) * -115) 0 0 calc(var(--u) * -115);
-  color: #8a4b2a;
+  left: calc(50% - var(--u) * 29);
+  top: 100%;
+  width: calc(var(--u) * 172);
+  height: calc(var(--u) * 172);
+  margin: calc(var(--u) * 14) 0 0 calc(var(--u) * -86);
+  color: var(--henna);
   opacity: 0;
   pointer-events: none;
   will-change: transform;
+}
+/* the "pen": its nozzle tip sits on the element's top-left corner, so
+   GSAP's x/y place the tip exactly on the line being drawn */
+.henna-cone {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  top: 0;
+  width: calc(var(--u) * 46);
+  height: calc(var(--u) * 46);
+  transform-origin: 0 0;
+  pointer-events: none;
+  visibility: hidden;
+  will-change: transform;
+}
+.henna-cone-art {
+  position: absolute;
+  left: calc(var(--u) * -5.1);
+  top: calc(var(--u) * -42.2);
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 calc(var(--u) * 3) calc(var(--u) * 3) rgb(90 40 20 / 0.25));
+}
+.henna-cone-art svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 .t-pattern svg {
   display: block;
@@ -1237,14 +1278,91 @@ body {
   height: 100%;
   overflow: visible;
 }
-.t-date {
+/* Event date, same format for every event: the day in a gold medallion
+   (rolls up like a calendar reel), weekday and month tracked in beside it */
+.t-when {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 9);
+  margin-bottom: calc(var(--u) * 3);
+  color: var(--gold);
+}
+.t-medal {
+  position: relative;
+  flex: none;
+  width: calc(var(--u) * 42);
+  height: calc(var(--u) * 42);
+  display: grid;
+  place-items: center;
+}
+.t-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.t-ring-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.1;
+}
+.t-ring-dots {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-dasharray: 0 3.6;
+  opacity: 0.75;
+}
+.t-gem {
+  fill: currentColor;
+}
+.t-day {
+  position: relative;
+  display: flex;
   font-family: var(--font-serif);
   font-weight: 600;
-  font-size: calc(var(--u) * 10.5);
-  letter-spacing: 0.26em;
+  font-size: calc(var(--u) * 18);
+  line-height: 1;
+  color: var(--burgundy);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.t-reel-mask {
+  display: block;
+  height: 1em;
+  overflow: hidden;
+}
+.t-reel {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+.t-reel > span {
+  display: block;
+  height: 1em;
+  line-height: 1;
+  text-align: center;
+}
+.t-when-txt {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 3);
+  font-family: var(--font-serif);
   text-transform: uppercase;
+  letter-spacing: 0.26em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.t-wk {
+  font-weight: 600;
+  font-size: calc(var(--u) * 10.5);
   color: var(--gold-dark);
-  font-variant-numeric: lining-nums;
+}
+.t-mon {
+  font-size: calc(var(--u) * 9.5);
+  color: var(--ink);
+  opacity: 0.8;
 }
 .t-title {
   font-size: calc(var(--u) * 34);
