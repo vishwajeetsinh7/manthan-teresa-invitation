@@ -36,9 +36,25 @@ export function Invitation() {
   const tiltRef = useRef(false);
 
   /* Scene 1 tap: everything iOS needs a user gesture for happens here */
+  /** Start the song. Must run inside the tap itself — that's what lets
+   *  iPhone/Android play sound. The file has a soft fade-in baked in (iOS
+   *  ignores volume changes); elsewhere the volume also eases up. */
+  const startMusic = () => {
+    const a = audioRef.current;
+    if (!a || !musicOn) return;
+    a.currentTime = 0;
+    a.volume = 0;
+    a.play()
+      .then(() => gsap.to(a, { volume: timing.music.volume, duration: timing.music.fadeIn, ease: "none" }))
+      .catch(() => {}); // no music file / blocked → the invitation simply stays silent
+  };
+
   const handleTap = () => {
     if (phase !== "tap") return;
     const v = videoRef.current;
+
+    // the song starts the moment the envelope is opened
+    startMusic();
 
     // Dev switch: NEXT_PUBLIC_SKIP_VIDEO=true in .env.local → tapping goes
     // straight to the invitation (no envelope video). Not set on Vercel, so
@@ -51,35 +67,16 @@ export function Invitation() {
       return;
     }
 
-    // 1) video with sound
+    // 1) the envelope video plays silently — the song is the only sound
     if (v) {
-      v.muted = false;
+      v.muted = true;
       v.currentTime = 0;
       v.play().catch(() => {
-        v.muted = true;
-        v.play().catch(() => {
-          // video can't play at all → go straight to the reveal
-          if (veilRef.current) gsap.set(veilRef.current, { opacity: 1 });
-          setPhase("reveal");
-          setVideoDone(true);
-        });
+        // video can't play at all → go straight to the reveal
+        if (veilRef.current) gsap.set(veilRef.current, { opacity: 1 });
+        setPhase("reveal");
+        setVideoDone(true);
       });
-    }
-
-    // 2) unlock background music for later (muted play → pause) — only when
-    //    a music file actually exists, so nothing extra competes with the video
-    const a = audioRef.current;
-    if (a && musicAvailable) {
-      a.muted = true;
-      a.play()
-        .then(() => {
-          a.pause();
-          a.currentTime = 0;
-          a.muted = false;
-        })
-        .catch(() => {
-          a.muted = false;
-        });
     }
 
     // 3) device tilt: used only where it needs NO permission (Android etc.).
@@ -111,20 +108,32 @@ export function Invitation() {
     };
   }, []);
 
-  /* Background music: fades in once the invitation reveals */
+  /* Music on/off button + back to the envelope (replay). The song itself is
+     started by the tap (startMusic); this only pauses / resumes it. */
   useEffect(() => {
     const a = audioRef.current;
-    if (!a || !musicAvailable) return;
-    if (phase === "reveal" && musicOn) {
-      a.volume = 0;
-      a.play()
-        .then(() => gsap.to(a, { volume: timing.music.volume, duration: timing.music.fadeIn, ease: "none" }))
-        .catch(() => {});
-    } else {
+    if (!a) return;
+    if (phase === "tap" || !musicOn) {
       gsap.killTweensOf(a);
       a.pause();
+    } else if (a.paused) {
+      a.play()
+        .then(() => gsap.to(a, { volume: timing.music.volume, duration: 0.8, ease: "none" }))
+        .catch(() => {});
     }
-  }, [phase, musicOn, musicAvailable]);
+  }, [phase, musicOn]);
+
+  /* Pause while the guest switches to another app; resume on return. */
+  useEffect(() => {
+    const onVis = () => {
+      const a = audioRef.current;
+      if (!a) return;
+      if (document.hidden) a.pause();
+      else if (phase !== "tap" && musicOn) a.play().catch(() => {});
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [phase, musicOn]);
 
   /* Controls fade in with the reveal */
   useGSAP(
@@ -240,8 +249,9 @@ export function Invitation() {
 
         <div ref={veilRef} className="white-veil" aria-hidden />
 
-        {/* only exists once a music file has been added */}
-        {musicAvailable && <audio ref={audioRef} src={assets.music} loop preload="none" />}
+        {/* background song — started by the opening tap, loops; the button
+            appears once the file is confirmed to exist */}
+        <audio ref={audioRef} src={assets.music} loop preload="auto" onError={() => setMusicAvailable(false)} />
       </div>
 
       <DesktopNote />

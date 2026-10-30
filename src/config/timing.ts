@@ -131,5 +131,6 @@ export const timing = {
     traveler: { pxPerSecond: 320, minDur: 0.7, maxDur: 1.6, roll: 0.6 },
   },
 
-  music: { fadeIn: 2.5, volume: 0.55 },
+  /** background song: starts on the opening tap (the video itself is muted) */
+  music: { fadeIn: 2.5, volume: 0.75 },
 } as const;

@@ -266,6 +266,7 @@ export function VideoScene({ videoRef, veilRef, playing, onStarted, onReveal, on
       <video
         ref={videoRef}
         playsInline
+        muted // silent: the background song is the only sound
         preload="auto"
         poster={assets.video.poster}
         disablePictureInPicture
