@@ -165,23 +165,24 @@ const config = {
         ["strand-long", 874, 34],
       ].forEach(([piece, x, w], i) => out.push(put(`strand-${i + 1}`, piece, x, 316, w, 3.2)));
 
-      // clouds: a soft bank round and under the lotus — far ones small and high, mid ones behind
-      // the lotus, a bed under the rangoli, near ones big and low at the corners (each shape used
-      // again only mirrored and resized, never beside itself)
+      // clouds: far ones small and high behind the lotus; a bank in front of the lotus's base, so
+      // it rests in the clouds (nothing floats under it); near ones big and low at the corners, on
+      // top of everything (each shape used again only mirrored and resized, never beside itself)
       [
         ["cloud-1", 95, 795, 230, 1, false],
         ["cloud-4", 930, 820, 220, 1, true],
         ["cloud-7", 40, 660, 150, 0.9, true],
         ["cloud-5", 990, 690, 150, 0.9, false],
-        ["cloud-3", 120, 1210, 230, 5.2, false],
-        ["cloud-8", 905, 1200, 220, 5.2, true],
-        ["cloud-2", 300, 1310, 300, 4.9, true],
-        ["cloud-6", 730, 1320, 320, 4.9, false],
-        ["cloud-4", 90, 1360, 250, 4.8, false],
-        ["cloud-1", 950, 1370, 260, 4.8, true],
-        ["cloud-6", 512, 1545, 560, 4.7, true],
-        ["cloud-8", 250, 1515, 300, 4.75, false],
-        ["cloud-3", 790, 1520, 280, 4.75, true],
+        ["cloud-3", 95, 1235, 220, 6.6, false],
+        ["cloud-8", 930, 1225, 210, 6.6, true],
+        ["cloud-2", 270, 1345, 300, 6.7, true],
+        ["cloud-6", 755, 1350, 320, 6.7, false],
+        ["cloud-4", 512, 1400, 280, 6.75, false],
+        ["cloud-1", 80, 1375, 260, 6.8, false],
+        ["cloud-1", 955, 1380, 260, 6.8, true],
+        ["cloud-6", 512, 1505, 600, 6.85, true],
+        ["cloud-8", 250, 1460, 320, 6.9, false],
+        ["cloud-3", 790, 1465, 300, 6.9, true],
         ["cloud-5", 40, 1500, 280, 8, false],
         ["cloud-7", 985, 1505, 270, 8, true],
         ["cloud-2", 120, 1580, 360, 8.05, false],

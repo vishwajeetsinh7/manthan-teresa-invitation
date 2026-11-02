@@ -117,7 +117,7 @@ for (const spec of cfg.pieces) {
     sh.groups.filter((g) => px >= g.x0 && px <= g.x1 && py >= g.y0 && py <= g.y1).sort((a, b) => b.area - a.area)[0];
   if (!found) fail(`${spec.name}: no piece at ${px},${py} on ${spec.sheet}`);
   const key = `${spec.sheet}:${found.id}`;
-  if (used.has(key) && !spec.clip && !spec.split) fail(`${spec.name}: that piece is already named`);
+  if (used.has(key) && !spec.clip && !spec.split && !spec.exclude) fail(`${spec.name}: that piece is already named`);
   used.add(key);
   picks.push({ spec, sh, hit: { ...found, parts: [...found.parts] } });
 }
@@ -152,7 +152,8 @@ for (const { spec, sh, hit } of picks) {
   const inside = cutFilter(spec);
   const px4 = Buffer.alloc(w * h * 4);
   // a warm-only piece (powder, gold) is re-keyed with a stronger cap (see chroma-key)
-  const warm = spec.warm !== undefined ? chromaKey(sh.rgb.subarray(0), sh.W * sh.H, { ...cfg.key, cap: spec.warm }) : null;
+  // (or with its own key settings: `key` — a violet piece keeps its blue)
+  const warm = spec.key ? chromaKey(sh.rgb, sh.W * sh.H, { ...cfg.key, ...spec.key }) : spec.warm !== undefined ? chromaKey(sh.rgb.subarray(0), sh.W * sh.H, { ...cfg.key, cap: spec.warm }) : null;
   for (let y = 0; y < h; y++)
     for (let x = 0; x < w; x++) {
       const i = (y0 + y) * sh.W + (x0 + x);
@@ -162,11 +163,80 @@ for (const { spec, sh, hit } of picks) {
       if (inside && !inside(x0 + x, y0 + y)) continue;
       (warm ? warm.rgba : sh.rgba).copy(px4, (y * w + x) * 4, i * 4, i * 4 + 4);
     }
-  pieces[spec.name] = inside ? trim({ spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} }) : { spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} };
+  // `clearAbove` { y, x0, x1 } (sheet px): erase a painted part above a line (the garbo's flame)
+  if (spec.clearAbove) {
+    const C = spec.clearAbove;
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++) if (y0 + y < C.y && x0 + x >= C.x0 && x0 + x < C.x1) px4[(y * w + x) * 4 + 3] = 0;
+  }
+  pieces[spec.name] = inside || spec.clearAbove ? trim({ spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} }) : { spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} };
+}
+
+/* ── 3b. glow masks: the small dark holes of a piece (the garbo's pierced pot), as a warm glow
+   overlay in the piece's own frame; too few holes → a soft inner glow of the given body box ── */
+for (const spec of cfg.pieces) {
+  const G = spec.glowMask;
+  if (!G) continue;
+  const p = pieces[spec.name];
+  const [bx0, by0, bx1, by1] = G.box.map((v, i) => v - (i % 2 ? p.y0 : p.x0));
+  const dark = new Uint8Array(p.w * p.h);
+  for (let y = Math.max(0, by0); y < Math.min(p.h, by1); y++)
+    for (let x = Math.max(0, bx0); x < Math.min(p.w, bx1); x++) {
+      const o = (y * p.w + x) * 4;
+      if (p.px[o + 3] > 200 && p.px[o] + p.px[o + 1] + p.px[o + 2] < (G.darkMax ?? 150)) dark[y * p.w + x] = 1;
+    }
+  // the dark spots: small connected groups only (not big shadows)
+  const seen = new Uint8Array(p.w * p.h);
+  const holes = [];
+  for (let s = 0; s < dark.length; s++) {
+    if (!dark[s] || seen[s]) continue;
+    const list = [s];
+    seen[s] = 1;
+    for (let k = 0; k < list.length; k++) {
+      const q = list[k];
+      const x = q % p.w;
+      for (const u of [q - 1, q + 1, q - p.w, q + p.w]) {
+        if (u < 0 || u >= dark.length || seen[u] || !dark[u]) continue;
+        if ((u === q - 1 && x === 0) || (u === q + 1 && x === p.w - 1)) continue;
+        seen[u] = 1;
+        list.push(u);
+      }
+    }
+    if (list.length >= (G.minArea ?? 4) && list.length <= (G.maxArea ?? 400)) holes.push(list);
+  }
+  const mask = Buffer.alloc(p.w * p.h);
+  if (holes.length >= 10) for (const l of holes) for (const q of l) mask[q] = 255;
+  else {
+    // a soft oval inside the body box
+    const cx = (bx0 + bx1) / 2;
+    const cy = (by0 + by1) / 2;
+    for (let y = 0; y < p.h; y++)
+      for (let x = 0; x < p.w; x++) {
+        const d = Math.hypot((x - cx) / ((bx1 - bx0) / 2), (y - cy) / ((by1 - by0) / 2));
+        if (d < 1) mask[y * p.w + x] = Math.round(255 * Math.min(1, (1 - d) * 2.5));
+      }
+  }
+  const soft = await sharp(mask, { raw: { width: p.w, height: p.h, channels: 1 } }).blur(G.blur ?? 3).extractChannel(0).raw().toBuffer();
+  const out = Buffer.alloc(p.w * p.h * 4);
+  const [cr, cg, cb] = G.color ?? [255, 196, 96];
+  for (let i = 0; i < p.w * p.h; i++) {
+    out[i * 4] = cr;
+    out[i * 4 + 1] = cg;
+    out[i * 4 + 2] = cb;
+    out[i * 4 + 3] = Math.min(p.px[i * 4 + 3], Math.min(255, soft[i] * (G.gain ?? 2.2)));
+  }
+  pieces[`${spec.name}-holes`] = { spec: { name: `${spec.name}-holes` }, x0: p.x0, y0: p.y0, w: p.w, h: p.h, px: out, extra: {}, sameAs: spec.name };
+  console.log(`${spec.name}: ${holes.length} holes${holes.length < 10 ? " (too few: a soft inner glow instead)" : ""}`);
 }
 
 /** a clip rectangle or a split line (sheet px) → is (x, y) part of this piece? */
 function cutFilter(spec) {
+  // `exclude` [x0, y0, x1, y1]: everything but that box (the DJ console without the boy behind it)
+  if (spec.exclude) {
+    const [ex0, ey0, ex1, ey1] = spec.exclude;
+    const rest = cutFilter({ ...spec, exclude: undefined });
+    return (x, y) => !(x >= ex0 && x < ex1 && y >= ey0 && y < ey1) && (!rest || rest(x, y));
+  }
   if (spec.clip) {
     const [cx0, cy0, cx1, cy1] = spec.clip;
     return (x, y) => x >= cx0 && x < cx1 && y >= cy0 && y < cy1;
@@ -544,7 +614,14 @@ for (const [name, p] of Object.entries(pieces)) {
     .resize(w, h, { kernel: "lanczos3" })
     .webp({ quality: 88, alphaQuality: 100, effort: 6, smartSubsample: true })
     .toFile(path.join(cfg.outDir, file));
-  manifest.pieces[name] = { src: file, w, h, aspect: +(p.w / p.h).toFixed(4), pivot: p.pivot, ...p.extra };
+  manifest.pieces[name] = { src: file, w, h, aspect: +(p.w / p.h).toFixed(4), pivot: p.pivot, ...(cfg.sheetSize ? { sw: p.w, sh: p.h } : {}), ...p.extra };
+}
+// more than one master (a scene with two looks): master-<key>.webp each, for ?debug=1
+for (const [k, file] of Object.entries(cfg.masters ?? {})) {
+  const f = path.join(cfg.srcDir, file);
+  const mm = await sharp(f).metadata();
+  await sharp(f).resize({ width: 1024 }).webp({ quality: 70 }).toFile(path.join(cfg.outDir, `master-${k}.webp`));
+  manifest.masters = { ...manifest.masters, [k]: { src: `master-${k}.webp`, aspect: +(mm.height / mm.width).toFixed(4) } };
 }
 // the master, for ?debug=1 only (its height / width, so the overlay keeps its shape)
 const master = path.join(cfg.srcDir, cfg.master ?? "master.png");

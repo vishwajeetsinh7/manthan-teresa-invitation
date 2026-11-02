@@ -1,0 +1,793 @@
+{
+  "name": "garba-dance",
+  "pieces": {
+    "dancer-bride": {
+      "src": "dancer-bride.webp",
+      "w": 300,
+      "h": 469,
+      "aspect": 0.6397,
+      "pivot": [
+        0.5,
+        0.9915
+      ],
+      "sw": 300,
+      "sh": 469,
+      "points": {
+        "sticks": [
+          0.8867,
+          0.0128
+        ]
+      }
+    },
+    "dancer-groom": {
+      "src": "dancer-groom.webp",
+      "w": 263,
+      "h": 502,
+      "aspect": 0.5239,
+      "pivot": [
+        0.5,
+        0.992
+      ],
+      "sw": 263,
+      "sh": 502,
+      "points": {
+        "sticks": [
+          0.9392,
+          0.0657
+        ]
+      }
+    },
+    "dancer-gujarati": {
+      "src": "dancer-gujarati.webp",
+      "w": 290,
+      "h": 468,
+      "aspect": 0.6197,
+      "pivot": [
+        0.5,
+        0.9915
+      ],
+      "sw": 290,
+      "sh": 468,
+      "points": {
+        "sticks": [
+          0.9138,
+          0.0256
+        ]
+      }
+    },
+    "dancer-kerala": {
+      "src": "dancer-kerala.webp",
+      "w": 271,
+      "h": 469,
+      "aspect": 0.5778,
+      "pivot": [
+        0.5,
+        0.9915
+      ],
+      "sw": 271,
+      "sh": 469,
+      "points": {
+        "sticks": [
+          0.8598,
+          0.0277
+        ]
+      }
+    },
+    "dancer-mustard": {
+      "src": "dancer-mustard.webp",
+      "w": 229,
+      "h": 477,
+      "aspect": 0.4801,
+      "pivot": [
+        0.5,
+        0.9916
+      ],
+      "sw": 229,
+      "sh": 477,
+      "points": {
+        "sticks": [
+          0.9345,
+          0.0356
+        ]
+      }
+    },
+    "dancer-pink": {
+      "src": "dancer-pink.webp",
+      "w": 290,
+      "h": 467,
+      "aspect": 0.621,
+      "pivot": [
+        0.5,
+        0.9914
+      ],
+      "sw": 290,
+      "sh": 467,
+      "points": {
+        "sticks": [
+          0.8724,
+          0.03
+        ]
+      }
+    },
+    "crew-couple": {
+      "src": "crew-couple.webp",
+      "w": 549,
+      "h": 604,
+      "aspect": 0.9091,
+      "pivot": [
+        0.5,
+        0.9938
+      ],
+      "sw": 590,
+      "sh": 649,
+      "points": {
+        "hem": [
+          0.4271,
+          0.9245
+        ]
+      }
+    },
+    "crew-gujarati": {
+      "src": "crew-gujarati.webp",
+      "w": 238,
+      "h": 533,
+      "aspect": 0.4469,
+      "pivot": [
+        0.5,
+        0.9938
+      ],
+      "sw": 286,
+      "sh": 640
+    },
+    "crew-kerala": {
+      "src": "crew-kerala.webp",
+      "w": 348,
+      "h": 640,
+      "aspect": 0.5437,
+      "pivot": [
+        0.5,
+        0.9938
+      ],
+      "sw": 348,
+      "sh": 640
+    },
+    "crew-flowergirl": {
+      "src": "crew-flowergirl.webp",
+      "w": 308,
+      "h": 416,
+      "aspect": 0.7413,
+      "pivot": [
+        0.5,
+        0.9907
+      ],
+      "sw": 318,
+      "sh": 429
+    },
+    "bunting": {
+      "src": "bunting.webp",
+      "w": 1118,
+      "h": 181,
+      "aspect": 6.1818,
+      "pivot": [
+        0.5,
+        0
+      ],
+      "sw": 1496,
+      "sh": 242,
+      "points": {
+        "endL": [
+          0.0134,
+          0.0744
+        ],
+        "endR": [
+          0.986,
+          0.0744
+        ]
+      }
+    },
+    "toran": {
+      "src": "toran.webp",
+      "w": 575,
+      "h": 80,
+      "aspect": 7.164,
+      "pivot": [
+        0.5,
+        0
+      ],
+      "sw": 1354,
+      "sh": 189,
+      "points": {
+        "endL": [
+          0.0066,
+          0.0688
+        ],
+        "endR": [
+          0.9963,
+          0.0688
+        ]
+      }
+    },
+    "garbo": {
+      "src": "garbo.webp",
+      "w": 257,
+      "h": 283,
+      "aspect": 0.9066,
+      "pivot": [
+        0.5,
+        0.9909
+      ],
+      "sw": 398,
+      "sh": 439,
+      "points": {
+        "flame": [
+          0.5075,
+          0.0547
+        ]
+      }
+    },
+    "dhol-player": {
+      "src": "dhol-player.webp",
+      "w": 228,
+      "h": 371,
+      "aspect": 0.6142,
+      "pivot": [
+        0.5,
+        0.9929
+      ],
+      "sw": 347,
+      "sh": 565,
+      "points": {
+        "dhol": [
+          0.4726,
+          0.4885
+        ]
+      }
+    },
+    "lantern-1": {
+      "src": "lantern-1.webp",
+      "w": 81,
+      "h": 183,
+      "aspect": 0.4428,
+      "pivot": [
+        0.5,
+        0.0083
+      ],
+      "sw": 213,
+      "sh": 481,
+      "points": {
+        "core": [
+          0.4883,
+          0.4782
+        ]
+      }
+    },
+    "lantern-2": {
+      "src": "lantern-2.webp",
+      "w": 107,
+      "h": 229,
+      "aspect": 0.4668,
+      "pivot": [
+        0.5,
+        0.0083
+      ],
+      "sw": 225,
+      "sh": 482,
+      "points": {
+        "core": [
+          0.4933,
+          0.5
+        ]
+      }
+    },
+    "truss": {
+      "src": "truss.webp",
+      "w": 811,
+      "h": 156,
+      "aspect": 5.2074,
+      "pivot": [
+        0.5,
+        0
+      ],
+      "sw": 1406,
+      "sh": 270,
+      "points": {
+        "lens1": [
+          0.1401,
+          0.763
+        ],
+        "lens2": [
+          0.3805,
+          0.763
+        ],
+        "lens3": [
+          0.6259,
+          0.763
+        ],
+        "lens4": [
+          0.8713,
+          0.7704
+        ]
+      }
+    },
+    "disco-ball": {
+      "src": "disco-ball.webp",
+      "w": 178,
+      "h": 242,
+      "aspect": 0.7351,
+      "pivot": [
+        0.5019,
+        0.0063
+      ],
+      "sw": 469,
+      "sh": 638,
+      "points": {
+        "chain": [
+          0.5032,
+          0.011
+        ],
+        "ball": [
+          0.5032,
+          0.6285
+        ],
+        "edge": [
+          0.9936,
+          0.6285
+        ]
+      }
+    },
+    "dj-boy": {
+      "src": "dj-boy.webp",
+      "w": 120,
+      "h": 123,
+      "aspect": 0.9788,
+      "pivot": [
+        0.5077,
+        0.8788
+      ],
+      "sw": 323,
+      "sh": 330
+    },
+    "dj-console": {
+      "src": "dj-console.webp",
+      "w": 269,
+      "h": 149,
+      "aspect": 1.8,
+      "pivot": [
+        0.5,
+        0.9901
+      ],
+      "sw": 729,
+      "sh": 405,
+      "points": {
+        "coneL": [
+          0.1111,
+          0.2988
+        ],
+        "coneR": [
+          0.8861,
+          0.2988
+        ]
+      }
+    },
+    "floor": {
+      "src": "floor.webp",
+      "w": 1214,
+      "h": 1202,
+      "aspect": 1.01,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 1214,
+      "sh": 1202
+    },
+    "diya-flame-1": {
+      "src": "diya-flame-1.webp",
+      "w": 75,
+      "h": 191,
+      "aspect": 0.3927,
+      "pivot": [
+        0.5,
+        0.9791
+      ],
+      "sw": 75,
+      "sh": 191
+    },
+    "diya-flame-2": {
+      "src": "diya-flame-2.webp",
+      "w": 68,
+      "h": 173,
+      "aspect": 0.3931,
+      "pivot": [
+        0.5,
+        0.9769
+      ],
+      "sw": 68,
+      "sh": 173
+    },
+    "diya-flame-3": {
+      "src": "diya-flame-3.webp",
+      "w": 67,
+      "h": 183,
+      "aspect": 0.3661,
+      "pivot": [
+        0.5,
+        0.9781
+      ],
+      "sw": 67,
+      "sh": 183
+    },
+    "spark-1": {
+      "src": "spark-1.webp",
+      "w": 132,
+      "h": 146,
+      "aspect": 0.9038,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 141,
+      "sh": 156
+    },
+    "spark-2": {
+      "src": "spark-2.webp",
+      "w": 132,
+      "h": 120,
+      "aspect": 1.1017,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 195,
+      "sh": 177
+    },
+    "spark-3": {
+      "src": "spark-3.webp",
+      "w": 132,
+      "h": 114,
+      "aspect": 1.1548,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 179,
+      "sh": 155
+    },
+    "mirror-1": {
+      "src": "mirror-1.webp",
+      "w": 36,
+      "h": 36,
+      "aspect": 0.9913,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 114,
+      "sh": 115
+    },
+    "mirror-2": {
+      "src": "mirror-2.webp",
+      "w": 36,
+      "h": 36,
+      "aspect": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 102,
+      "sh": 102
+    },
+    "mirror-3": {
+      "src": "mirror-3.webp",
+      "w": 36,
+      "h": 36,
+      "aspect": 0.9907,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 106,
+      "sh": 107
+    },
+    "mirror-4": {
+      "src": "mirror-4.webp",
+      "w": 36,
+      "h": 36,
+      "aspect": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 106,
+      "sh": 106
+    },
+    "confetti-1": {
+      "src": "confetti-1.webp",
+      "w": 30,
+      "h": 29,
+      "aspect": 1.0488,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 86,
+      "sh": 82
+    },
+    "confetti-2": {
+      "src": "confetti-2.webp",
+      "w": 30,
+      "h": 29,
+      "aspect": 1.023,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 89,
+      "sh": 87
+    },
+    "confetti-3": {
+      "src": "confetti-3.webp",
+      "w": 42,
+      "h": 29,
+      "aspect": 1.4536,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 141,
+      "sh": 97
+    },
+    "confetti-4": {
+      "src": "confetti-4.webp",
+      "w": 42,
+      "h": 18,
+      "aspect": 2.2879,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 151,
+      "sh": 66
+    },
+    "confetti-5": {
+      "src": "confetti-5.webp",
+      "w": 36,
+      "h": 25,
+      "aspect": 1.4648,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 104,
+      "sh": 71
+    },
+    "confetti-6": {
+      "src": "confetti-6.webp",
+      "w": 36,
+      "h": 24,
+      "aspect": 1.4828,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 129,
+      "sh": 87
+    },
+    "confetti-7": {
+      "src": "confetti-7.webp",
+      "w": 42,
+      "h": 91,
+      "aspect": 0.4634,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 76,
+      "sh": 164
+    },
+    "confetti-8": {
+      "src": "confetti-8.webp",
+      "w": 42,
+      "h": 88,
+      "aspect": 0.475,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 76,
+      "sh": 160
+    },
+    "note-1": {
+      "src": "note-1.webp",
+      "w": 48,
+      "h": 67,
+      "aspect": 0.7177,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 89,
+      "sh": 124
+    },
+    "note-2": {
+      "src": "note-2.webp",
+      "w": 54,
+      "h": 60,
+      "aspect": 0.906,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 106,
+      "sh": 117
+    },
+    "note-3": {
+      "src": "note-3.webp",
+      "w": 54,
+      "h": 124,
+      "aspect": 0.434,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 69,
+      "sh": 159
+    },
+    "note-4": {
+      "src": "note-4.webp",
+      "w": 54,
+      "h": 73,
+      "aspect": 0.7381,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 93,
+      "sh": 126
+    },
+    "petal-marigold-1": {
+      "src": "petal-marigold-1.webp",
+      "w": 39,
+      "h": 40,
+      "aspect": 0.9826,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 113,
+      "sh": 115
+    },
+    "petal-marigold-2": {
+      "src": "petal-marigold-2.webp",
+      "w": 33,
+      "h": 26,
+      "aspect": 1.25,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 90,
+      "sh": 72
+    },
+    "petal-marigold-3": {
+      "src": "petal-marigold-3.webp",
+      "w": 39,
+      "h": 31,
+      "aspect": 1.2692,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 132,
+      "sh": 104
+    },
+    "petal-rose-1": {
+      "src": "petal-rose-1.webp",
+      "w": 39,
+      "h": 44,
+      "aspect": 0.8957,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 103,
+      "sh": 115
+    },
+    "petal-rose-2": {
+      "src": "petal-rose-2.webp",
+      "w": 39,
+      "h": 39,
+      "aspect": 1,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 112,
+      "sh": 112
+    },
+    "petal-rose-3": {
+      "src": "petal-rose-3.webp",
+      "w": 39,
+      "h": 39,
+      "aspect": 1.0093,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 109,
+      "sh": 108
+    },
+    "sparkle-1": {
+      "src": "sparkle-1.webp",
+      "w": 36,
+      "h": 40,
+      "aspect": 0.8953,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 77,
+      "sh": 86
+    },
+    "sparkle-2": {
+      "src": "sparkle-2.webp",
+      "w": 42,
+      "h": 44,
+      "aspect": 0.9492,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 112,
+      "sh": 118
+    },
+    "sparkle-3": {
+      "src": "sparkle-3.webp",
+      "w": 36,
+      "h": 38,
+      "aspect": 0.9419,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 81,
+      "sh": 86
+    },
+    "sparkle-4": {
+      "src": "sparkle-4.webp",
+      "w": 42,
+      "h": 46,
+      "aspect": 0.9138,
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sw": 106,
+      "sh": 116
+    },
+    "garbo-holes": {
+      "src": "garbo-holes.webp",
+      "w": 257,
+      "h": 283,
+      "aspect": 0.9066,
+      "pivot": [
+        0.5,
+        0.5763
+      ],
+      "sw": 398,
+      "sh": 439
+    }
+  },
+  "masters": {
+    "garba": {
+      "src": "master-garba.webp",
+      "aspect": 1.5
+    },
+    "dance": {
+      "src": "master-dance.webp",
+      "aspect": 1.5
+    }
+  },
+  "master": "master.webp",
+  "masterAspect": 1.5
+}

@@ -53,9 +53,9 @@ export const invitation = {
   /**
    * `mood` (optional) recolours the whole page while that event is on screen —
    * see src/config/moods.ts. Only "haldi" exists for now.
-   * `scene`: the illustrated scene under the event — "mehndi" / "haldi" / "hindu-wedding" / "hindu-lotus" / "church-wedding" (src/components/scenes/*Scene),
+   * `scene`: the illustrated scene under the event — "mehndi" / "haldi" / "garba-dance" / "hindu-wedding" / "hindu-lotus" / "church-wedding" (src/components/scenes/*Scene),
    *   or "soon": a placeholder ("Images coming soon") of the same size, until that event's art is ready.
-   * `icons`: gold line icons drawn beside the event (mehndi, haldi, mandap, church, cheers).
+   * `icons`: gold line icons drawn beside the event (mehndi, haldi, dandiya, mandap, church, cheers).
    * `flower`: what the travelling rose turns into on this event —
    *   kind 0 burgundy · 1 blush · 2 ivory · 3 raspberry · 4 pale pink; tint "gold" warms it to turmeric.
    */
@@ -85,6 +85,18 @@ export const invitation = {
       mood: "haldi",
       icons: ["haldi"],
       flower: { kind: 2 }, // flower-3
+    },
+    {
+      day: "24",
+      month: "May",
+      weekday: "Monday",
+      title: "Garba & Dance", // PLACEHOLDER
+      scene: "garba-dance", // "Raas to Remix"
+      time: "8:00 PM onwards", // PLACEHOLDER
+      place: "The Grand Palace", // PLACEHOLDER
+      note: "Dandiya & dancing shoes", // PLACEHOLDER
+      icons: ["dandiya"],
+      flower: { kind: 1 }, // blush
     },
     {
       day: "24",

@@ -324,6 +324,34 @@ export const timing = {
       /** the flower girl's petal tosses once it idles (s between) */
       toss: [5, 7] as [number, number],
     },
+    /** the Garba / Dance Night scene ("Raas to Remix"): one stage, two looks on one beat */
+    garba: {
+      /** tempo (beats a minute): the garba, the drop's peak, the dance */
+      bpm: { garba: 110, drop: 140, dance: 124 },
+      /** garba → drop → dance → return → …, each look this many beats (off: only the toggle switches) */
+      autoLoop: true as boolean,
+      modeBeats: 24,
+      /** the assembly as the page arrives (s); going back up rewinds it this much faster */
+      assemble: 6.6,
+      reverseSpeed: 6,
+      startAt: "96%",
+      /** the ring: bars for one turn; the gap inside a pair (°) and how far each closes to click */
+      barsPerTurn: 8,
+      pairGap: 34,
+      clickClose: 7,
+      /** at most this many drifting petals (garba) */
+      maxAmbient: 8,
+      /** disco reflections; confetti pieces in a burst (every 8 beats) */
+      reflections: 24,
+      confetti: [20, 30] as [number, number],
+      /** spotlight swing (± °) */
+      beamSwing: 20,
+      /** shake: a jolt over `threshold` m/s² on `hits` readings within `window` s, at most once per `cooldown` s */
+      shake: { threshold: 15, hits: 2, window: 0.4, cooldown: 1.5 },
+      /** under this many frames a second for 2 s it sheds work: fewer reflections and confetti,
+       *  then no blend modes, then a still floor */
+      minFps: 40,
+    },
     /** the one rose that travels down the vine to the event in focus */
     traveler: { pxPerSecond: 320, minDur: 0.7, maxDur: 1.6, roll: 0.6 },
   },

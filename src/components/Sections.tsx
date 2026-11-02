@@ -16,6 +16,7 @@ import { HaldiScene } from "./scenes/HaldiScene";
 import { HinduWeddingScene } from "./scenes/HinduWeddingScene";
 import { HinduLotusScene } from "./scenes/HinduLotusScene";
 import { ChurchWeddingScene } from "./scenes/ChurchWeddingScene";
+import { GarbaDanceScene } from "./scenes/GarbaDanceScene";
 
 function Countdown() {
   const target = new Date(C.countdownTo).getTime();
@@ -752,6 +753,8 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
               <HinduLotusScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
             ) : sceneOf(i) === "church-wedding" ? (
               <ChurchWeddingScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
+            ) : sceneOf(i) === "garba-dance" ? (
+              <GarbaDanceScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
             ) : sceneOf(i) === "soon" ? (
               <SceneComingSoon key={`scene-${i}`} page={i === 0 ? "mehndi" : `event-${i}`} style={sceneStyle(i)} />
             ) : null,

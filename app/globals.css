@@ -2473,3 +2473,428 @@ body {
 .lt-scene[data-reduce] .lt-fly {
   display: none;
 }
+
+/* ── Garba / Dance Night, "Raas to Remix" (src/components/scenes/GarbaDanceScene.tsx) ── */
+/* centred, unclipped, taps never in the way of scrolling (all from .hw-scene); a little
+   bigger than the other scenes — most of the screen under the event's details */
+.gd-scene {
+  --sw: clamp(calc(var(--u) * 170), calc((100cqh - var(--u) * 445) / var(--sa, 1.5)), calc(var(--u) * 350));
+  /* the bunting hangs above the stage's top: room for it under the event's details. (The
+     next event is ~662u down the page: stage + toggle fit in that.) */
+  margin-top: calc(var(--u) * 30);
+}
+.gd-scene .ms-particles {
+  z-index: 900;
+}
+.gd-scene .gd-debug {
+  top: 0;
+  height: 100%;
+  z-index: 2000;
+  display: none;
+}
+.gd-scene:not([data-mode="dance"]) .gd-debug[data-m="garba"],
+.gd-scene[data-mode="dance"] .gd-debug[data-m="dance"] {
+  display: block;
+}
+/* the sky arch: maroon to marigold; plum with stars on top of it (cross-fades) */
+.gd-sky {
+  position: absolute;
+  z-index: 1;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 calc(var(--sw) * 0.005) #d9a441;
+  pointer-events: none;
+}
+.gd-sky > div {
+  position: absolute;
+  inset: 0;
+}
+.gd-sky-g {
+  background:
+    radial-gradient(ellipse 70% 40% at 50% 100%, rgb(255 196 92 / 0.75), transparent 70%),
+    linear-gradient(#4f0c1c 0%, #7a1624 30%, #a8352a 58%, #d9782f 82%, #f0a748 100%);
+}
+.gd-sky-d {
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 60% 35% at 50% 100%, rgb(150 40 110 / 0.55), transparent 75%),
+    linear-gradient(#2e0f1f 0%, #3b1128 50%, #4a1430 100%);
+}
+.gd-stars {
+  opacity: 0;
+}
+.gd-stars i {
+  position: absolute;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #fff3c4, rgb(255 210 120 / 0.6) 45%, transparent);
+  animation: gd-twinkle var(--d, 2.4s) ease-in-out var(--dl, 0s) infinite;
+}
+@keyframes gd-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+/* the string lights (bulbs on a canvas, over the sky) */
+.gd-lights {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+/* the floor: the whole round floor, a little wider than the stage */
+.gd-floorclip {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+.gd-floorbase {
+  position: absolute;
+  aspect-ratio: 1 / 0.5;
+  translate: -50% -58%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(240 196 140 / 0.95), rgb(232 180 120 / 0.55) 60%, transparent);
+}
+.gd-floorbase-d {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #5b1838, rgb(74 20 48 / 0.85) 60%, transparent);
+}
+.gd-plane {
+  position: absolute;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) scaleY(var(--sq, 0.62));
+}
+.gd-plane-spin {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.gd-plane-spin img,
+.gd-plane-spin canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+/* a layout piece: the outer box (entrances, exits) and the inner one (moves on the beat) */
+.gd-in {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.gd-in > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+.gd-dancer {
+  position: absolute;
+  will-change: transform, opacity;
+}
+.gd-dancer img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+/* the garbo sinks into the floor / rises from it: clipped at its base */
+.gd-garbo {
+  clip-path: inset(-80% -40% 0 -40%);
+}
+.gd-in > img.gd-holes {
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+.gd-flame {
+  position: absolute;
+  translate: -50% -100%;
+  transform-origin: 50% 100%;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.gd-flame > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.gd-flame-glow {
+  position: absolute;
+  left: -160%;
+  right: -160%;
+  top: -30%;
+  bottom: -70%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 214 120 / 0.75), rgb(255 160 60 / 0.25) 55%, transparent);
+  mix-blend-mode: screen;
+}
+.gd-pool {
+  position: absolute;
+  aspect-ratio: 2.6;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.gd-pool-garbo {
+  z-index: 12;
+  translate: -50% -50%;
+  opacity: 0;
+  background: radial-gradient(closest-side, rgb(255 190 90 / 0.8), rgb(255 150 60 / 0.3) 55%, transparent);
+}
+.gd-pool-beam {
+  left: 0;
+  top: 0;
+  width: 30%;
+  margin: -5.77% 0 0 -15%;
+  z-index: 14;
+  background: radial-gradient(closest-side, var(--c), transparent);
+}
+/* the dhol: a gold ripple ring and a glow at its head */
+.gd-dhol-ring,
+.gd-dhol-glow,
+.gd-cone,
+.gd-core {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.gd-dhol-ring {
+  width: 44%;
+  margin: -22% 0 0 -22%;
+  border: calc(var(--sw) * 0.004) solid #f3cf6e;
+  box-shadow: 0 0 calc(var(--sw) * 0.012) rgb(255 210 120 / 0.8);
+  opacity: 0;
+}
+.gd-dhol-glow {
+  width: 36%;
+  margin: -18% 0 0 -18%;
+  background: radial-gradient(closest-side, rgb(255 236 190 / 0.9), transparent);
+  mix-blend-mode: screen;
+  opacity: 0.35;
+}
+.gd-cone {
+  width: 18%;
+  margin: -9% 0 0 -9%;
+  border: calc(var(--sw) * 0.003) solid #ffd27a;
+  opacity: 0;
+}
+.gd-core {
+  width: 70%;
+  margin: -35% 0 0 -35%;
+  background: radial-gradient(closest-side, rgb(255 220 140 / 0.85), rgb(255 170 70 / 0.25) 60%, transparent);
+  mix-blend-mode: screen;
+}
+/* the lanterns' strings, up to the top */
+.gd-lstring {
+  position: absolute;
+  top: 0;
+  z-index: 815;
+  width: calc(var(--sw) * 0.003);
+  margin-left: calc(var(--sw) * -0.0015);
+  background: linear-gradient(#c99a45, #8a6326);
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+/* the DJ rises up from behind the floor (clipped at the console's base) */
+.gd-djgroup {
+  position: absolute;
+  inset: 0;
+  z-index: 205;
+  pointer-events: none;
+}
+/* the couple's hem: a ring of sparkles */
+.gd-hem {
+  position: absolute;
+  width: 70%;
+  aspect-ratio: 3;
+  margin: -11.67% 0 0 -35%;
+}
+.gd-hem img,
+.gd-facet {
+  position: absolute;
+  width: 9%;
+  margin: -4.5% 0 0 -4.5%;
+  opacity: 0;
+}
+/* the disco ball's shine: a highlight band sliding across, facets twinkling */
+.gd-ball {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.gd-band {
+  position: absolute;
+  inset: -20% 30%;
+  background: linear-gradient(90deg, transparent, rgb(255 250 230 / 0.55), transparent);
+  rotate: 25deg;
+  mix-blend-mode: screen;
+  animation: gd-band 2.8s linear infinite;
+}
+@keyframes gd-band {
+  from {
+    transform: translateX(-180%);
+  }
+  to {
+    transform: translateX(180%);
+  }
+}
+.gd-facet {
+  width: 16%;
+  margin: -8% 0 0 -8%;
+}
+/* the spotlight beams (soft cones from each lens) and the disco reflections */
+.gd-beam {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 760;
+  width: calc(var(--sw) * 0.34);
+  height: calc(var(--sw) * 0.95);
+  margin-left: calc(var(--sw) * -0.17);
+  transform-origin: 50% 0;
+  clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
+  background: linear-gradient(var(--c), transparent 92%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.gd-dots {
+  position: absolute;
+  inset: 0;
+  z-index: 770;
+  overflow: hidden;
+  pointer-events: none;
+}
+.gd-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3.4%;
+  aspect-ratio: 1;
+  margin: -1.7% 0 0 -1.7%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--c), transparent);
+  mix-blend-mode: screen;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+/* the ball of light that rises from the flame and becomes the disco ball */
+.gd-lightball {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 870;
+  aspect-ratio: 1;
+  margin: -8.3% 0 0 -8.3%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #fffaf0, #ffe1a0 35%, rgb(255 180 90 / 0.5) 65%, transparent);
+  pointer-events: none;
+}
+/* sparks, twinkles, ripples */
+.gd-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 910;
+  pointer-events: none;
+}
+.gd-spark,
+.gd-glint {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.gd-spark {
+  width: 13%;
+  margin: -6.5% 0 0 -6.5%;
+}
+.gd-glint {
+  width: 3.6%;
+  margin: -1.8% 0 0 -1.8%;
+}
+.gd-ripple {
+  position: absolute;
+  z-index: 15;
+  width: calc(var(--sw) * 0.5);
+  height: calc(var(--sw) * 0.31);
+  margin: calc(var(--sw) * -0.155) 0 0 calc(var(--sw) * -0.25);
+  border-radius: 50%;
+  border: calc(var(--sw) * 0.005) solid #ffd88a;
+  box-shadow:
+    0 0 calc(var(--sw) * 0.02) rgb(255 200 110 / 0.8),
+    inset 0 0 calc(var(--sw) * 0.02) rgb(255 200 110 / 0.6);
+  pointer-events: none;
+}
+/* the toggle: "Garba ✦ Dance", the side on show highlighted */
+.gd-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--u) * 6);
+  padding: calc(var(--u) * 4) calc(var(--u) * 5);
+}
+.gd-toggle > span:not(.gd-t-x) {
+  padding: calc(var(--u) * 3) calc(var(--u) * 11);
+  border-radius: 999px;
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease;
+}
+.gd-t-x {
+  color: var(--gold);
+  font-size: 0.8em;
+}
+.gd-scene:not([data-mode="dance"]) .gd-t-g,
+.gd-scene[data-mode="dance"] .gd-t-d {
+  background: var(--color-burgundy);
+  color: #fbf6ec;
+}
+/* a slow phone: no blend modes (lite 2+) */
+.gd-scene:is([data-lite="2"], [data-lite="3"]) :is(.gd-beam, .gd-pool, .gd-dot, .gd-band, .gd-flame-glow, .gd-dhol-glow, .gd-core),
+.gd-scene:is([data-lite="2"], [data-lite="3"]) .gd-in > img.gd-holes {
+  mix-blend-mode: normal;
+}
+/* reduced motion: the two masters' layouts, still; the toggle cross-fades between them */
+.gd-scene[data-reduce] [data-look],
+.gd-scene[data-reduce] .gd-skyd {
+  transition: opacity 0.6s ease;
+}
+.gd-scene[data-reduce]:not([data-mode="dance"]) [data-look="dance"],
+.gd-scene[data-reduce][data-mode="dance"] [data-look="garba"] {
+  opacity: 0;
+}
+.gd-scene[data-reduce][data-mode="dance"] .gd-skyd {
+  opacity: 1;
+}
+.gd-scene[data-reduce] .gd-stars i,
+.gd-scene[data-reduce] .gd-band {
+  animation: none;
+}
+.gd-scene[data-reduce] .gd-flame,
+.gd-scene[data-reduce] .gd-in > img.gd-holes {
+  opacity: 1;
+}
+.gd-scene[data-reduce] .gd-pool-garbo {
+  opacity: 0.8;
+}
+.gd-scene[data-reduce] .gd-lightball,
+.gd-scene[data-reduce] .gd-beam,
+.gd-scene[data-reduce] .gd-pool-beam {
+  display: none;
+}

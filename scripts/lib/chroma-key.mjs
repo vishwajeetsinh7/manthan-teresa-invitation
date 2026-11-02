@@ -28,10 +28,10 @@ const smooth = (e0, e1, x) => {
 /**
  * @param {Buffer} rgb   raw RGB pixels
  * @param {number} n     pixel count
- * @param {{ lo: number, hi: number, screen?: "green" | "blue", bg?: [number, number, number], cap?: number }} key
+ * @param {{ lo: number, hi: number, screen?: "green" | "blue", bg?: [number, number, number], cap?: number, despill?: boolean }} key
  * @returns {{ rgba: Buffer, alpha: Float32Array }}
  */
-export function chromaKey(rgb, n, { lo, hi, screen = "green", bg, cap }) {
+export function chromaKey(rgb, n, { lo, hi, screen = "green", bg, cap, despill = true }) {
   const S = screen === "blue" ? 2 : 1; // the screen's channel
   const [o1, o2] = screen === "blue" ? [0, 1] : [0, 2]; // the other two
   const BG = bg ?? (screen === "blue" ? [0, 0, 255] : [0, 255, 0]);
@@ -56,7 +56,7 @@ export function chromaKey(rgb, n, { lo, hi, screen = "green", bg, cap }) {
       // un-mix the screen: C = a·F + (1 − a)·BG  →  F
       for (let k = 0; k < 3; k++) c[k] = clamp((c[k] - (1 - a) * BG[k]) / a, 0, 255);
     }
-    c[S] = Math.min(c[S], Math.max(c[o1], c[o2])); // despill
+    if (despill) c[S] = Math.min(c[S], Math.max(c[o1], c[o2])); // despill (off for a violet piece)
     rgba[i * 4] = c[0];
     rgba[i * 4 + 1] = c[1];
     rgba[i * 4 + 2] = c[2];

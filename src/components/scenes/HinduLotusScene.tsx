@@ -64,7 +64,7 @@ const KINDS = {
 };
 const ALL_PETAL_PIECES = [...S.stageRings, ...S.crownRings].map((r) => r.piece);
 const RUNTIME = [
-  ...new Set([...SC.ITEMS.map((i) => i.piece), ...ALL_PETAL_PIECES, "lotus-floor", "rangoli-top", "lotus-painted", "diya", "ghee-drop", ...Object.values(KINDS).flat()]),
+  ...new Set([...SC.ITEMS.map((i) => i.piece), ...ALL_PETAL_PIECES, "lotus-floor", "lotus-painted", "diya", "ghee-drop", ...Object.values(KINDS).flat()]),
 ].map(url);
 
 // where things are
@@ -150,7 +150,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       const strands = STRANDS.map((s) => item(s.id));
       const clouds = CLOUDS.map((c) => item(c.id));
       const floaters = FLOATERS.map((f) => item(f.id));
-      const rangoli = q(".lt-rangoli-img")[0] as HTMLElement;
       const diyas = q(".lt-diya");
       const diyaFlames = q(".lt-diya .hw-diya-flame");
       const props = [item("pandit"), item("havan-kund"), item("kalash"), item("thali")];
@@ -348,7 +347,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       let t = 0;
 
       // 1. the clouds sail in from the left and the right; a whirl of flowers spins into the
-      //    heart of the sky; the rangoli opens from its centre, turning
+      //    heart of the sky
       clouds.forEach((c, i) => {
         const fromLeft = CLOUDS[i].x < 50;
         tl.fromTo(c, { x: () => (fromLeft ? -1 : 1) * W() * rnd(0.55, 0.8), autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: rnd(0.9, 1.3), ease: "power3.out" }, t + i * 0.06);
@@ -373,7 +372,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           t + (i % 8) * 0.03,
         );
       });
-      tl.fromTo(rangoli, { clipPath: "circle(0% at 50% 50%)", rotation: 90 }, { clipPath: "circle(71% at 50% 50%)", rotation: 0, duration: 1.4, ease: "power2.out" }, t + 0.2);
       t += ACT.arrive;
 
       // 2. the stage lotus rises from the clouds as a closed bud and opens in slow motion — the
@@ -487,8 +485,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           const d = (near ? rnd(22, 30) : rnd(15, 20)) * k();
           idle.fromTo(c, { x: -d }, { x: d, duration: near ? rnd(12, 15) : rnd(16, 20), ease: "sine.inOut", yoyo: true, repeat: -1 }, rnd(0, 4));
         });
-        // the rangoli turns slowly (anticlockwise)
-        idle.to(rangoli, { rotation: "-=360", duration: S.rangoliSpinSeconds, ease: "none", repeat: -1 }, 0);
         // the strands sway from their loops
         strands.forEach((s) => idle.fromTo(s, { rotation: -2 }, { rotation: 2, duration: rnd(1.8, 2.6), ease: "sine.inOut", yoyo: true, repeat: -1 }, rnd(0, 2)));
         // buds and floating diyas rise slowly round the stage and come round again
@@ -746,7 +742,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
     const pz = pose(pt, pt.theta, pt.lean, ST.tilt);
     return { ...tipAt(STAGE_VIEW, pz.tip), z: petalZ(STAGE_VIEW, pz) + 1 };
   });
-  const rg = META.rangoli;
   // the painted lotus: its floor (centre at 50 % / 54.5 % of the picture, 36.4 % of its width
   // across) on the stage lotus's floor
   const paintedW = ST.r / 0.364;
@@ -779,11 +774,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
               <LotusPetals className="lt-crown" view={CROWN_VIEW} petals={crownPetals} url={url} />
               <Pc id="kalash-finial" z={400} />
               <Pc id="canopy-rim" z={600} />
-            </div>
-
-            {/* the rangoli on the clouds below, seen at an angle, turning */}
-            <div className="lt-rangoli" style={{ left: `${rg.x - rg.r}%`, top: `${rg.y - (rg.r * rg.squash) / A}%`, width: `${rg.r * 2}%`, height: `${(rg.r * 2 * rg.squash) / A}%`, ["--sq" as string]: rg.squash }}>
-              <img className="lt-rangoli-img" src={url("rangoli-top")} alt="" draggable={false} />
             </div>
 
             {/* mid clouds, under the lotus */}
@@ -844,7 +834,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
               ))}
             </div>
 
-            {/* near: big clouds, buds and floating diyas */}
+            {/* the cloud bank the lotus rests in (in front of its base), and the near clouds, on top */}
             {CLOUDS.filter((c) => c.z >= 6).map((c) => (
               <Pc key={c.id} id={c.id} className="lt-cloud lt-near" />
             ))}

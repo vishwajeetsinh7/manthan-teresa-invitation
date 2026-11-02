@@ -1,0 +1,157 @@
+{
+  "//": "Stage layout in % of the stage (x, y = the piece's pivot; w = width). Back to front by z. Made by --fit, tweak freely.",
+  "aspect": 1.5,
+  "items": [
+    {
+      "id": "dj-boy",
+      "piece": "dj-boy",
+      "x": 81.89,
+      "y": 38.79,
+      "w": 11.34,
+      "z": 20
+    },
+    {
+      "id": "dj-console",
+      "piece": "dj-console",
+      "x": 81.84,
+      "y": 46.48,
+      "w": 25.59,
+      "z": 21
+    },
+    {
+      "id": "dhol-player",
+      "piece": "dhol-player",
+      "x": 10.94,
+      "y": 49.22,
+      "w": 21.68,
+      "z": 30
+    },
+    {
+      "id": "garbo",
+      "piece": "garbo",
+      "x": 50.29,
+      "y": 65.49,
+      "w": 24.41,
+      "z": 50
+    },
+    {
+      "id": "crew-gujarati",
+      "piece": "crew-gujarati",
+      "x": 12.89,
+      "y": 63.28,
+      "w": 22.66,
+      "z": 52
+    },
+    {
+      "id": "crew-couple",
+      "piece": "crew-couple",
+      "x": 49.32,
+      "y": 65.76,
+      "w": 52.25,
+      "z": 54,
+      "flip": true
+    },
+    {
+      "id": "crew-flowergirl",
+      "piece": "crew-flowergirl",
+      "x": 18.75,
+      "y": 90.36,
+      "w": 29.3,
+      "z": 58
+    },
+    {
+      "id": "crew-kerala",
+      "piece": "crew-kerala",
+      "x": 83.2,
+      "y": 85.55,
+      "w": 34.38,
+      "z": 59
+    },
+    {
+      "id": "lantern-l",
+      "piece": "lantern-1",
+      "x": 34.38,
+      "y": 12.11,
+      "w": 7.62,
+      "z": 82
+    },
+    {
+      "id": "lantern-r",
+      "piece": "lantern-1",
+      "x": 65.63,
+      "y": 12.11,
+      "w": 7.62,
+      "z": 82,
+      "flip": true
+    },
+    {
+      "id": "lantern-c",
+      "piece": "lantern-2",
+      "x": 50,
+      "y": 9.51,
+      "w": 10.16,
+      "z": 82.5
+    },
+    {
+      "id": "toran",
+      "piece": "toran",
+      "x": 50,
+      "y": 1.56,
+      "w": 54.69,
+      "z": 83
+    },
+    {
+      "id": "bunting",
+      "piece": "bunting",
+      "x": 50,
+      "y": -0.39,
+      "w": 106.45,
+      "z": 84
+    },
+    {
+      "id": "truss",
+      "piece": "truss",
+      "x": 50,
+      "y": 4.69,
+      "w": 77.15,
+      "z": 85
+    },
+    {
+      "id": "disco-ball",
+      "piece": "disco-ball",
+      "x": 50,
+      "y": 9.07,
+      "w": 16.93,
+      "z": 86
+    }
+  ],
+  "meta": {
+    "stage": {
+      "floor": {
+        "x": 50,
+        "y": 76.04,
+        "r": 53.52,
+        "squash": 0.62
+      },
+      "ring": {
+        "x": 51.37,
+        "y": 65.36,
+        "rx": 29.3,
+        "ry": 11.46,
+        "w": 27.54,
+        "back": 0.72
+      },
+      "arch": {
+        "x": 5.66,
+        "y": 0.91,
+        "w": 88.67,
+        "bottom": 65.76
+      },
+      "ball": {
+        "x": 50,
+        "y": 18.55,
+        "r": 8.3
+      }
+    }
+  }
+}
