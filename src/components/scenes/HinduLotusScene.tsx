@@ -21,17 +21,16 @@ import { LotusPetals, buildPetals, petalTransform, petalZ, pose, type Petal, typ
  * on four petal tips; the couple appear, wedded, and the diyas light one by
  * one; jasmine and petals rain.
  *
- * Then it lives: the lotus's petals lean slowly in and out, a wave round the
- * flower (they never turn: turning, they swapped places and glitched); the
- * crown's petals sway, the stage and the canopy float, clouds drift (and lean with the
+ * Then it lives: the whole lotus drifts gently left and right (its petals stay
+ * still: moving, they broke apart); the crown's petals sway, the stage and the canopy float, clouds drift (and lean with the
  * phone's tilt, as does the camera), buds and floating diyas rise, the arch
  * sheds a petal now and then, the fire flickers and the pandit offers ghee.
  *
- * Guests can play: tap the lotus (a ripple runs round it), the canopy (its
+ * Guests can play: tap the lotus (a few flowers), the canopy (its
  * crown's petals spring outward one after another, petals drop), the arch (petals fall), a cloud (it
  * drifts away and back), the fire (it flares), a diya (it jumps), a strand
  * (it swings), or anywhere else (a burst of flowers). Shake the phone (after
- * the "Shake to shower blessings" pill): a wave runs round the lotus, the clouds puff
+ * the "Shake to shower blessings" pill): the crown's petals spring, the clouds puff
  * out, petals storm down from the canopy. Taps never block scrolling.
  *
  * No halo, glow or light rays behind anyone: the only warm light near the
@@ -45,7 +44,6 @@ const SC = makeScene(manifest as unknown as Manifest, layout as Layout, 0);
 const { url, box, byId, point } = SC;
 const S = timing.sections.lotus;
 const ACT = S.acts;
-const CAM = S.camera;
 const A = SC.ASPECT;
 const META = (layout as unknown as { meta: { lotus: { stage: G; crown: G; rangoli: { x: number; y: number; r: number; squash: number } } } }).meta.lotus;
 type G = { x: number; y: number; r: number; tilt: number };
@@ -171,32 +169,23 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       const crownL = lotusOf("lt-crown", crownPetals, CROWN_VIEW, -1, S.crownSpinSeconds, S.crownRings.length);
       lotuses.push(crownL);
       type L = ReturnType<typeof lotusOf>;
-      let breathe = false;
-      /** a petal's lean now: closed (−12°, a bud) → its own, staggered round the ring; breathing; a ripple */
-      const leanOf = (L: L, pt: Petal, a: number) => {
+      /** a petal's lean now: closed (−12°, a bud) → its own, staggered round the ring */
+      const leanOf = (L: L, pt: Petal) => {
         const o = L.open[pt.ring].v;
         const qv = Math.min(1, Math.max(0, o * 1.5 - (pt.i / pt.n) * 0.5));
         const oe = 1 - (1 - qv) * (1 - qv);
-        let lean = -12 + (pt.lean + 12) * oe;
-        // the slow wave: each petal leans out and back in, one after another round the flower
-        if (breathe) lean += S.petalSway.amp * Math.sin((clock * Math.PI * 2) / S.petalSway.seconds - (a * Math.PI) / 90);
-        const an = (((a % 360) + 360) % 360) / 360;
-        const rt = clock - L.rip - an * 0.6;
-        if (rt > 0 && rt < 0.7) lean += 8 * Math.sin((Math.PI * rt) / 0.7);
-        return lean;
+        // once open, the petals stay exactly where they are (moving, they broke apart)
+        return -12 + (pt.lean + 12) * oe;
       };
       /** open a lotus ring (from a bud) over `dur` s */
       const openRing = (L: L, ring: number, at: number, dur: number) => tl.fromTo(L.open[ring], { v: 0 }, { v: 1, duration: dur, ease: "power1.inOut" }, at);
 
-      /* ── the ticker: spins, light, hand-over, the diyas on their petal tips, floats, parallax, fire ── */
-      let tadj = 0;
-      let tadjTo = 0;
+      /* ── the ticker: the petals (opening), the diyas on their petal tips, the float, the clouds' parallax, fire ── */
       let cloudX = 0;
       let cloudXTo = 0;
       let base: { beta: number; gamma: number } | null = null;
       const unOrient = onOrient((o) => {
         if (!base) base = o;
-        tadjTo = gsap.utils.clamp(-1, 1, (o.beta - base.beta) / 20) * CAM.tiltNudge;
         cloudXTo = gsap.utils.clamp(-1, 1, (o.gamma - base.gamma) / 20);
       });
       const fireLayers = q(".hw-flame-layer").map((el, i) => ({ el, imgs: [...el.querySelectorAll("img")] as HTMLElement[], shape: i, cur: { sy: 1, sx: 1, sk: 0, op: 1 }, to: { sy: 1, sx: 1, sk: 0, op: 1 }, next: 0, nextShape: 0.4 }));
@@ -249,18 +238,16 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         if (!running) return;
         const dt = Math.min(0.05, dms / 1000);
         clock += dt;
-        tadj += (tadjTo - tadj) * Math.min(1, dt * 3);
         cloudX += (cloudXTo - cloudX) * Math.min(1, dt * 3);
-        root.style.setProperty("--tadj", `${tadj.toFixed(2)}deg`);
         root.style.setProperty("--cloudx", cloudX.toFixed(3));
         for (const L of lotuses) {
-          // still: the petals never turn round the ring (turning, they swapped places in front of
-          // and behind each other); they only lean in and out (leanOf)
+          // still: the petals never turn round the ring and never follow the phone's tilt (moving,
+          // they broke apart); they only open, once
           const ang = 0;
-          const tilt = L.view.tilt + (L === crownL ? tadj * 0.3 : tadj);
+          const tilt = L.view.tilt;
           for (const e of L.els) {
             const a = e.p.theta + ang;
-            const pz = pose(e.p, a, leanOf(L, e.p, a), tilt);
+            const pz = pose(e.p, a, leanOf(L, e.p), tilt);
             e.el.style.transform = petalTransform(L.view, pz);
             const z = petalZ(L.view, pz);
             if (z !== e.lastZ) {
@@ -279,7 +266,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           diyas.forEach((d, i) => {
             const pt = diyaPetals[i];
             const a = pt.theta + ang;
-            const pz = pose(pt, a, leanOf(stageL, pt, a), ST.tilt + tadj);
+            const pz = pose(pt, a, leanOf(stageL, pt), ST.tilt);
             const at = tipAt(STAGE_VIEW, pz.tip);
             d.style.left = `${at.x.toFixed(2)}%`;
             d.style.top = `${at.y.toFixed(2)}%`;
@@ -288,7 +275,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         }
         // the stage and the canopy float, out of phase
         // the lotus floats: a slow drift left and right, and a gentle rise and fall
-        stageGroup.style.translate = `${(5 * k() * Math.sin((clock * Math.PI * 2) / 9)).toFixed(2)}px ${(4 * k() * Math.sin((clock * Math.PI * 2) / 6)).toFixed(2)}px`;
+        stageGroup.style.translate = `${(S.lotusDrift.px * k() * Math.sin((clock * Math.PI * 2) / S.lotusDrift.seconds)).toFixed(2)}px ${(4 * k() * Math.sin((clock * Math.PI * 2) / 6)).toFixed(2)}px`;
         canopyGroup.style.translate = `0 ${(3 * k() * Math.sin((clock * Math.PI * 2) / 7 + 2)).toFixed(2)}px`;
         fireTick(dt);
         // a slow phone: shed petals, then the painted lotus (only once it idles)
@@ -337,9 +324,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       const swing = (el: Element, amp: number) =>
         gsap.to(el, { keyframes: [{ rotation: amp, duration: 0.25 }, { rotation: -amp * 0.7, duration: 0.4 }, { rotation: amp * 0.4, duration: 0.4 }, { rotation: -amp * 0.15, duration: 0.35 }, { rotation: 0, duration: 0.35 }], ease: "sine.inOut", overwrite: "auto" });
       /** a wave round a lotus: each petal leans a little further and back, one after another */
-      const ripple = (L: L) => {
-        L.rip = clock;
-      };
 
       /* ── hidden until their moment ── */
       gsap.set([couple, ...props, ...strands, ...rim, fire, glow, ...diyas, ...floaters], { autoAlpha: 0 });
@@ -497,7 +481,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       //    round the lotus; the fire flares
       tl.call(() => fall([...strandTips, ...ARCH_PTS.slice(4, 20)], 26), undefined, t + 0.1);
       tl.call(flare, undefined, t + 0.3);
-      if (stageL) tl.call(() => ripple(stageL), undefined, t + 0.2);
       t += ACT.blessing;
 
       /* ── idle ─────────────────────────────────────────────────────────── */
@@ -507,7 +490,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         idleStarted = true;
         assembled = true;
         assembledOnce.current = true;
-        breathe = true;
         // the crown's petals sway slowly from their bases, each a little out of step
         fan.forEach((el) => {
           const rot = +(el.dataset.rot ?? 0);
@@ -602,9 +584,8 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         const ab = box(byId["arch"]);
         const inMiddle = Math.abs(sx - byId["arch"].x) < ab.w * 0.3 && sy > ab.top + ab.h * 0.22;
         if (inB(ab) && !inMiddle) return fall(ARCH_PTS, Math.round(rnd(6, 10)), KINDS.petals, 0.9);
-        // the stage lotus: a ripple runs round it and it spins faster
+        // the stage lotus: a few flowers (its petals never move)
         if (stageL && Math.abs(sx - ST.x) < ST.r * 1.25 && sy > ST.y - 9 && sy < ST.y + (ST.r * 0.9) / A) {
-          ripple(stageL);
           tapBurst(px({ x: sx, y: sy }), 4);
           return;
         }
@@ -625,7 +606,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         const now = performance.now();
         if (now - lastShower < S.shake.cooldown * 1000) return;
         lastShower = now;
-        if (stageL) ripple(stageL);
         fanKick(1.3);
         clouds.forEach((c, i) => {
           const out = CLOUDS[i].x < 50 ? -1 : 1;
@@ -706,7 +686,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           idle.clear();
           idleStarted = false;
           assembled = false;
-          breathe = false;
           for (const L of lotuses) L.on.v = 0;
           gsap.to(pill, { autoAlpha: 0, duration: 0.2, overwrite: "auto" });
           gate.run();

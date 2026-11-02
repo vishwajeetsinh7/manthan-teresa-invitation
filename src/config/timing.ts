@@ -282,10 +282,11 @@ export const timing = {
       stageSpinSeconds: 60,
       crownSpinSeconds: 45,
       rangoliSpinSeconds: 120,
-      /** "3d": petals built in 3D, held still (never turning, so they never swap places), each
-       *  leaning slowly in and out; "painted": the painted lotus (the low-power fallback) */
-      /** the petals' slow wave: how far each leans in and out (°), one wave round the lotus (s) */
-      petalSway: { amp: 6, seconds: 7 },
+      /** "3d": petals built in 3D, held completely still once open (moving, they broke apart);
+       *  the whole lotus drifts gently left and right instead; "painted": the painted lotus
+       *  (the low-power fallback) */
+      /** the whole lotus's drift: how far left / right (px on a 390-wide phone), one sway (s) */
+      lotusDrift: { px: 5, seconds: 9 },
       lotusMode: "3d" as "3d" | "painted",
       /** the camera: perspective (× the stage width), its tilt onto each lotus (°), how much the
        *  phone's own tilt nudges it (°) and the clouds (px) */
