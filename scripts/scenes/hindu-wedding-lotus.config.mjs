@@ -131,9 +131,10 @@ const config = {
     stage: { aspect: A, headroom: 0 },
     items: [
       // the people and the ritual pieces where they are in the master
-      { piece: "couple-final", fixed: { x: X(430), y: Y(996), w: Wd(330) }, z: 6 },
-      { piece: "pandit", box: [590, 725, 865, 975], z: 6.2, rows: [0, 0.7] },
-      { piece: "havan-kund", fixed: { x: X(516), y: Y(1056), w: Wd(256) }, z: 6.4 },
+      // the couple centred under the arch, the pandit at their right, facing the fire
+      { piece: "couple-final", fixed: { x: X(492), y: Y(996), w: Wd(330) }, z: 6 },
+      { piece: "pandit", fixed: { x: X(778), y: Y(980), w: Wd(268) }, z: 6.2 },
+      { piece: "havan-kund", fixed: { x: X(512), y: Y(1062), w: Wd(250) }, z: 6.4 },
       { piece: "kalash", box: [150, 915, 340, 1085], z: 6.5 },
       { piece: "thali", box: [660, 1000, 815, 1080], z: 6.5 },
     ],
@@ -164,21 +165,32 @@ const config = {
         ["strand-long", 874, 34],
       ].forEach(([piece, x, w], i) => out.push(put(`strand-${i + 1}`, piece, x, 316, w, 3.2)));
 
-      // clouds: far ones small and high, near ones big and low (none the same as its neighbour)
+      // clouds: a soft bank round and under the lotus — far ones small and high, mid ones behind
+      // the lotus, a bed under the rangoli, near ones big and low at the corners (each shape used
+      // again only mirrored and resized, never beside itself)
       [
         ["cloud-1", 95, 795, 230, 1, false],
         ["cloud-4", 930, 820, 220, 1, true],
-        ["cloud-3", 160, 1260, 190, 5.2, false],
-        ["cloud-8", 880, 1235, 170, 5.2, true],
-        ["cloud-6", 210, 1530, 430, 8, false],
-        ["cloud-2", 840, 1540, 360, 8, true],
-        ["cloud-5", 70, 1430, 260, 7.9, false],
-        ["cloud-7", 960, 1450, 250, 7.9, false],
+        ["cloud-7", 40, 660, 150, 0.9, true],
+        ["cloud-5", 990, 690, 150, 0.9, false],
+        ["cloud-3", 120, 1210, 230, 5.2, false],
+        ["cloud-8", 905, 1200, 220, 5.2, true],
+        ["cloud-2", 300, 1310, 300, 4.9, true],
+        ["cloud-6", 730, 1320, 320, 4.9, false],
+        ["cloud-4", 90, 1360, 250, 4.8, false],
+        ["cloud-1", 950, 1370, 260, 4.8, true],
+        ["cloud-6", 512, 1545, 560, 4.7, true],
+        ["cloud-8", 250, 1515, 300, 4.75, false],
+        ["cloud-3", 790, 1520, 280, 4.75, true],
+        ["cloud-5", 40, 1500, 280, 8, false],
+        ["cloud-7", 985, 1505, 270, 8, true],
+        ["cloud-2", 120, 1580, 360, 8.05, false],
+        ["cloud-6", 900, 1585, 380, 8.05, true],
       ].forEach(([piece, x, y, w, z, flip], i) => out.push(put(`cloud-${i + 1}`, piece, x, y, w, z, flip ? { flip } : {})));
 
       // floating buds and diyas around the lotus (they rise and come round again while idle)
-      out.push(put("bud-a", "bud-1", 96, 1428, 52, 8.1), put("bud-b", "bud-3", 942, 1338, 52, 8.1));
-      out.push(put("fdiya-a", "float-diya-1", 150, 1318, 54, 8.1), put("fdiya-b", "float-diya-2", 856, 1330, 54, 8.1));
+      out.push(put("bud-a", "bud-1", 70, 1400, 50, 8.1), put("bud-b", "bud-3", 955, 1300, 50, 8.1));
+      out.push(put("fdiya-a", "float-diya-1", 140, 1300, 52, 8.1), put("fdiya-b", "float-diya-2", 880, 1420, 52, 8.1));
       out.push(put("bud-c", "bud-2", 40, 1150, 40, 1.2), put("fdiya-c", "float-diya-3", 990, 1100, 44, 1.2));
 
       // where the two lotuses are (built in 3D by the scene), in stage %; tilt = the camera's
@@ -188,7 +200,7 @@ const config = {
         meta: true,
         stage: { x: X(510), y: Y(1035), r: Wd(425), tilt: 74 },
         crown: { x: X(512), y: Y(272), r: Wd(408), tilt: 87 },
-        rangoli: { x: X(512), y: Y(1412), r: Wd(282), squash: 0.3 },
+        rangoli: { x: X(512), y: Y(1448), r: Wd(300), squash: 0.3 },
       });
       return out;
     },

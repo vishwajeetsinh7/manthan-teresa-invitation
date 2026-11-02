@@ -9,7 +9,7 @@ import { onOrient } from "@/src/lib/tilt";
 import manifest from "@/public/scenes/hindu-wedding-lotus/manifest.json";
 import layout from "@/src/config/scenes/hindu-wedding-lotus.json";
 import { DebugMaster, ParticlePool, createIdle, createParticles, gateIdle, makeScene, playOnArrival, stageVars, useDebug, useSceneAssets, zOf, type Layout, type Manifest, type Particle } from "./engine";
-import { Lotus3D, buildPetals, frontOpacity, petalLight, petalTwist, project, tipOf, type Petal } from "./lotus3d";
+import { LotusPetals, buildPetals, petalTransform, petalZ, pose, type Petal, type View } from "./lotus3d";
 
 /**
  * The Hindu wedding on a heavenly lotus — "Swarg Kamal". Clouds sail in from
@@ -79,10 +79,13 @@ const ARCH_PTS = Array.from({ length: 24 }, (_, i) => point("arch", `a${i}`));
 const STRANDS = SC.ITEMS.filter((i) => i.id.startsWith("strand-"));
 const CLOUDS = SC.ITEMS.filter((i) => i.id.startsWith("cloud-"));
 const FLOATERS = SC.ITEMS.filter((i) => /^(bud|fdiya)-/.test(i.id));
-/** the camera's perspective in the stage lotus's own radius units */
-const Pstage = CAM.perspective / (ST.r / 100);
-/** a projected lotus point (R units) → stage % */
-const toStage = (g: G, q: { x: number; y: number }) => ({ x: g.x + q.x * g.r, y: g.y + (q.y * g.r) / A });
+/** how each lotus is seen: centre, radius, the camera's tilt; z: the people / the kalash sit at
+ *  this depth — nearer petals in front of them, farther ones behind */
+const STAGE_VIEW: View = { x: ST.x, y: ST.y, R: ST.r, tilt: ST.tilt, z: 400, zSpread: 80 };
+const CROWN_VIEW: View = { x: CR.x, y: CR.y, R: CR.r, tilt: CR.tilt, z: 400, zSpread: 80 };
+const KC = Math.cos((ST.tilt * Math.PI) / 180);
+/** a petal tip (R units from the centre) → stage % */
+const tipAt = (v: View, t: { x: number; y: number }) => ({ x: v.x + t.x * v.R, y: v.y + (t.y * v.R) / A });
 
 /** a flat piece placed from the layout */
 function Pc({ id, z, className, children, style }: { id: string; z?: number; className?: string; children?: ReactNode; style?: CSSProperties }) {
@@ -152,35 +155,34 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       const diyaFlames = q(".lt-diya .hw-diya-flame");
       const props = [item("pandit"), item("havan-kund"), item("kalash"), item("thali")];
 
-      /* ── the two lotuses: their petals (both copies), spin, light, hand-over ── */
-      const lotusOf = (sel: string, petals: Petal[], dir: number, seconds: number) => {
-        const spins = q(`${sel} .lt-spin`) as HTMLElement[];
-        const els = petals.map((p) => {
-          const copies = q(`${sel} .lt-petal[data-p="${p.key}"]`) as HTMLElement[];
-          return {
-            p,
-            front: copies.find((c) => c.closest("[data-copy='front']")) ?? null,
-            imgs: copies.map((c) => c.querySelector("img") as HTMLElement),
-            leans: copies.map((c) => c.querySelector(".lt-lean") as HTMLElement),
-            lastB: -1,
-            lastO: -1,
-            lastT: 999,
-          };
+      /* ── the two lotuses: every petal placed each frame on its ring (spin, open, breathing, ripple) ── */
+      const lotusOf = (cls: string, petals: Petal[], view: View, dir: number, seconds: number, rings: number) => {
+        const els = petals.map((pt) => {
+          const el = q(`.${cls}[data-p="${pt.key}"]`)[0] as HTMLElement;
+          return { p: pt, el, img: el.querySelector("img") as HTMLElement, lastB: -1, lastZ: -1 };
         });
-        return { spins, els, dir, rate: 360 / seconds, phi: 0, extra: { v: 0 }, mult: { v: 1 }, on: { v: 0 } };
+        return { els, view, dir, rate: 360 / seconds, phi: 0, extra: { v: 0 }, mult: { v: 1 }, on: { v: 0 }, open: Array.from({ length: rings }, () => ({ v: 0 })), rip: -1e9 };
       };
-      const lotuses = painted ? [] : [lotusOf(".lt-stage", stagePetals, 1, S.stageSpinSeconds)];
+      const lotuses = painted ? [] : [lotusOf("lt-stage", stagePetals, STAGE_VIEW, 1, S.stageSpinSeconds, S.stageRings.length)];
       const stageL = lotuses[0] ?? null;
-      const crownL = lotusOf(".lt-crown", crownPetals, -1, S.crownSpinSeconds);
+      const crownL = lotusOf("lt-crown", crownPetals, CROWN_VIEW, -1, S.crownSpinSeconds, S.crownRings.length);
       lotuses.push(crownL);
-      /** a ring of petals closed into a bud (lean −12°) / opened back to its own lean */
-      const leanTo = (L: ReturnType<typeof lotusOf>, ring: number, lean: number | null, at: number, dur: number) => {
-        const els = L.els.filter((e) => e.p.ring === ring);
-        els.forEach((e, i) => {
-          const to = lean ?? e.p.lean;
-          tl.fromTo(e.leans, { "--lean": `${lean === null ? -12 : e.p.lean}deg` }, { "--lean": `${to}deg`, duration: dur, ease: "power2.out" }, at + (i / els.length) * dur * 0.5);
-        });
+      type L = ReturnType<typeof lotusOf>;
+      let breathe = false;
+      /** a petal's lean now: closed (−12°, a bud) → its own, staggered round the ring; breathing; a ripple */
+      const leanOf = (L: L, pt: Petal, a: number) => {
+        const o = L.open[pt.ring].v;
+        const qv = Math.min(1, Math.max(0, o * 1.5 - (pt.i / pt.n) * 0.5));
+        const oe = 1 - (1 - qv) * (1 - qv);
+        let lean = -12 + (pt.lean + 12) * oe;
+        if (breathe) lean += 2 * Math.sin((clock * Math.PI * 2) / 5 - (a * Math.PI) / 90);
+        const an = (((a % 360) + 360) % 360) / 360;
+        const rt = clock - L.rip - an * 0.6;
+        if (rt > 0 && rt < 0.7) lean += 8 * Math.sin((Math.PI * rt) / 0.7);
+        return lean;
       };
+      /** open a lotus ring (from a bud) over `dur` s */
+      const openRing = (L: L, ring: number, at: number, dur: number) => tl.fromTo(L.open[ring], { v: 0 }, { v: 1, duration: dur, ease: "power1.inOut" }, at);
 
       /* ── the ticker: spins, light, hand-over, the diyas on their petal tips, floats, parallax, fire ── */
       let tadj = 0;
@@ -250,26 +252,19 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         for (const L of lotuses) {
           L.phi += L.dir * L.rate * L.mult.v * L.on.v * dt;
           const ang = L.phi + L.extra.v;
-          const t = `rotateZ(${ang.toFixed(2)}deg)`;
-          L.spins.forEach((s) => (s.style.transform = t));
+          const tilt = L.view.tilt + (L === crownL ? tadj * 0.3 : tadj);
           for (const e of L.els) {
             const a = e.p.theta + ang;
-            const b = petalLight(a);
-            if (b !== e.lastB) {
-              e.lastB = b;
-              e.imgs.forEach((im) => (im.style.filter = `brightness(${b})`));
+            const pz = pose(e.p, a, leanOf(L, e.p, a), tilt);
+            e.el.style.transform = petalTransform(L.view, pz);
+            const z = petalZ(L.view, pz);
+            if (z !== e.lastZ) {
+              e.lastZ = z;
+              e.el.style.zIndex = String(z);
             }
-            const tw = petalTwist(a, S.petalTwist);
-            if (tw !== e.lastT) {
-              e.lastT = tw;
-              e.leans.forEach((l) => l.style.setProperty("--tw", `${tw}deg`));
-            }
-            if (e.front) {
-              const o = Math.round(frontOpacity(a) * 50) / 50;
-              if (o !== e.lastO) {
-                e.lastO = o;
-                e.front.style.opacity = String(o);
-              }
+            if (pz.light !== e.lastB) {
+              e.lastB = pz.light;
+              e.img.style.filter = `brightness(${pz.light})`;
             }
           }
         }
@@ -277,13 +272,13 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         if (stageL) {
           const ang = stageL.phi + stageL.extra.v;
           diyas.forEach((d, i) => {
-            const p = diyaPetals[i];
-            const tip = tipOf(p);
-            const pr = project(p.theta + ang, tip.along, tip.up, ST.tilt + tadj, Pstage);
-            const at = toStage(ST, pr);
+            const pt = diyaPetals[i];
+            const a = pt.theta + ang;
+            const pz = pose(pt, a, leanOf(stageL, pt, a), ST.tilt + tadj);
+            const at = tipAt(STAGE_VIEW, pz.tip);
             d.style.left = `${at.x.toFixed(2)}%`;
             d.style.top = `${at.y.toFixed(2)}%`;
-            d.style.zIndex = pr.near > -0.05 ? "95" : "55";
+            d.style.zIndex = String(petalZ(STAGE_VIEW, pz) + 1);
           });
         }
         // the stage and the canopy float, out of phase
@@ -336,12 +331,8 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       const swing = (el: Element, amp: number) =>
         gsap.to(el, { keyframes: [{ rotation: amp, duration: 0.25 }, { rotation: -amp * 0.7, duration: 0.4 }, { rotation: amp * 0.4, duration: 0.4 }, { rotation: -amp * 0.15, duration: 0.35 }, { rotation: 0, duration: 0.35 }], ease: "sine.inOut", overwrite: "auto" });
       /** a wave round a lotus: each petal leans a little further and back, one after another */
-      const ripple = (L: ReturnType<typeof lotusOf>) => {
-        const ang = L.phi + L.extra.v;
-        L.els.forEach((e) => {
-          const a = (((e.p.theta + ang) % 360) + 360) % 360;
-          gsap.to(e.leans, { keyframes: [{ "--lean": `${e.p.lean + 8}deg`, duration: 0.25 }, { "--lean": `${e.p.lean}deg`, duration: 0.45 }], ease: "sine.inOut", delay: (a / 360) * 0.6, overwrite: "auto" });
-        });
+      const ripple = (L: L) => {
+        L.rip = clock;
         gsap.timeline().to(L.mult, { v: 3, duration: 0.3, ease: "power2.out" }).to(L.mult, { v: 1, duration: 1.2, ease: "power2.inOut" }, 0.3);
       };
 
@@ -389,7 +380,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       //    lower petals curl down first, then the outer, then the inner — turning 120° clockwise
       tl.fromTo(stageGroup, { scale: 0.35, y: () => H() * 0.08, autoAlpha: 0 }, { scale: 1, y: 0, autoAlpha: 1, duration: ACT.bloom, ease: "power2.out" }, t - 0.2);
       if (stageL) {
-        [0, 1, 2].forEach((ring, j) => leanTo(stageL, ring, null, t + j * 0.35, ACT.bloom - 0.6));
+        [0, 1, 2].forEach((ring, j) => openRing(stageL, ring, t + j * 0.35, ACT.bloom - 0.6));
         tl.fromTo(stageL.extra, { v: -120 }, { v: 0, duration: ACT.bloom + 0.2, ease: "power2.out" }, t - 0.2);
         tl.fromTo(q(".lt-floor"), { opacity: 0 }, { opacity: 1, duration: 0.8 }, t + 0.4);
         tl.to(stageL.on, { v: 1, duration: 1.2, ease: "sine.in" }, t + ACT.bloom - 0.2);
@@ -430,7 +421,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       tl.fromTo(canopyGroup, { y: () => -H() * 0.2 }, { y: 0, duration: 0.9, ease: "back.out(1.4)" }, t);
       tl.to(rim, { autoAlpha: 1, duration: 0.35 }, t);
       tl.fromTo(q(".lt-crown"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, t + 0.15);
-      [0, 1].forEach((ring, j) => leanTo(crownL, ring, null, t + 0.25 + j * 0.2, 1.0));
+      [0, 1].forEach((ring, j) => openRing(crownL, ring, t + 0.25 + j * 0.2, 1.0));
       tl.fromTo(crownL.extra, { v: 120 }, { v: 0, duration: 1.3, ease: "power2.out" }, t + 0.2);
       tl.to(crownL.on, { v: 1, duration: 1, ease: "sine.in" }, t + 1.2);
       strands.forEach((s, i) => {
@@ -489,7 +480,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         idleStarted = true;
         assembled = true;
         assembledOnce.current = true;
-        if (quality === 0) root.setAttribute("data-breathe", "");
+        breathe = quality === 0;
         // clouds drift (the nearer, the further and faster)
         clouds.forEach((c, i) => {
           const near = CLOUDS[i].z > 7;
@@ -681,7 +672,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           idle.clear();
           idleStarted = false;
           assembled = false;
-          root.removeAttribute("data-breathe");
+          breathe = false;
           for (const L of lotuses) L.on.v = 0;
           gsap.to(pill, { autoAlpha: 0, duration: 0.2, overwrite: "auto" });
           gate.run();
@@ -690,7 +681,10 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       // rebuilt for a slower phone after it had assembled: straight to the end, idling
       if (assembledOnce.current) {
         tl.progress(1, true);
-        for (const L of lotuses) L.on.v = 1;
+        for (const L of lotuses) {
+          L.on.v = 1;
+          L.open.forEach((o) => (o.v = 1));
+        }
         startIdle();
       }
       return () => {
@@ -748,10 +742,9 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
   }, [ready, reduce]);
 
   // the diyas' still positions (reduced motion; and before the ticker takes over)
-  const diyaAt = diyaPetals.map((p) => {
-    const tip = tipOf(p);
-    const pr = project(p.theta, tip.along, tip.up, ST.tilt, Pstage);
-    return { ...toStage(ST, pr), near: pr.near };
+  const diyaAt = diyaPetals.map((pt) => {
+    const pz = pose(pt, pt.theta, pt.lean, ST.tilt);
+    return { ...tipAt(STAGE_VIEW, pz.tip), z: petalZ(STAGE_VIEW, pz) + 1 };
   });
   const rg = META.rangoli;
   // the painted lotus: its floor (centre at 50 % / 54.5 % of the picture, 36.4 % of its width
@@ -781,12 +774,11 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
             {/* the canopy: strands, the crown's back petals, the kalash, its front petals, the rim */}
             <div className="lt-canopy">
               {STRANDS.map((s) => (
-                <Pc key={s.id} id={s.id} z={10} className="lt-strand" />
+                <Pc key={s.id} id={s.id} z={200} className="lt-strand" />
               ))}
-              <Lotus3D className="lt-crown" centre={CR} radius={CR.r} aspect={A} tilt={CR.tilt} perspective={CAM.perspective} twist={S.petalTwist} petals={crownPetals} url={url} copy="back" style={{ zIndex: 20 }} />
-              <Pc id="kalash-finial" z={30} />
-              <Lotus3D className="lt-crown" centre={CR} radius={CR.r} aspect={A} tilt={CR.tilt} perspective={CAM.perspective} twist={S.petalTwist} petals={crownPetals} url={url} copy="front" style={{ zIndex: 40 }} />
-              <Pc id="canopy-rim" z={50} />
+              <LotusPetals className="lt-crown" view={CROWN_VIEW} petals={crownPetals} url={url} />
+              <Pc id="kalash-finial" z={400} />
+              <Pc id="canopy-rim" z={600} />
             </div>
 
             {/* the rangoli on the clouds below, seen at an angle, turning */}
@@ -806,26 +798,19 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
                   <img src={url("lotus-painted")} alt="" draggable={false} />
                 </div>
               ) : (
-                <Lotus3D
-                  className="lt-stage"
-                  centre={ST}
-                  radius={ST.r}
-                  aspect={A}
-                  tilt={ST.tilt}
-                  perspective={CAM.perspective}
-                  twist={S.petalTwist}
-                  petals={stagePetals}
-                  url={url}
-                  copy="back"
-                  style={{ zIndex: 10 }}
-                  floor={<img className="lt-floor" src={url("lotus-floor")} alt="" draggable={false} />}
-                />
+                <>
+                  <LotusPetals className="lt-stage" view={STAGE_VIEW} petals={stagePetals} url={url} />
+                  {/* the floor: the mandala seen at the camera's angle (the near petals rise over its edge) */}
+                  <div className="lt-floor" style={{ left: `${ST.x - ST.r}%`, top: `${ST.y - (ST.r * KC) / A}%`, width: `${ST.r * 2}%`, aspectRatio: 1 / KC, zIndex: 400 }}>
+                    <img src={url("lotus-floor")} alt="" draggable={false} />
+                  </div>
+                </>
               )}
-              <Pc id="couple-final" z={60} />
-              <Pc id="pandit" z={62} />
-              <Pc id="havan-kund" />
-              <Pc id="kalash" z={85} />
-              <Pc id="thali" z={85} />
+              <Pc id="couple-final" z={430} />
+              <Pc id="pandit" z={432} />
+              <Pc id="havan-kund" className="lt-kund" />
+              <Pc id="kalash" z={470} />
+              <Pc id="thali" z={470} />
               <div className="hw-fire-glow" style={{ left: `${FIRE.x}%`, top: `${FIRE.y}%`, width: `${FIRE_W * 2.2}%` }} />
               <div className="hw-fire" style={{ left: `${FIRE.x}%`, top: `${FIRE.y + 1}%`, width: `${FIRE_W}%` }}>
                 {[{ w: 100, l: 0 }, { w: 85, l: 11 }, { w: 70, l: 15 }].map((L, i) => (
@@ -844,10 +829,10 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
                   <img src={url("lotus-painted")} alt="" draggable={false} />
                 </div>
               ) : (
-                <Lotus3D className="lt-stage" centre={ST} radius={ST.r} aspect={A} tilt={ST.tilt} perspective={CAM.perspective} twist={S.petalTwist} petals={stagePetals} url={url} copy="front" style={{ zIndex: 90 }} />
+                null
               )}
               {diyaAt.map((d, i) => (
-                <div key={i} className="lt-diya" style={{ left: `${painted ? [16, 38, 62, 84][i] : d.x}%`, top: `${painted ? 72.5 : d.y}%`, zIndex: painted || d.near > -0.05 ? 95 : 55, width: `${DIYA_W}%` }}>
+                <div key={i} className="lt-diya" style={{ left: `${painted ? [16, 38, 62, 84][i] : d.x}%`, top: `${painted ? 72.5 : d.y}%`, zIndex: painted ? 500 : d.z, width: `${DIYA_W}%` }}>
                   <div className="lt-diya-in">
                     <img src={url("diya")} alt="" draggable={false} />
                     <div className="hw-diya-flame" style={{ left: `${WICK[0] * 100}%`, top: `${WICK[1] * 100 + 2}%` }}>

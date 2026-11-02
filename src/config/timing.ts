@@ -287,21 +287,21 @@ export const timing = {
       /** the camera: perspective (× the stage width), its tilt onto each lotus (°), how much the
        *  phone's own tilt nudges it (°) and the clouds (px) */
       camera: { perspective: 2.6, stageTilt: 74, crownTilt: 87, tiltNudge: 3, cloudNudge: 10 },
-      /** petal rings (radius, petal height: × the lotus radius; lean: ° outward from upright;
-       *  offset: × a petal step); `lite`: the counts when the phone is slow */
+      /** petal rings (radius, petal height, drop — how far below the floor the petals grow from —
+       *  all × the lotus radius; lean: ° outward from upright; offset: × a petal step); `lite`: the
+       *  counts when the phone is slow. The bowl hangs under the floor, as in the painting: the
+       *  front petals rise just to its front edge, so the fire and the couple stay in view */
       stageRings: [
-        { piece: "petal-lower", n: 12, lite: 8, r: 0.88, h: 0.62, lean: 112, offset: 0 },
-        { piece: "petal-outer", n: 14, lite: 10, r: 1.02, h: 0.5, lean: 61, offset: 0.5 },
-        { piece: "petal-inner", n: 10, lite: 8, r: 0.93, h: 0.34, lean: 36, offset: 0 },
+        { piece: "petal-lower", n: 18, lite: 12, r: 0.86, h: 0.46, drop: 0.3, lean: 100, offset: 0 },
+        { piece: "petal-outer", n: 18, lite: 12, r: 1.02, h: 0.54, drop: 0.24, lean: 58, offset: 0.5 },
+        { piece: "petal-inner", n: 16, lite: 10, r: 0.92, h: 0.38, drop: 0.12, lean: 32, offset: 0 },
       ],
       crownRings: [
-        { piece: "crown-petal-outer", n: 12, lite: 8, r: 0.8, h: 0.4, lean: 35, offset: 0.5 },
-        { piece: "crown-petal-inner", n: 8, lite: 6, r: 0.45, h: 0.3, lean: 12, offset: 0 },
+        { piece: "crown-petal-outer", n: 14, lite: 10, r: 0.8, h: 0.42, drop: 0, lean: 35, offset: 0.5 },
+        { piece: "crown-petal-inner", n: 10, lite: 7, r: 0.46, h: 0.32, drop: 0, lean: 12, offset: 0 },
       ],
-      /** each petal turns its face towards the camera (° at the sides), so none is seen edge-on */
-      petalTwist: 68,
       /** which outer petals carry the four diyas */
-      diyaPetals: [0, 4, 7, 11],
+      diyaPetals: [0, 5, 9, 14],
       /** the pandit's ghee offering (s between) */
       offering: [5, 7] as [number, number],
       /** taps: at most this many tap petals on screen */
