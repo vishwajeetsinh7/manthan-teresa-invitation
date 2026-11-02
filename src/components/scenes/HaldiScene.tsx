@@ -310,8 +310,35 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
           delay,
           overwrite: "auto",
         });
+      /** flowers fall off the swing's two flower ropes, from wherever the ropes are right now */
+      const swingFlowers = (k01: number, dir: number) => {
+        const seatY = byId["couple"].y - 4; // where the ropes meet the seat (stage %)
+        const n = Math.round(4 + 8 * k01);
+        for (let i = 0; i < n; i++) {
+          const rope = ROPES[i % 2];
+          const y = rnd(rope.top + 4, seatY); // somewhere along the rope
+          // the rope hangs from the beam and swings with the seat (rotation about the beam)
+          const a = (side.a * Math.PI) / 180;
+          const dy = ((y - PIVOT.y) / 100) * H();
+          const x = (rope.x / 100) * W() - Math.sin(a) * dy;
+          spawn(gsap.utils.random([...KINDS.rare, ...KINDS.petals.slice(0, 4), "petal-white-1", "petal-white-3"]), x + rnd(-3, 3) * k(), PIVOT.y / 100 * H() + Math.cos(a) * dy, {
+            vx: (dir * rnd(10, 45) + rnd(-15, 15)) * k(),
+            vy: -rnd(5, 35) * k(),
+            g: 210 * k(),
+            vr: rnd(-160, 160),
+            sw: rnd(3, 7),
+            s: rnd(0.4, 0.62),
+            life: rnd(2.2, 3),
+            land: ((byId["pookalam"].y + rnd(-6, 8)) / 100) * H(),
+          });
+        }
+      };
       /** everything in the picture reacts to a shake (k01: 0 … 1 strength; dir: which way it jolted) */
       const react = (k01: number, dir: number) => {
+        // the phone buzzes: a tap for a small shake, a double buzz for a strong one (Android; iOS has none)
+        navigator.vibrate?.(k01 >= 0.6 ? [22, 50, 22] : 12);
+        // flowers shake loose from the swing's flower ropes and fall (more, the harder the shake)
+        swingFlowers(k01, dir);
         // hanging strands swing on their loops (their pendulums: engine useHangingTilt)
         root.dispatchEvent(new CustomEvent("hang:kick", { detail: { v: dir * (25 + 45 * k01) } }));
         // umbrellas swing from their tops, one after another
@@ -336,8 +363,7 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
             });
         }
         if (k01 < 0.6) return;
-        // a strong shake: petals shake off the beam, a turmeric puff from the seat, a buzz
-        navigator.vibrate?.(12);
+        // a strong shake: petals shake off the beam, a turmeric puff from the seat
         puff();
         for (let i = 0; i < Math.round(rnd(5, 8)); i++)
           spawn(gsap.utils.random([...KINDS.petals.slice(0, 4), ...KINDS.rare]), rnd(0.2, 0.8) * W(), (BAR_Y / 100) * H() + rnd(0, 6), {
@@ -526,7 +552,7 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
             {[0, 1, 2].map((i) => (
               <img key={`sp${i}`} className="ms-spark" src={url(KINDS.sparkles[i + 1])} alt="" />
             ))}
-            <ParticlePool n={26} />
+            <ParticlePool n={40} />
             <p className="hs-hint">
               <svg viewBox="0 0 24 24" aria-hidden>
                 <rect x="7" y="3" width="10" height="18" rx="2.2" />
