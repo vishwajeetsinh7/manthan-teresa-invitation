@@ -185,9 +185,9 @@
     },
     "curtain-left": {
       "src": "curtain-left.webp",
-      "w": 310,
-      "h": 998,
-      "aspect": 0.3106,
+      "w": 406,
+      "h": 1016,
+      "aspect": 0.3996,
       "pivot": [
         0.5,
         0
@@ -195,9 +195,9 @@
     },
     "curtain-right": {
       "src": "curtain-right.webp",
-      "w": 309,
-      "h": 998,
-      "aspect": 0.3096,
+      "w": 403,
+      "h": 1016,
+      "aspect": 0.3967,
       "pivot": [
         0.5,
         0
@@ -213,34 +213,34 @@
         0
       ]
     },
-    "umbrella-palm": {
-      "src": "umbrella-palm.webp",
-      "w": 298,
-      "h": 272,
-      "aspect": 1.0968,
-      "pivot": [
-        0.5025,
-        0.0074
-      ]
-    },
     "umbrella-yellow": {
       "src": "umbrella-yellow.webp",
-      "w": 262,
-      "h": 309,
-      "aspect": 0.8477,
+      "w": 252,
+      "h": 200,
+      "aspect": 1.262,
       "pivot": [
-        0.5254,
-        0.0066
+        0.5025,
+        0.0128
       ]
     },
-    "umbrella-orange": {
-      "src": "umbrella-orange.webp",
-      "w": 227,
-      "h": 268,
-      "aspect": 0.846,
+    "umbrella-red": {
+      "src": "umbrella-red.webp",
+      "w": 252,
+      "h": 200,
+      "aspect": 1.262,
       "pivot": [
-        0.4932,
-        0.0066
+        0.5013,
+        0.0128
+      ]
+    },
+    "umbrella-green": {
+      "src": "umbrella-green.webp",
+      "w": 278,
+      "h": 224,
+      "aspect": 1.2421,
+      "pivot": [
+        0.5013,
+        0.0126
       ]
     },
     "urli": {
@@ -674,5 +674,6 @@
       ]
     }
   },
-  "master": "master.webp"
+  "master": "master.webp",
+  "masterAspect": 1.5
 }

@@ -4,6 +4,8 @@
 import { useRef, type CSSProperties, type RefObject } from "react";
 import { gsap, useGSAP } from "@/src/lib/gsap";
 import { timing } from "@/src/config/timing";
+import { motionActive, onShake } from "@/src/lib/motion";
+import { onTilt } from "@/src/lib/tilt";
 import manifest from "@/public/scenes/haldi/manifest.json";
 import layout from "@/src/config/scenes/haldi.json";
 import {
@@ -34,6 +36,12 @@ import {
  * water drops from the Kerala friend's pot — and a little boy with a pichkari
  * pops in now and then to squirt the couple.
  *
+ * Shake the phone (or tap the swing) and the swing goes back and up, away from
+ * us, then comes forward and down towards us — a damped pendulum in depth
+ * (rotateX about the beam, in perspective) that settles over a few swings. A
+ * strong push puffs turmeric from the seat, shakes marigold petals off the
+ * beam and sets the umbrellas dancing. Upside down, shakes leave it alone.
+ *
  * Built on the shared scene engine (./engine), placed like the Mehndi scene:
  * in the bottom part of the Haldi page, assembling (timed) as the page
  * arrives. Pieces from scripts/build-scene-assets.mjs (scripts/scenes/haldi.config.mjs);
@@ -51,7 +59,10 @@ const KINDS = {
   splats: ["splat-1", "splat-2", "splat-3", "splat-4"],
   sparkles: ["sparkle-1", "sparkle-2", "sparkle-3", "sparkle-4"],
 };
-const RUNTIME = [...new Set([...ITEMS.map((i) => i.piece), ...DABS.map((d) => d.piece!), "puff-1", "puff-2", ...Object.values(KINDS).flat()])].map(url);
+const RUNTIME = [...new Set([...ITEMS.map((i) => i.piece), ...DABS.map((d) => d.piece!), "puff-1", "puff-2", "puff-3", ...Object.values(KINDS).flat()])].map(url);
+const SH = S.swingShake;
+/** the "shake to swing" hint shows once per guest */
+const HINT_KEY = "invite:shake-hint";
 
 // the swing hangs from the beam's bar, midway between its ropes
 const beamBox = box(byId["beam"]);
@@ -150,6 +161,17 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
           88 + i * 0.9,
         ),
       );
+      // the turmeric handprint stamps beside "Wear yellow" (once; it stays)
+      tl.call(
+        () => {
+          const st = document.querySelector<SVGElement>('[data-stamp="haldi-hand"]');
+          if (!st || st.dataset.shown) return;
+          st.dataset.shown = "1";
+          gsap.fromTo(st, { scale: 1.6, opacity: 0, rotation: -24 }, { scale: 1, opacity: 0.75, rotation: -12, duration: 0.45, ease: "back.out(2.2)" });
+        },
+        undefined,
+        86,
+      );
       if (tl.duration() < T) tl.to({}, { duration: T - tl.duration() });
       gsap.set(item("boy"), { autoAlpha: 0 });
 
@@ -217,8 +239,101 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
         });
         // the little boy: first soon after assembly, then every 20–25 s while in view
         every(S.boyEvery[0], S.boyEvery[1], boyVisit, S.boyFirst);
+        // sunlight through the curtains, slowly breathing
+        idle.fromTo(sun, { opacity: 0.45 }, { opacity: 0.8, duration: 3.2, ease: "sine.inOut", yoyo: true, repeat: -1 }, 0);
+        // the first time on a phone that can shake: a small "shake to swing" hint
+        gsap.delayedCall(2.5, () => {
+          if (!motionActive()) return;
+          try {
+            if (localStorage.getItem(HINT_KEY)) return;
+            localStorage.setItem(HINT_KEY, "1");
+          } catch {
+            return;
+          }
+          gsap.fromTo(q(".hs-hint"), { autoAlpha: 0, y: 6 }, { keyframes: [{ autoAlpha: 1, y: 0, duration: 0.5 }, { autoAlpha: 1, duration: 3 }, { autoAlpha: 0, duration: 0.6 }] });
+        });
         gate.run();
       };
+
+      /* ── the swing in depth: a damped pendulum (θ, °) pushed by shakes / taps ── */
+      const pend = { a: 0, v: 0, armed: false };
+      const w0 = (2 * Math.PI) / SH.period;
+      const shadow = q(".hs-shadow")[0] as HTMLElement;
+      const swingPuff = q(".hs-swing-puff")[0] as HTMLElement;
+      const sun = q(".hs-sun")[0] as HTMLElement;
+      const umbrellas = items("umbrella-");
+      let upsideDown = false;
+      const unTilt = onTilt(({ angle, strength }) => (upsideDown = strength > 0.5 && Math.abs(angle) > 120));
+      let lastA = 0;
+      const step = (_t: number, dms: number) => {
+        if (!assembled || idle.paused()) return;
+        if (Math.abs(pend.a) < 0.02 && Math.abs(pend.v) < 0.05) {
+          if (pend.a !== 0) {
+            pend.a = pend.v = 0;
+            gsap.set(swing, { rotationX: 0 });
+            gsap.set(shadow, { scale: 1, y: 0, opacity: 1 });
+          }
+          return;
+        }
+        const dt = Math.min(0.05, dms / 1000);
+        const acc = -w0 * w0 * (180 / Math.PI) * Math.sin((pend.a * Math.PI) / 180) - SH.damping * pend.v;
+        pend.v += acc * dt;
+        pend.a += pend.v * dt;
+        // (pushed past its furthest: it stops there softly and falls back)
+        if (Math.abs(pend.a) > SH.maxAngle) {
+          pend.a = Math.sign(pend.a) * SH.maxAngle;
+          pend.v = 0;
+        }
+        // + = towards us (nearer, lower); − = away (further, higher): rotateX about the beam
+        gsap.set(swing, { rotationX: pend.a });
+        // the seat's shadow on the floor follows it
+        gsap.set(shadow, { scale: 1 + pend.a / 70, y: (pend.a / 100) * H() * 0.25, opacity: 1 - Math.abs(pend.a) / 50 });
+        // at its furthest towards us after a strong push: a turmeric puff from the seat, the sun brightens
+        if (pend.armed && pend.v < 0 && pend.a > 8 && lastA <= pend.a + 0.5) {
+          pend.armed = false;
+          gsap.fromTo(swingPuff, { scale: 0.3, opacity: 0.9, y: 0 }, { scale: 1.15, opacity: 0, y: () => H() * 0.04, duration: 1.2, ease: "power2.out" });
+          gsap.fromTo(sun, { opacity: 0.6 }, { opacity: 1, duration: 0.3, yoyo: true, repeat: 1, ease: "sine.inOut" });
+        }
+        lastA = pend.a;
+      };
+      gsap.ticker.add(step);
+      /** push the swing away from us (it then comes back towards us); k01: 0 … 1 strength */
+      const push = (k01: number, speed?: number) => {
+        if (!assembled) return;
+        pend.v -= speed ?? SH.push[0] + (SH.push[1] - SH.push[0]) * k01;
+        if (k01 < 0.6) return;
+        // a strong push: the puff is armed, petals shake off the beam, the umbrellas dance, a buzz
+        pend.armed = true;
+        navigator.vibrate?.(12);
+        const n = Math.round(rnd(5, 8));
+        for (let i = 0; i < n; i++)
+          spawn(gsap.utils.random([...KINDS.petals.slice(0, 4), ...KINDS.rare]), rnd(0.2, 0.8) * W(), (BAR_Y / 100) * H() + rnd(0, 6), {
+            vy: rnd(10, 30) * k(),
+            vx: rnd(-10, 10) * k(),
+            g: 40 * k(),
+            life: rnd(3, 4),
+            s: rnd(0.4, 0.6),
+          });
+        umbrellas.forEach((u, i) =>
+          gsap.to(u, {
+            keyframes: [{ "--kick": 7 * (i % 2 ? -1 : 1), duration: 0.25 }, { "--kick": -4, duration: 0.4 }, { "--kick": 2, duration: 0.4 }, { "--kick": 0, duration: 0.5 }],
+            ease: "sine.inOut",
+            delay: i * 0.08,
+          }),
+        );
+      };
+      const unShake = onShake(
+        (m) => {
+          if (upsideDown) return; // upside down: leave the swing alone
+          push(Math.min(1, Math.max(0, (m - SH.threshold) / (SH.strong - SH.threshold))));
+        },
+        SH.threshold,
+        SH.cooldown,
+      );
+      // no sensors (desktop) or no permission: a tap on the swing pushes it
+      const onTap = () => push(0.7, SH.tapPush);
+      const coupleEl = item("couple");
+      coupleEl.addEventListener("click", onTap);
 
       /* the comic beat: in from the right, plant, squirt the couple, the swing jolts, flip, out */
       const boy = item("boy");
@@ -283,11 +398,20 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
           idle.clear();
           idleStarted = false;
           amp.v = S.swingAmp;
+          pend.a = pend.v = 0;
+          pend.armed = false;
+          gsap.set(swing, { rotationX: 0 });
           gsap.set(boy, { autoAlpha: 0, x: 0, scaleX: 1 });
           gate.run();
         },
       });
-      return () => gate.dispose();
+      return () => {
+        gate.dispose();
+        gsap.ticker.remove(step);
+        unShake();
+        unTilt();
+        coupleEl.removeEventListener("click", onTap);
+      };
     },
     { dependencies: [ready, reduce], scope: wrap },
   );
@@ -299,7 +423,7 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
 
   return (
     <div ref={wrap} className="ms-wrap hs-scene" data-page={page} data-reduce={reduce || undefined} style={{ ...style, ...stageVars(SC.ASPECT) }} aria-hidden>
-      <div className="ms-stage" data-ready={ready || undefined}>
+      <div className="ms-stage" data-ready={ready || undefined} style={{ perspectiveOrigin: `${PIVOT.x}% ${PIVOT.y}%` }}>
         {debug && <DebugMaster scene={SC} />}
         {ready && (
           <>
@@ -309,14 +433,18 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
               groupExtra={(name) =>
                 name === "swing" ? (
                   // plain twisted cord from the beam's bar down to each flower-wrapped rope
-                  <svg className="hs-cords" viewBox={`0 0 100 ${100 * SC.ASPECT}`} preserveAspectRatio="none">
+                  // (and the turmeric puff from the seat, which swings with it)
+                  <>
+                    <img className="hs-swing-puff" src={url("puff-3")} alt="" style={{ left: `${couple.x}%`, top: `${cb.top + cb.h * 0.62}%` }} />
+                    <svg className="hs-cords" viewBox={`0 0 100 ${100 * SC.ASPECT}`} preserveAspectRatio="none">
                     {ROPES.map((r, i) => (
                       <g key={i}>
                         <line x1={r.x} y1={BAR_Y * SC.ASPECT} x2={r.x} y2={(r.top + 0.6) * SC.ASPECT} className="hs-cord" />
                         <line x1={r.x} y1={BAR_Y * SC.ASPECT} x2={r.x} y2={(r.top + 0.6) * SC.ASPECT} className="hs-cord-twist" />
                       </g>
                     ))}
-                  </svg>
+                    </svg>
+                  </>
                 ) : null
               }
               extra={(it) =>
@@ -338,6 +466,7 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
             />
             {/* the opening glow, the pookalam's popping petals, the haldi puff and shower */}
             <div className="hs-glow" />
+            <div className="hs-sun" />
             <div className="hs-pop" style={{ left: `${byId["pookalam"].x}%`, top: `${byId["pookalam"].y}%` }}>
               {["petal-marigold-1", "petal-white-2", "petal-marigold-3", "petal-white-4", "petal-marigold-2"].map((n, i) => (
                 <img key={i} src={url(n)} alt="" />
@@ -363,6 +492,13 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
               <img key={`sp${i}`} className="ms-spark" src={url(KINDS.sparkles[i + 1])} alt="" />
             ))}
             <ParticlePool n={26} />
+            <p className="hs-hint">
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <rect x="7" y="3" width="10" height="18" rx="2.2" />
+                <path d="M3.5 9 C2.5 11 2.5 13 3.5 15 M20.5 9 C21.5 11 21.5 13 20.5 15" />
+              </svg>
+              shake to swing
+            </p>
           </>
         )}
       </div>

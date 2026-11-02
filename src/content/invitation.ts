@@ -82,6 +82,7 @@ export const invitation = {
       time: "10:00 AM onwards", // PLACEHOLDER
       place: "The Grand Palace", // PLACEHOLDER
       note: "Wear yellow",
+      stamp: "haldi-hand", // a turmeric handprint stamps beside the note as the Haldi scene arrives
       mood: "haldi",
       icons: ["haldi"],
       flower: { kind: 2 }, // flower-3

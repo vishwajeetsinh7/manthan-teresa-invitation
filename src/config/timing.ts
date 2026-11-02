@@ -240,6 +240,14 @@ export const timing = {
       /** the little boy with the pichkari: first visit after assembly, then every … while in view (s) */
       boyFirst: 2,
       boyEvery: [20, 25] as [number, number],
+      /**
+       * the swing in depth (towards / away from us) when the phone is shaken, or the swing tapped:
+       * a damped pendulum about the beam. threshold / strong: the jolt (m/s²) that pushes it / a
+       * strong push (puff, petals, buzz); push: how fast it sets off (°/s, gentle … strong — swing
+       * amplitude ≈ push / (2π / period) in radians: 52 °/s ≈ 21°);
+       * period (s) and damping (1/s): ~6–8 visible swings after a strong shake; maxAngle (°)
+       */
+      swingShake: { threshold: 11, strong: 17, cooldown: 0.25, push: [20, 52] as [number, number], tapPush: 36, period: 2.6, damping: 0.34, maxAngle: 22 },
     },
     /** the Hindu wedding scene ("Four Rounds of Fire"): the story plays (timed) as its page arrives */
     hindu: {

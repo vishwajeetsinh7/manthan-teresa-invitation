@@ -1844,6 +1844,79 @@ body {
 }
 .hs-scene .ms-stage {
   overflow: visible;
+  /* the swing swings in depth (rotateX about the beam; origin set inline) */
+  perspective: 900px;
+}
+/* tap the swing to push it (where there are no motion sensors) */
+.hs-scene:not([data-reduce]) [data-id="couple"] {
+  pointer-events: auto;
+  cursor: pointer;
+}
+/* the umbrellas dance when the swing is pushed hard (--kick, in degrees) */
+.hs-scene [data-id^="umbrella-"] {
+  rotate: calc(var(--kick, 0) * 1deg);
+}
+.hs-swing-puff {
+  position: absolute;
+  width: 30%;
+  translate: -50% -50%;
+  opacity: 0;
+  z-index: 70;
+  pointer-events: none;
+}
+/* sunlight through the curtains, from the top left */
+.hs-sun {
+  position: absolute;
+  left: -12%;
+  top: -6%;
+  width: 72%;
+  height: 82%;
+  background: linear-gradient(150deg, rgb(255 238 178 / 0.6), rgb(255 222 140 / 0.18) 38%, rgb(255 222 140 / 0) 62%);
+  filter: blur(4px);
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  z-index: 25;
+  pointer-events: none;
+}
+.hs-hint {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  translate: -50% calc(var(--u) * 4);
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 6);
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: calc(var(--u) * 12);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+}
+.hs-hint svg {
+  width: calc(var(--u) * 16);
+  height: calc(var(--u) * 16);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+/* the turmeric handprint beside "Wear yellow" (pressed in by the Haldi scene) */
+.note-stamp {
+  display: inline-block;
+  width: calc(var(--u) * 22);
+  height: calc(var(--u) * 26);
+  margin-left: calc(var(--u) * 8);
+  vertical-align: -0.35em;
+  transform-origin: 50% 60%;
+  opacity: 0;
+}
+.note-stamp[data-reduce] {
+  opacity: 0.75;
+  rotate: -12deg;
 }
 .ms-wrap[data-reduce] [data-id^="panel-"],
 .ms-wrap[data-reduce] [data-id="boy"] {

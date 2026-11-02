@@ -10,17 +10,17 @@
     {
       "id": "curtain-left",
       "piece": "curtain-left",
-      "x": -11,
+      "x": -17.88,
       "y": 0,
-      "w": 48,
+      "w": 61.76,
       "z": 1
     },
     {
       "id": "curtain-right",
       "piece": "curtain-right",
-      "x": 111,
+      "x": 117.65,
       "y": 0,
-      "w": 48,
+      "w": 61.31,
       "z": 1
     },
     {
@@ -102,25 +102,25 @@
     {
       "id": "umbrella-yellow",
       "piece": "umbrella-yellow",
-      "x": 18.88,
-      "y": 10.99,
-      "w": 20.31,
+      "x": 18.9,
+      "y": 11,
+      "w": 19.5,
       "z": 4
     },
     {
-      "id": "umbrella-palm",
-      "piece": "umbrella-palm",
-      "x": 50.64,
-      "y": 11.96,
-      "w": 23.05,
+      "id": "umbrella-green",
+      "piece": "umbrella-green",
+      "x": 50.6,
+      "y": 12,
+      "w": 21.5,
       "z": 4
     },
     {
-      "id": "umbrella-orange",
-      "piece": "umbrella-orange",
-      "x": 82.89,
-      "y": 13.17,
-      "w": 17.58,
+      "id": "umbrella-red",
+      "piece": "umbrella-red",
+      "x": 82.9,
+      "y": 13.2,
+      "w": 19.5,
       "z": 4
     },
     {

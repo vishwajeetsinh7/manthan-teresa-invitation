@@ -75,6 +75,30 @@ function layoutThread() {
   return { THREAD: thread, NODE: node, sceneStyle };
 }
 
+/** A turmeric handprint stamped beside "Wear yellow" (pressed in by the Haldi scene, once). */
+function HaldiHandStamp({ reduce }: { reduce: boolean }) {
+  return (
+    <svg className="note-stamp" data-stamp="haldi-hand" data-reduce={reduce || undefined} viewBox="0 0 40 48" aria-hidden>
+      <defs>
+        <filter id="stamp-rough" x="-10%" y="-10%" width="120%" height="120%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" result="d" />
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.1 1.35" result="speck" />
+          <feComposite in="d" in2="speck" operator="in" />
+        </filter>
+      </defs>
+      <g filter="url(#stamp-rough)" fill="#E3A01B">
+        <ellipse cx="20" cy="32" rx="10.5" ry="11.5" />
+        <rect x="5" y="22" width="6" height="13" rx="3" transform="rotate(-38 8 28)" />
+        <rect x="9.6" y="7" width="6" height="20" rx="3" transform="rotate(-9 12.6 17)" />
+        <rect x="16.6" y="4" width="6.4" height="22" rx="3.2" />
+        <rect x="23.4" y="6" width="6" height="21" rx="3" transform="rotate(8 26.4 16)" />
+        <rect x="29" y="13" width="5" height="16" rx="2.5" transform="rotate(20 31.5 21)" />
+      </g>
+    </svg>
+  );
+}
+
 /** Same size and place as the Mehndi scene, until that event's illustrations are ready. */
 function SceneComingSoon({ page, style }: { page: string; style: CSSProperties }) {
   return (
@@ -730,7 +754,10 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                   </h3>
                   <p className="t-line t-time">{e.time}</p>
                   <p className="t-line t-place">{e.place}</p>
-                  <p className="t-line t-note">{e.note}</p>
+                  <p className="t-line t-note">
+                    {e.note}
+                    {"stamp" in e && e.stamp === "haldi-hand" && <HaldiHandStamp reduce={reduceMotion} />}
+                  </p>
                 </div>
                 {mehndi && (
                   <span className="henna-cone" aria-hidden>

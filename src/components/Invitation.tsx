@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { requestTilt } from "@/src/lib/tilt";
+import { requestMotion } from "@/src/lib/motion";
 import { gsap, useGSAP } from "@/src/lib/gsap";
 import { invitation as C } from "@/src/content/invitation";
 import { timing } from "@/src/config/timing";
@@ -59,6 +60,8 @@ export function Invitation() {
     startMusic();
     // the hanging garlands follow the phone's tilt (iOS asks for permission, only during a tap)
     requestTilt();
+    // shaking the phone pushes the Haldi swing (iOS asks here too)
+    requestMotion();
 
     // Dev switch: NEXT_PUBLIC_SKIP_VIDEO=true in .env.local → tapping goes
     // straight to the invitation (no envelope video). Not set on Vercel, so

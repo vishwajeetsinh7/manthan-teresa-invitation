@@ -35,10 +35,12 @@ const config = {
     couple: "couple.png",
     friends: "friends.png",
     canopy: "canopy.png",
-    curtains: "curtains.png",
+    // ivory curtains with a green kasavu border and three umbrellas (the first, yellow curtains.png, is kept)
+    curtains: "curtains-v2.png",
     props: "props.png",
     particles: "particles.png",
-    panel: "curtain-new.png",
+    // the closed panel, recoloured to match (scripts/scenes/haldi-panel-recolor.mjs → curtain-new-white.png)
+    panel: "curtain-new-white.png",
     mehndi: "../mehndi/garlands.png", // the banana plant, reused
   },
   pieces: [
@@ -58,12 +60,12 @@ const config = {
     { name: "strand-3", sheet: "canopy", at: [1130, 490], pivot: "top", gather: 10 },
     { name: "strand-4", sheet: "canopy", at: [1250, 430], pivot: "top", gather: 10 },
 
-    { name: "curtain-left", sheet: "curtains", at: [130, 500], pivot: "topcenter" },
-    { name: "curtain-right", sheet: "curtains", at: [1400, 500], pivot: "topcenter" },
+    { name: "curtain-left", sheet: "curtains", at: [220, 300], pivot: "topcenter" },
+    { name: "curtain-right", sheet: "curtains", at: [1310, 300], pivot: "topcenter" },
     { name: "curtain-panel", sheet: "panel", at: [510, 700], pivot: "topcenter" },
-    { name: "umbrella-palm", sheet: "curtains", at: [765, 250], pivot: "top", gather: 20 },
-    { name: "umbrella-yellow", sheet: "curtains", at: [500, 600], pivot: "top", gather: 20 },
-    { name: "umbrella-orange", sheet: "curtains", at: [1015, 600], pivot: "top", gather: 20 },
+    { name: "umbrella-yellow", sheet: "curtains", at: [765, 120], pivot: "top", gather: 20 },
+    { name: "umbrella-red", sheet: "curtains", at: [765, 440], pivot: "top", gather: 20 },
+    { name: "umbrella-green", sheet: "curtains", at: [765, 750], pivot: "top", gather: 20 },
 
     { name: "urli", sheet: "props", at: [255, 350] },
     { name: "matkis", sheet: "props", at: [605, 300] },
@@ -110,16 +112,17 @@ const config = {
     items: [
       // measured from the master (stage %): the beam spans 115–935 px, centred at y ≈ 56 px
       { piece: "beam", fixed: { x: 51.3, y: 9.7, w: 80 }, z: 6 },
-      { piece: "umbrella-yellow", box: [88, 12, 302, 300], z: 4, rows: [0, 0.62] },
-      { piece: "umbrella-palm", box: [385, 40, 655, 300], z: 4, rows: [0, 0.62] },
-      { piece: "umbrella-orange", box: [760, 12, 972, 300], z: 4, rows: [0, 0.62] },
+      // the three new umbrellas, where the first ones hung (yellow left, green centre, red right)
+      { piece: "umbrella-yellow", fixed: { x: 18.9, y: 11, w: 19.5 }, z: 4 },
+      { piece: "umbrella-green", fixed: { x: 50.6, y: 12, w: 21.5 }, z: 4 },
+      { piece: "umbrella-red", fixed: { x: 82.9, y: 13.2, w: 19.5 }, z: 4 },
       { id: "couple", piece: "couple-clean", box: [300, 420, 860, 1125], z: 6, group: "swing" },
       // the friends' poses differ from the master's: placed by their height there
       // (Gujarati: head 345 → hem 1165, haldi fingertips at x 375; Kerala: bun 365 → hem
       // 1115, pot mouth at x 672)
       { piece: "friend-gujarati", fixed: { x: 11.9, y: 77.4, w: 51.9 }, z: 8 },
       { piece: "friend-kerala", fixed: { x: 81.8, y: 74.3, w: 34.5 }, z: 8 },
-      { piece: "pookalam", box: [160, 1118, 885, 1296], z: 3 },
+      { piece: "pookalam", fixed: { x: 54.88, y: 79.61, w: 70.7 }, z: 3 }, // (as fitted the first time)
       { piece: "matkis", box: [0, 960, 168, 1272], z: 9 },
       { piece: "basket", box: [92, 1215, 388, 1388], z: 10 },
       { piece: "urli", box: [335, 1262, 727, 1476], z: 10 },
@@ -171,9 +174,12 @@ const config = {
         rot: [12, -40, 75, -8, 130, -60, 20, 95, -120, 40, -15, 60][k],
       }));
       return [
-        // tied-back curtains at the far edges, full height (mostly outside the stage)
-        { id: "curtain-left", piece: "curtain-left", x: -11, y: 0, w: 48, z: 1 },
-        { id: "curtain-right", piece: "curtain-right", x: 111, y: 0, w: 48, z: 1 },
+        // tied-back curtains at the far edges, full height (mostly outside the stage): as tall as the
+        // first ones (96.6 % of the stage), their inner (border) edge where those had it (13 % in)
+        ...[["curtain-left", 13, -1], ["curtain-right", 87, 1]].map(([id, edge, side]) => {
+          const w = 96.6 * A * (P[id].w / P[id].h);
+          return { id, piece: id, x: +(edge + (side * w) / 2).toFixed(2), y: 0, w: +w.toFixed(2), z: 1 };
+        }),
         // banana plants behind the friends (pots hidden)
         { id: "banana-left", piece: "banana", x: 6, y: 74, w: 34, z: 2 },
         { id: "banana-right", piece: "banana", x: 94, y: 74, w: 34, z: 2, flip: true },
