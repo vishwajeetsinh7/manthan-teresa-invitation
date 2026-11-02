@@ -27,7 +27,8 @@ import { LotusPetals, buildPetals, petalTransform, petalZ, pose, type Petal, typ
  * phone's tilt, as does the camera), buds and floating diyas rise, the arch
  * sheds a petal now and then, the fire flickers and the pandit offers ghee.
  *
- * Guests can play: tap the lotus (a ripple runs round it), the canopy, the arch (petals fall), a cloud (it
+ * Guests can play: tap the lotus (a ripple runs round it), the canopy (its
+ * crown's petals spring outward one after another, petals drop), the arch (petals fall), a cloud (it
  * drifts away and back), the fire (it flares), a diya (it jumps), a strand
  * (it swings), or anywhere else (a burst of flowers). Shake the phone (after
  * the "Shake to shower blessings" pill): a wave runs round the lotus, the clouds puff
@@ -286,7 +287,8 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           });
         }
         // the stage and the canopy float, out of phase
-        stageGroup.style.translate = `0 ${(4 * k() * Math.sin((clock * Math.PI * 2) / 6)).toFixed(2)}px`;
+        // the lotus floats: a slow drift left and right, and a gentle rise and fall
+        stageGroup.style.translate = `${(5 * k() * Math.sin((clock * Math.PI * 2) / 9)).toFixed(2)}px ${(4 * k() * Math.sin((clock * Math.PI * 2) / 6)).toFixed(2)}px`;
         canopyGroup.style.translate = `0 ${(3 * k() * Math.sin((clock * Math.PI * 2) / 7 + 2)).toFixed(2)}px`;
         fireTick(dt);
         // a slow phone: shed petals, then the painted lotus (only once it idles)
@@ -427,6 +429,29 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         tl.fromTo(el, { autoAlpha: 0, scale: 0.3, rotation: 0 }, { autoAlpha: 1, scale: 1, rotation: rot, duration: 0.8, ease: "back.out(1.6)" }, t + 0.2 + (Math.abs(rot) / 60) * 0.35);
       });
       [0, 1].forEach((ring, j) => openRing(crownL, ring, t + 0.25 + j * 0.2, 1.0));
+      /** the crown's petals spring outward and settle, from the middle out (on the petal art, so
+       *  it adds to their slow sway) */
+      const fanKick = (amp = 1) =>
+        fan.forEach((el) => {
+          const rot = +(el.dataset.rot ?? 0);
+          const dir = Math.sign(rot);
+          const img = el.querySelector("img");
+          if (!img) return;
+          gsap.fromTo(
+            img,
+            { rotation: 0, scaleY: 1 },
+            {
+              keyframes: [
+                { rotation: dir * 14 * amp, scaleY: 1 + 0.08 * amp, duration: 0.22, ease: "power2.out" },
+                { rotation: -dir * 5 * amp, scaleY: 0.97, duration: 0.35, ease: "sine.inOut" },
+                { rotation: 0, scaleY: 1, duration: 0.55, ease: "sine.out" },
+              ],
+              transformOrigin: "50% 100%",
+              delay: (Math.abs(rot) / 60) * 0.25,
+              overwrite: true,
+            },
+          );
+        });
       strands.forEach((s, i) => {
         tl.to(s, { autoAlpha: 1, duration: 0.05 }, t + 0.7 + i * 0.1);
         tl.to(s, { scaleY: 1, duration: 0.45, ease: "power2.out" }, t + 0.7 + i * 0.1);
@@ -484,9 +509,9 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         assembledOnce.current = true;
         breathe = true;
         // the crown's petals sway slowly from their bases, each a little out of step
-        fan.forEach((el, i) => {
+        fan.forEach((el) => {
           const rot = +(el.dataset.rot ?? 0);
-          idle.fromTo(el, { rotation: rot - 2.5 }, { rotation: rot + 2.5, duration: rnd(3.2, 4.4), ease: "sine.inOut", yoyo: true, repeat: -1 }, i * 0.35);
+          idle.fromTo(el, { rotation: rot - 4 }, { rotation: rot + 4, duration: 3.6, ease: "sine.inOut", yoyo: true, repeat: -1 }, ((rot + 60) / 120) * 1.8);
         });
         // clouds drift (the nearer, the further and faster)
         clouds.forEach((c, i) => {
@@ -568,7 +593,11 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         }
         // the canopy: its petals ripple and it spins faster (anticlockwise)
         const cb = box(byId["canopy-rim"]);
-        if (sx >= cb.left && sx <= cb.left + cb.w && sy >= CR.y - 13 && sy <= cb.top + cb.h) return ripple(crownL);
+        if (sx >= cb.left && sx <= cb.left + cb.w && sy >= CR.y - 13 && sy <= cb.top + cb.h) {
+          fanKick();
+          fall(rimPts, Math.round(rnd(5, 8)), KINDS.petals, 0.9);
+          return;
+        }
         // the arch (not its open middle): petals fall from it
         const ab = box(byId["arch"]);
         const inMiddle = Math.abs(sx - byId["arch"].x) < ab.w * 0.3 && sy > ab.top + ab.h * 0.22;
@@ -597,6 +626,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         if (now - lastShower < S.shake.cooldown * 1000) return;
         lastShower = now;
         if (stageL) ripple(stageL);
+        fanKick(1.3);
         clouds.forEach((c, i) => {
           const out = CLOUDS[i].x < 50 ? -1 : 1;
           gsap.to(c, { keyframes: [{ xPercent: out * 16, scale: 1.06, duration: 0.35, ease: "power2.out" }, { xPercent: 0, scale: 1, duration: 1.6, ease: "sine.inOut" }], overwrite: false });
