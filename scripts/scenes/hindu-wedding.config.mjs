@@ -107,11 +107,14 @@ const config = {
       // the pandit on the platform, right of the fire, facing it (master-v2: x 640–870, seat at y 1064)
       // (his piece includes his low seat and the ghee bowl at his left)
       { piece: "pandit", fixed: { x: X(742), y: Y(1066), w: Wd(318) }, z: 5.4 },
-      { piece: "kalash", box: [362, 1228, 600, 1404], z: 11 },
-      { piece: "thali", box: [596, 1290, 800, 1404], z: 11 },
+      // the kalash and the thali on the stage, in front of the kund (left and right)
+      { piece: "kalash", fixed: { x: X(320), y: Y(1250), w: Wd(170) }, z: 11 },
+      { piece: "thali", fixed: { x: X(705), y: Y(1254), w: Wd(176) }, z: 11 },
       // the platform: deeper than its art (master-v2: x 20–1005, its back edge at y ≈ 975,
       // the front face down to y ≈ 1230) — stretched to that height
-      { piece: "platform", fixed: { x: X(512), y: Y(1246), w: Wd(986), h: +((292 / (A * 1024)) * 100).toFixed(2) }, z: 2 },
+      // (bigger than master-v2's: its front edge further down, at y ≈ 1268, the face to 1390, so the
+      // kalash and the thali stand on it)
+      { piece: "platform", fixed: { x: X(512), y: Y(1390), w: Wd(1000), h: +((436 / (A * 1024)) * 100).toFixed(2) }, z: 2 },
     ],
     /** the rest, placed from master-v2's measurements and from each other */
     extra: (items, P) => {
@@ -181,8 +184,8 @@ const config = {
       out.push({ id: "varmala-1", piece: "varmala-loose", x: groomA.x, y: 40, w: vw, z: 6.9 }, { id: "varmala-2", piece: "varmala-loose", x: brideA.x, y: 40, w: vw, z: 6.9 });
       out.push({ id: "couple-walk", piece: "couple-walk", x: cf.x, y: feetY, w: r2(P["couple-walk"].w * sheetScale), z: 5.5 });
 
-      // four diyas along the platform's front edge (master-v2: x 240 / 345 / 676 / 790, standing at y 1162)
-      [240, 345, 676, 790].forEach((x, i) => out.push({ id: `diya-${i + 1}`, piece: "diya", x: X(x), y: Y(1162), w: Wd(56), z: 11 }));
+      // four diyas along the stage's front edge, between the kalash and the thali
+      [170, 455, 570, 854].forEach((x, i) => out.push({ id: `diya-${i + 1}`, piece: "diya", x: X(x), y: Y(1272), w: Wd(56), z: 11 }));
 
       // a scatter of petals, tuberose and akshat (the floor, and a few on the platform)
       const kinds = ["petal-red-1", "tuberose-2", "akshat-1", "petal-pink-2", "petal-red-3", "akshat-3", "tuberose-4", "petal-pink-4", "petal-red-2", "akshat-2", "petal-marigold-1", "tuberose-1", "petal-pink-1", "akshat-4"];

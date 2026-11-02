@@ -169,8 +169,9 @@ const config = {
       const rimShare = rim.rimR[0] - rim.rimL[0]; // rim diameter, as a share of the piece's width
       out.push({ id: "carpet", piece: "carpet", x: r2((572.5 / 1148) * 100), y: r2((1170 / 1371) * 100), w: r2(((1075 / 1148) * 100) / rimShare), z: 2 });
       out.push({ id: "rug", piece: "rug", x: 50, y: 97, w: 96, z: 2 });
-      // the flower girl, at the bride's scale as before (24 % of the stage beside a 59 % bride)
-      out.push({ id: "flower-girl", piece: "flower-girl", x: 50, y: 99, w: r2(bride.w * (24 / 58.98)), z: 10 });
+      // the flower girl, a little girl beside the seated bride (as in the real photos: her head
+      // about level with the seated bride's shoulders)
+      out.push({ id: "flower-girl", piece: "flower-girl", x: 50, y: 99, w: r2(bride.w * (24 / 58.98) * 1.45), z: 10 });
       return out;
     },
   },

@@ -45,8 +45,8 @@
     },
     "flower-girl": {
       "src": "flower-girl.webp",
-      "w": 257,
-      "h": 392,
+      "w": 372,
+      "h": 568,
       "aspect": 0.655,
       "pivot": [
         0.5,

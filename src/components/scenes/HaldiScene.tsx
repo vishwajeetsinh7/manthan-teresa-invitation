@@ -166,17 +166,6 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
           88 + i * 0.9,
         ),
       );
-      // the turmeric handprint stamps beside "Wear yellow" (once; it stays)
-      tl.call(
-        () => {
-          const st = document.querySelector<SVGElement>('[data-stamp="haldi-hand"]');
-          if (!st || st.dataset.shown) return;
-          st.dataset.shown = "1";
-          gsap.fromTo(st, { scale: 1.6, opacity: 0, rotation: -24 }, { scale: 1, opacity: 0.75, rotation: -12, duration: 0.45, ease: "back.out(2.2)" });
-        },
-        undefined,
-        86,
-      );
       if (tl.duration() < T) tl.to({}, { duration: T - tl.duration() });
       gsap.set(item("boy"), { autoAlpha: 0 });
 

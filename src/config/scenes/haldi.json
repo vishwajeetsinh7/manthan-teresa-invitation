@@ -16,14 +16,6 @@
       "z": 1
     },
     {
-      "id": "curtain-right",
-      "piece": "curtain-right",
-      "x": 117.65,
-      "y": 0,
-      "w": 61.31,
-      "z": 1
-    },
-    {
       "id": "banana-left",
       "piece": "banana",
       "x": 6,
@@ -301,10 +293,18 @@
     {
       "id": "boy",
       "piece": "boy",
-      "x": 89.45,
-      "y": 82.76,
-      "w": 27.34,
+      "x": 74,
+      "y": 84,
+      "w": 19.7,
       "z": 12
+    },
+    {
+      "id": "curtain-right",
+      "piece": "curtain-right",
+      "x": 117.65,
+      "y": 0,
+      "w": 61.31,
+      "z": 12.5
     },
     {
       "id": "panel-left",

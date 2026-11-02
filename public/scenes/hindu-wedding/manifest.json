@@ -145,8 +145,8 @@
     },
     "kalash": {
       "src": "kalash.webp",
-      "w": 262,
-      "h": 289,
+      "w": 215,
+      "h": 237,
       "aspect": 0.9071,
       "pivot": [
         0.5,
@@ -155,8 +155,8 @@
     },
     "thali": {
       "src": "thali.webp",
-      "w": 247,
-      "h": 147,
+      "w": 222,
+      "h": 132,
       "aspect": 1.6832,
       "pivot": [
         0.5,
@@ -195,8 +195,8 @@
     },
     "platform": {
       "src": "platform.webp",
-      "w": 1243,
-      "h": 276,
+      "w": 1260,
+      "h": 280,
       "aspect": 4.5046,
       "pivot": [
         0.5,

@@ -1911,20 +1911,6 @@ body {
   stroke-width: 1.4;
   stroke-linecap: round;
 }
-/* the turmeric handprint beside "Wear yellow" (pressed in by the Haldi scene) */
-.note-stamp {
-  display: inline-block;
-  width: calc(var(--u) * 22);
-  height: calc(var(--u) * 26);
-  margin-left: calc(var(--u) * 8);
-  vertical-align: -0.35em;
-  transform-origin: 50% 60%;
-  opacity: 0;
-}
-.note-stamp[data-reduce] {
-  opacity: 0.75;
-  rotate: -12deg;
-}
 .ms-wrap[data-reduce] [data-id^="panel-"],
 .ms-wrap[data-reduce] [data-id="boy"] {
   display: none;

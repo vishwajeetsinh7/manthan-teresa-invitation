@@ -121,7 +121,9 @@ const config = {
       { piece: "basket", box: [92, 1215, 388, 1388], z: 10 },
       { piece: "urli", box: [335, 1262, 727, 1476], z: 10 },
       { piece: "haldi-bowl", box: [688, 1300, 1000, 1442], z: 10 },
-      { piece: "boy", box: [790, 845, 1040, 1312], z: 12 },
+      // a little boy (smaller than before), standing clear of the right-hand curtain — he runs out
+      // from behind it (the curtain is in front of him)
+      { piece: "boy", fixed: { x: 74, y: 84, w: 19.7 }, z: 12 },
     ],
     /** pieces that are not matched to the master (or are placed from others) */
     extra: (items, P) => {
@@ -170,9 +172,10 @@ const config = {
       return [
         // tied-back curtains at the far edges, full height (mostly outside the stage): as tall as the
         // first ones (96.6 % of the stage), their inner (border) edge where those had it (13 % in)
-        ...[["curtain-left", 13, -1], ["curtain-right", 87, 1]].map(([id, edge, side]) => {
+        // (the right one in front of everything: the boy comes and goes behind it)
+        ...[["curtain-left", 13, -1, 1], ["curtain-right", 87, 1, 12.5]].map(([id, edge, side, z]) => {
           const w = 96.6 * A * (P[id].w / P[id].h);
-          return { id, piece: id, x: +(edge + (side * w) / 2).toFixed(2), y: 0, w: +w.toFixed(2), z: 1 };
+          return { id, piece: id, x: +(edge + (side * w) / 2).toFixed(2), y: 0, w: +w.toFixed(2), z };
         }),
         // banana plants at the sides (pots hidden)
         { id: "banana-left", piece: "banana", x: 6, y: 74, w: 34, z: 2 },
