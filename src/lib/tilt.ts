@@ -32,6 +32,26 @@ function onOrientation(e: DeviceOrientationEvent) {
   subs.forEach((f) => f(state));
 }
 
+/* the raw readings (front/back, left/right, degrees), for parallax */
+type Orient = { beta: number; gamma: number };
+const orientSubs = new Set<(o: Orient) => void>();
+function onRaw(e: DeviceOrientationEvent) {
+  if (e.beta == null || e.gamma == null) return;
+  const o = { beta: e.beta, gamma: e.gamma };
+  orientSubs.forEach((f) => f(o));
+}
+/** Follow the phone's raw orientation (beta, gamma); returns an unsubscribe. */
+export function onOrient(f: (o: Orient) => void) {
+  if (typeof window === "undefined") return () => {};
+  if (!orientSubs.size) window.addEventListener("deviceorientation", onRaw);
+  if (!(DeviceOrientationEvent as unknown as PermissionRequest).requestPermission) listen();
+  orientSubs.add(f);
+  return () => {
+    orientSubs.delete(f);
+    if (!orientSubs.size) window.removeEventListener("deviceorientation", onRaw);
+  };
+}
+
 function listen() {
   if (listening || typeof window === "undefined") return;
   listening = true;

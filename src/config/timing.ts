@@ -268,6 +268,49 @@ export const timing = {
       /** a subtle heat shimmer over the flames (off: only if it stays smooth on iPhone) */
       heatShimmer: false as boolean,
     },
+    /** the Hindu wedding on a heavenly lotus ("Swarg Kamal"): the story plays (timed) as its page arrives */
+    lotus: {
+      /** seconds for each act: clouds and a whirl of flowers; the stage lotus blooms; the arch
+       *  assembles; the canopy floats down and blooms, its strands unroll; the kund, the fire, the
+       *  pandit, the diyas; the couple; the diyas light one by one; the blessing */
+      acts: { arrive: 1.3, bloom: 2.0, arch: 1.3, canopy: 1.5, setup: 1.3, couple: 1.1, diyas: 1.6, blessing: 2.2 },
+      reverseSpeed: 6,
+      startAt: "96%",
+      maxAmbient: 8,
+      /** one full turn (s): the stage lotus (clockwise from above), the canopy lotus
+       *  (anticlockwise), the rangoli (anticlockwise) */
+      stageSpinSeconds: 60,
+      crownSpinSeconds: 45,
+      rangoliSpinSeconds: 120,
+      /** "3d": petals built in 3D and turning; "painted": the still painted lotus (low-power fallback) */
+      lotusMode: "3d" as "3d" | "painted",
+      /** the camera: perspective (× the stage width), its tilt onto each lotus (°), how much the
+       *  phone's own tilt nudges it (°) and the clouds (px) */
+      camera: { perspective: 2.6, stageTilt: 74, crownTilt: 87, tiltNudge: 3, cloudNudge: 10 },
+      /** petal rings (radius, petal height: × the lotus radius; lean: ° outward from upright;
+       *  offset: × a petal step); `lite`: the counts when the phone is slow */
+      stageRings: [
+        { piece: "petal-lower", n: 12, lite: 8, r: 0.88, h: 0.62, lean: 112, offset: 0 },
+        { piece: "petal-outer", n: 14, lite: 10, r: 1.02, h: 0.5, lean: 61, offset: 0.5 },
+        { piece: "petal-inner", n: 10, lite: 8, r: 0.93, h: 0.34, lean: 36, offset: 0 },
+      ],
+      crownRings: [
+        { piece: "crown-petal-outer", n: 12, lite: 8, r: 0.8, h: 0.4, lean: 35, offset: 0.5 },
+        { piece: "crown-petal-inner", n: 8, lite: 6, r: 0.45, h: 0.3, lean: 12, offset: 0 },
+      ],
+      /** each petal turns its face towards the camera (° at the sides), so none is seen edge-on */
+      petalTwist: 68,
+      /** which outer petals carry the four diyas */
+      diyaPetals: [0, 4, 7, 11],
+      /** the pandit's ghee offering (s between) */
+      offering: [5, 7] as [number, number],
+      /** taps: at most this many tap petals on screen */
+      tapMax: 40,
+      /** shake to shower blessings (as in the first Hindu wedding) */
+      shake: { threshold: 15, hits: 2, window: 0.4, cooldown: 1.5 },
+      /** below this many frames a second (for 2 s) it sheds petals, then falls back to the painted lotus */
+      minFps: 40,
+    },
     /** the church wedding scene ("The Aisle"): the story plays (timed) as its page arrives */
     church: {
       /** seconds for each act: the church appears; pews and guests, candles; the runner and the

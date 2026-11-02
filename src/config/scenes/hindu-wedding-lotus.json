@@ -1,0 +1,256 @@
+{
+  "//": "Stage layout in % of the stage (x, y = the piece's pivot; w = width). Back to front by z. Made by --fit, tweak freely.",
+  "aspect": 1.5,
+  "items": [
+    {
+      "id": "cloud-1",
+      "piece": "cloud-1",
+      "x": 9.28,
+      "y": 51.76,
+      "w": 22.46,
+      "z": 1
+    },
+    {
+      "id": "cloud-2",
+      "piece": "cloud-4",
+      "x": 90.82,
+      "y": 53.39,
+      "w": 21.48,
+      "z": 1,
+      "flip": true
+    },
+    {
+      "id": "bud-c",
+      "piece": "bud-2",
+      "x": 3.91,
+      "y": 74.87,
+      "w": 3.91,
+      "z": 1.2
+    },
+    {
+      "id": "fdiya-c",
+      "piece": "float-diya-3",
+      "x": 96.68,
+      "y": 71.61,
+      "w": 4.3,
+      "z": 1.2
+    },
+    {
+      "id": "arch",
+      "piece": "arch",
+      "x": 50,
+      "y": 60.22,
+      "w": 51.76,
+      "z": 2,
+      "h": 39.91
+    },
+    {
+      "id": "strand-1",
+      "piece": "strand-long",
+      "x": 14.65,
+      "y": 20.57,
+      "w": 3.32,
+      "z": 3.2
+    },
+    {
+      "id": "strand-2",
+      "piece": "strand-med",
+      "x": 20.31,
+      "y": 20.57,
+      "w": 3.91,
+      "z": 3.2
+    },
+    {
+      "id": "strand-3",
+      "piece": "strand-short",
+      "x": 25.2,
+      "y": 20.57,
+      "w": 3.71,
+      "z": 3.2
+    },
+    {
+      "id": "strand-4",
+      "piece": "strand-short",
+      "x": 74.8,
+      "y": 20.57,
+      "w": 3.71,
+      "z": 3.2
+    },
+    {
+      "id": "strand-5",
+      "piece": "strand-med",
+      "x": 79.88,
+      "y": 20.57,
+      "w": 3.91,
+      "z": 3.2
+    },
+    {
+      "id": "strand-6",
+      "piece": "strand-long",
+      "x": 85.35,
+      "y": 20.57,
+      "w": 3.32,
+      "z": 3.2
+    },
+    {
+      "id": "kalash-finial",
+      "piece": "kalash-finial",
+      "x": 50,
+      "y": 17.97,
+      "w": 23.05,
+      "z": 4.3
+    },
+    {
+      "id": "canopy-rim",
+      "piece": "canopy-rim",
+      "x": 50,
+      "y": 26.94,
+      "w": 79.59,
+      "z": 4.6
+    },
+    {
+      "id": "cloud-3",
+      "piece": "cloud-3",
+      "x": 15.63,
+      "y": 82.03,
+      "w": 18.55,
+      "z": 5.2
+    },
+    {
+      "id": "cloud-4",
+      "piece": "cloud-8",
+      "x": 85.94,
+      "y": 80.4,
+      "w": 16.6,
+      "z": 5.2,
+      "flip": true
+    },
+    {
+      "id": "couple-final",
+      "piece": "couple-final",
+      "x": 41.99,
+      "y": 64.84,
+      "w": 32.23,
+      "z": 6
+    },
+    {
+      "id": "pandit",
+      "piece": "pandit",
+      "x": 69.73,
+      "y": 64.24,
+      "w": 25.39,
+      "z": 6.2
+    },
+    {
+      "id": "havan-kund",
+      "piece": "havan-kund",
+      "x": 50.39,
+      "y": 68.75,
+      "w": 25,
+      "z": 6.4
+    },
+    {
+      "id": "kalash",
+      "piece": "kalash",
+      "x": 24.02,
+      "y": 70.72,
+      "w": 15.23,
+      "z": 6.5
+    },
+    {
+      "id": "thali",
+      "piece": "thali",
+      "x": 72.07,
+      "y": 70.21,
+      "w": 12.89,
+      "z": 6.5
+    },
+    {
+      "id": "cloud-7",
+      "piece": "cloud-5",
+      "x": 6.84,
+      "y": 93.1,
+      "w": 25.39,
+      "z": 7.9
+    },
+    {
+      "id": "cloud-8",
+      "piece": "cloud-7",
+      "x": 93.75,
+      "y": 94.4,
+      "w": 24.41,
+      "z": 7.9
+    },
+    {
+      "id": "cloud-5",
+      "piece": "cloud-6",
+      "x": 20.51,
+      "y": 99.61,
+      "w": 41.99,
+      "z": 8
+    },
+    {
+      "id": "cloud-6",
+      "piece": "cloud-2",
+      "x": 82.03,
+      "y": 100.26,
+      "w": 35.16,
+      "z": 8,
+      "flip": true
+    },
+    {
+      "id": "bud-a",
+      "piece": "bud-1",
+      "x": 9.38,
+      "y": 92.97,
+      "w": 5.08,
+      "z": 8.1
+    },
+    {
+      "id": "bud-b",
+      "piece": "bud-3",
+      "x": 91.99,
+      "y": 87.11,
+      "w": 5.08,
+      "z": 8.1
+    },
+    {
+      "id": "fdiya-a",
+      "piece": "float-diya-1",
+      "x": 14.65,
+      "y": 85.81,
+      "w": 5.27,
+      "z": 8.1
+    },
+    {
+      "id": "fdiya-b",
+      "piece": "float-diya-2",
+      "x": 83.59,
+      "y": 86.59,
+      "w": 5.27,
+      "z": 8.1
+    }
+  ],
+  "meta": {
+    "lotus": {
+      "stage": {
+        "x": 49.8,
+        "y": 67.38,
+        "r": 41.5,
+        "tilt": 74
+      },
+      "crown": {
+        "x": 50,
+        "y": 17.71,
+        "r": 39.84,
+        "tilt": 87
+      },
+      "rangoli": {
+        "x": 50,
+        "y": 91.93,
+        "r": 27.54,
+        "squash": 0.3
+      }
+    }
+  }
+}

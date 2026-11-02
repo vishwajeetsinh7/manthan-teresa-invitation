@@ -2351,3 +2351,148 @@ body {
   width: 3.4%;
   opacity: 0;
 }
+
+/* ── Hindu wedding, the heavenly lotus (src/components/scenes/HinduLotusScene.tsx) ── */
+/* (centred, unclipped, and taps never in the way of scrolling: all from .hw-scene) */
+.lt-canopy,
+.lt-stagegroup {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.lt-canopy {
+  z-index: 40;
+}
+.lt-stagegroup {
+  z-index: 60;
+  will-change: transform;
+}
+/* a 3D lotus (./lotus3d): the camera's tilt onto the disc (+ the phone's tilt nudge), the ring
+   turning inside it, each petal standing on its base and leaning out (--lean) */
+.lt-3d {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.lt-tilt {
+  position: absolute;
+  aspect-ratio: 1;
+  transform-style: preserve-3d;
+  transform: rotateX(calc(var(--tilt) + var(--tadj, 0deg)));
+  will-change: transform;
+}
+.lt-crown .lt-tilt {
+  transform: rotateX(calc(var(--tilt) + var(--tadj, 0deg) * 0.4));
+}
+.lt-spin {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.lt-petal {
+  position: absolute;
+  transform-style: preserve-3d;
+  transform-origin: 50% 100%;
+}
+.lt-lean {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  transform: rotateX(calc(-90deg - var(--lean))) rotateY(var(--tw, 0deg)) scale(var(--s, 1));
+}
+.lt-lean img,
+.lt-floor {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+/* breathing petals: a slow wave round each ring (on `rotate`, so it adds to the lean) */
+.lt-scene[data-breathe] .lt-lean {
+  animation: lt-breathe 5s ease-in-out infinite alternate;
+}
+@keyframes lt-breathe {
+  from {
+    rotate: x -2deg;
+  }
+  to {
+    rotate: x 2deg;
+  }
+}
+/* the painted lotus (a slow phone): the whole flower behind, its front petals over the people */
+.lt-painted {
+  position: absolute;
+  z-index: 10;
+}
+.lt-painted img {
+  width: 100%;
+  display: block;
+}
+.lt-painted-front {
+  z-index: 90;
+  clip-path: inset(64% 0 0 0);
+}
+/* the rangoli: turned in its own plane, then squashed into the camera's oval */
+.lt-rangoli {
+  position: absolute;
+  z-index: 50;
+  pointer-events: none;
+}
+.lt-rangoli img {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  scale: 1 var(--sq, 0.3);
+}
+/* a diya riding on a petal tip (placed by the scene; --drop: as it settles) */
+.lt-diya {
+  position: absolute;
+  aspect-ratio: 0.973;
+  translate: -50% calc(-96% + var(--drop, 0px));
+  pointer-events: none;
+}
+.lt-diya-in {
+  position: absolute;
+  inset: 0;
+}
+.lt-diya-in > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.lt-floater-flame {
+  position: absolute;
+  width: 18%;
+  aspect-ratio: 0.42;
+  translate: -50% -100%;
+  transform-origin: 50% 100%;
+}
+.lt-floater-flame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+/* the flowers that fly in (the opening whirl, the arch's) */
+.lt-fly {
+  position: absolute;
+  inset: 0;
+  z-index: 115;
+  pointer-events: none;
+}
+.lt-fly img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4%;
+  translate: -50% -50%;
+  opacity: 0;
+}
+.lt-scene[data-reduce] .lt-fly {
+  display: none;
+}

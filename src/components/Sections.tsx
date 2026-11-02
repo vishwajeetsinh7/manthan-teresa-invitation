@@ -14,6 +14,7 @@ import { SOFT_BLUR } from "@/src/lib/device";
 import { MehndiScene } from "./scenes/MehndiScene";
 import { HaldiScene } from "./scenes/HaldiScene";
 import { HinduWeddingScene } from "./scenes/HinduWeddingScene";
+import { HinduLotusScene } from "./scenes/HinduLotusScene";
 import { ChurchWeddingScene } from "./scenes/ChurchWeddingScene";
 
 function Countdown() {
@@ -747,6 +748,8 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
               <HaldiScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
             ) : sceneOf(i) === "hindu-wedding" ? (
               <HinduWeddingScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
+            ) : sceneOf(i) === "hindu-lotus" ? (
+              <HinduLotusScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
             ) : sceneOf(i) === "church-wedding" ? (
               <ChurchWeddingScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
             ) : sceneOf(i) === "soon" ? (

@@ -53,7 +53,7 @@ export const invitation = {
   /**
    * `mood` (optional) recolours the whole page while that event is on screen —
    * see src/config/moods.ts. Only "haldi" exists for now.
-   * `scene`: the illustrated scene under the event — "mehndi" / "haldi" / "hindu-wedding" / "church-wedding" (src/components/scenes/*Scene),
+   * `scene`: the illustrated scene under the event — "mehndi" / "haldi" / "hindu-wedding" / "hindu-lotus" / "church-wedding" (src/components/scenes/*Scene),
    *   or "soon": a placeholder ("Images coming soon") of the same size, until that event's art is ready.
    * `icons`: gold line icons drawn beside the event (mehndi, haldi, mandap, church, cheers).
    * `flower`: what the travelling rose turns into on this event —
@@ -91,7 +91,8 @@ export const invitation = {
       month: "May",
       weekday: "Monday",
       title: "Hindu Wedding", // PLACEHOLDER
-      scene: "hindu-wedding", // "Four Rounds of Fire"
+      // "Swarg Kamal", the heavenly lotus (the first version, the mandap: "hindu-wedding" — git tag hindu-wedding-mandap)
+      scene: "hindu-lotus",
       time: "6:00 PM onwards", // PLACEHOLDER
       place: "The Grand Palace", // PLACEHOLDER
       note: "Traditional Indian", // PLACEHOLDER

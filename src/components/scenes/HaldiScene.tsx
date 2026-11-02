@@ -366,7 +366,8 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
       // a shake: the swing goes side to side, the way the phone jolted, and everything reacts
       const unShake = onShake(
         (m, acc) => {
-          if (upsideDown || !assembled) return; // upside down: leave it all alone
+          // upside down, or the swing off screen: leave it all alone
+          if (upsideDown || !assembled || idle.paused()) return;
           const k01 = Math.min(1, Math.max(0, (m - SH.threshold) / (SH.strong - SH.threshold)));
           const dir = acc.x === 0 ? (Math.random() < 0.5 ? -1 : 1) : Math.sign(acc.x);
           side.v += dir * (SH.sidePush[0] + (SH.sidePush[1] - SH.sidePush[0]) * k01);
