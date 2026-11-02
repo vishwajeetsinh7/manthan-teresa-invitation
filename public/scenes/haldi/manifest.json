@@ -205,9 +205,9 @@
     },
     "curtain-panel": {
       "src": "curtain-panel.webp",
-      "w": 551,
-      "h": 1495,
-      "aspect": 0.3686,
+      "w": 734,
+      "h": 1499,
+      "aspect": 0.4897,
       "pivot": [
         0.5,
         0

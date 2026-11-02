@@ -39,8 +39,8 @@ const config = {
     curtains: "curtains-v2.png",
     props: "props.png",
     particles: "particles.png",
-    // the closed panel, recoloured to match (scripts/scenes/haldi-panel-recolor.mjs → curtain-new-white.png)
-    panel: "curtain-new-white.png",
+    // the closed panels that part at the start: a plain cream curtain
+    panel: "curtain-plain.png",
     mehndi: "../mehndi/garlands.png", // the banana plant, reused
   },
   pieces: [
@@ -186,9 +186,10 @@ const config = {
         ...strands,
         ...ropes,
         ...scatter,
-        // the opening: two closed panels covering the stage (borders on their inner edges)
-        { id: "panel-left", piece: "curtain-panel", x: 28.8, y: 0, w: 57.6, z: 30 },
-        { id: "panel-right", piece: "curtain-panel", x: 71.2, y: 0, w: 57.6, z: 30, flip: true },
+        // the opening: two closed panels covering the stage, full height (the plain curtain's
+        // vertical pleats stretch cleanly); they part and slide away behind the tied-back curtains
+        { id: "panel-left", piece: "curtain-panel", x: 28.8, y: 0, w: 57.6, h: 100, z: 30 },
+        { id: "panel-right", piece: "curtain-panel", x: 71.2, y: 0, w: 57.6, h: 100, z: 30, flip: true },
       ];
     },
   },

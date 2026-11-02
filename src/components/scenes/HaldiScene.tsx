@@ -23,6 +23,7 @@ import {
   useDebug,
   useHangingTilt,
   useSceneAssets,
+  zOf,
   type Layout,
   type Manifest,
   type Region,
@@ -99,11 +100,22 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
       const tl = gsap.timeline({ paused: true, defaults: { ease: "power2.out" } });
       const T = 100;
 
-      // 0–12 %: the closed curtains part over a warm glow (the tied-back ones are already in place)
-      tl.fromTo(q(".hs-glow"), { opacity: 1, scale: 0.6 }, { opacity: 0, scale: 1.4, duration: 14, ease: "power2.out" }, 0)
-        .fromTo(item("panel-left"), { x: 0 }, { x: () => -W() * 0.62, duration: 11, ease: "power2.inOut" }, 1)
-        .fromTo(item("panel-right"), { x: 0 }, { x: () => W() * 0.62, duration: 11, ease: "power2.inOut" }, 1)
-        .set([item("panel-left"), item("panel-right")], { autoAlpha: 0 }, 12.5);
+      // 0–16 %: the closed curtains part over a warm glow — gathering up as they go, they slide away
+      //          behind the tied-back curtains (which sit in front of them until they are gone, then
+      //          go back to their own layer, behind everyone, before anyone arrives)
+      const panels = [item("panel-left"), item("panel-right")];
+      const sides = [item("curtain-left"), item("curtain-right")];
+      gsap.set(sides, { zIndex: 320 });
+      gsap.set(panels[0], { transformOrigin: "0% 0%" });
+      gsap.set(panels[1], { transformOrigin: "100% 0%" });
+      tl.fromTo(q(".hs-glow"), { opacity: 1, scale: 0.6 }, { opacity: 0, scale: 1.4, duration: 16, ease: "power2.out" }, 0)
+        .fromTo(panels[0], { x: 0, scaleX: 1 }, { x: () => -W() * 0.5, scaleX: 0.72, duration: 15, ease: "power3.inOut" }, 0.5)
+        .fromTo(panels[1], { x: 0, scaleX: 1 }, { x: () => W() * 0.5, scaleX: 0.72, duration: 15, ease: "power3.inOut" }, 0.5)
+        // the tied-back curtains stir as the panels slide in behind them
+        .fromTo(sides, { skewX: 0 }, { keyframes: [{ skewX: 0.9, duration: 3 }, { skewX: -0.4, duration: 3 }, { skewX: 0, duration: 3 }], ease: "sine.inOut" }, 9)
+        // (and fade softly as they go, so no strip of them is left peeking past the tie-backs)
+        .to(panels, { autoAlpha: 0, duration: 5, ease: "power1.in" }, 11)
+        .set(sides, { zIndex: zOf(byId["curtain-left"].z) }, 16);
 
       // 12–32 %: the beam lowers and settles; strands and umbrellas drop in; the swing descends
       tl.fromTo(item("beam"), { y: () => -H() * 0.16, opacity: 0 }, { y: 0, opacity: 1, duration: 7, ease: "power3.out" }, 12);

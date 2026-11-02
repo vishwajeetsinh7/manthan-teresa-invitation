@@ -29,7 +29,7 @@ import {
 
 /**
  * The Mehndi scene: the bride and the groom on their cushions. A round carpet
- * spins open and lands, the bride rises in, the toran drops, the groom slides
+ * spins open and lands, the bride slides in from the left, the toran drops, the groom slides
  * in on his cushion pointing at her palm, the props arrive and henna blooms on
  * her palms. Then the hidden initial: he leans in, a script letter draws
  * itself on her palm in gold and settles into her henna, a heart rises
@@ -137,8 +137,10 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       }
       tl.fromTo(q(".ms-shadow"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: dur(10) }, at(12));
 
-      // 15–25 %: the bride rises in on her cushion
-      tl.fromTo(item("bride"), { y: () => 30 * k(), opacity: 0 }, { y: 0, opacity: 1, duration: dur(10), ease: "power3.out" }, at(15));
+      // 15–25 %: the bride slides in from the left on her cushion (the groom comes from the right),
+      //          easing to a soft stop with a tiny settle
+      tl.fromTo(item("bride"), { x: () => -W() * 0.62 }, { x: 0, duration: dur(12), ease: "back.out(1.15)" }, at(15));
+      tl.fromTo(item("bride"), { opacity: 0 }, { opacity: 1, duration: dur(3), ease: "none" }, at(15));
 
       // 25–38 %: the toran — the cord draws, the strands drop in one by one and settle
       const strands = ITEMS.filter((i) => i.id.startsWith("toran-")).map((i) => item(i.id));
