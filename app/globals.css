@@ -1699,6 +1699,114 @@ body {
   width: 4.2%;
 }
 
+/* Mehndi: the round carpet — a flat circle tilted into an oval (perspective) and spun in its own
+   plane; a darker copy 3 px lower shows its edge */
+.mh-carpet {
+  position: absolute;
+  perspective: 900px;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.mh-carpet-layer {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.mh-carpet-spin {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.mh-carpet-spin img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+.mh-carpet-edge img {
+  filter: brightness(0.55);
+}
+.mh-dust {
+  position: absolute;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 214 120 / 0) 78%, rgb(255 214 120 / 0.75) 92%, rgb(255 214 120 / 0) 100%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0;
+}
+/* the hidden initial on her palm (henna by default: the reduced-motion final state). */
+.mh-initial {
+  position: absolute;
+  z-index: 56;
+  translate: -50% -50%;
+  overflow: visible;
+  pointer-events: none;
+}
+.mh-initial path {
+  fill: none;
+  stroke-width: 6.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mh-initial-henna {
+  opacity: 0.85;
+}
+/* while it draws: a bright gold line on a dark-gold outline (it reads on henna and paper), softly glowing */
+.mh-initial-gold {
+  filter: drop-shadow(0 0 2.5px rgb(255 200 90 / 0.75));
+}
+.mh-initial-gold .mh-line {
+  stroke: #6e430e;
+  stroke-width: 8.5;
+}
+.mh-initial-gold .mh-ink {
+  stroke: #f4c24a;
+  stroke-width: 4.6;
+}
+.ms-wrap[data-reduce] .mh-initial-gold,
+.ms-wrap[data-reduce] .mh-initial-glint {
+  display: none;
+}
+:is(.mh-palm-sparks, .mh-heart-sparks) {
+  position: absolute;
+  z-index: 130;
+  width: 6%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+}
+:is(.mh-palm-sparks, .mh-heart-sparks) img {
+  position: absolute;
+  width: 55%;
+  opacity: 0;
+}
+.mh-heart {
+  position: absolute;
+  z-index: 125;
+  width: 5.5%;
+  translate: -50% -50%;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+}
+.mh-heart path:first-child {
+  fill: #f2a3ae;
+  stroke: #7a1f2b;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.mh-heart-shine {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.75);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+/* reduced motion: the final scene — the groom with his hand on his heart */
+.mh-scene[data-reduce] [data-id="groom"] {
+  display: none;
+}
+
 /* "Images coming soon": same box as a scene (a soft gold-framed card) */
 .scene-soon-card {
   width: 100%;
@@ -1834,7 +1942,7 @@ body {
 .hw-scene {
   left: calc(50% - var(--sw) / 2);
 }
-.ms-wrap[data-reduce] :is([data-id^="groom-"], [data-id^="bride-"], [data-id="gujarati-a"], [data-id="kerala-a"], [data-id="antarpat"], [data-id^="varmala-"], [data-id="couple-walk"]) {
+.hw-scene[data-reduce] :is([data-id^="groom-"], [data-id^="bride-"], [data-id="gujarati-a"], [data-id="kerala-a"], [data-id="antarpat"], [data-id^="varmala-"], [data-id="couple-walk"]) {
   display: none;
 }
 .hw-fire {
@@ -1938,7 +2046,7 @@ body {
   -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 46%, #000 58%, transparent 100%);
   mask-image: radial-gradient(ellipse 62% 58% at 50% 46%, #000 58%, transparent 100%);
 }
-.ms-wrap[data-reduce] :is([data-id="groom"], [data-id="bride-father"], [data-id="girl-back"], [data-id="couple-veil"], [data-id="couple-kodi"], [data-id="kodi"]) {
+.cw-scene[data-reduce] :is([data-id="groom"], [data-id="bride-father"], [data-id="girl-back"], [data-id="couple-veil"], [data-id="couple-kodi"], [data-id="kodi"]) {
   display: none;
 }
 .cw-flame {

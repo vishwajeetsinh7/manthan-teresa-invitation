@@ -546,11 +546,13 @@ for (const [name, p] of Object.entries(pieces)) {
     .toFile(path.join(cfg.outDir, file));
   manifest.pieces[name] = { src: file, w, h, aspect: +(p.w / p.h).toFixed(4), pivot: p.pivot, ...p.extra };
 }
-// the master, for ?debug=1 only
-const master = path.join(cfg.srcDir, "master.png");
+// the master, for ?debug=1 only (its height / width, so the overlay keeps its shape)
+const master = path.join(cfg.srcDir, cfg.master ?? "master.png");
 if (existsSync(master)) {
+  const mm = await sharp(master).metadata();
   await sharp(master).resize({ width: 1024 }).webp({ quality: 70 }).toFile(path.join(cfg.outDir, "master.webp"));
   manifest.master = "master.webp";
+  manifest.masterAspect = +(mm.height / mm.width).toFixed(4);
 }
 writeFileSync(path.join(cfg.outDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
 
@@ -581,10 +583,10 @@ console.log(`✔ ${Object.keys(manifest.pieces).length} pieces → ${cfg.outDir}
 async function fitLayout() {
   const F = cfg.fit;
   if (!F) fail("no `fit` section in the config");
-  const { data: mdat, info: minfo } = await sharp(path.join(cfg.srcDir, "master.png")).removeAlpha().resize({ width: 256 }).raw().toBuffer({ resolveWithObject: true });
+  const { data: mdat, info: minfo } = await sharp(path.join(cfg.srcDir, cfg.master ?? "master.png")).removeAlpha().resize({ width: 256 }).raw().toBuffer({ resolveWithObject: true });
   const MW = minfo.width;
   const MH = minfo.height;
-  const k = MW / 1024; // master px → small
+  const k = MW / 1024; // master px (scaled to 1024 wide) → small
   const items = [];
   for (const g of F.items) {
     const p = pieces[g.piece];

@@ -34,7 +34,7 @@ export type Item = {
   tone?: number;
 };
 export type Layout = { aspect: number; items: Item[]; groups?: Record<string, { z?: number; pivot?: number[] }>; meta?: Record<string, unknown> };
-export type Manifest = { name: string; master?: string; pieces: Record<string, unknown> };
+export type Manifest = { name: string; master?: string; masterAspect?: number; pieces: Record<string, unknown> };
 export type Region = { x: number; y: number; r: number; name?: string; piece?: string };
 
 export function makeScene(manifest: Manifest, layout: Layout, headroom: number) {
@@ -59,7 +59,7 @@ export function makeScene(manifest: Manifest, layout: Layout, headroom: number) 
     const fx = it.flip ? 1 - pt[0] : pt[0];
     return { x: b.left + b.w * fx, y: b.top + b.h * pt[1] };
   };
-  return { dir, P, ITEMS, ASPECT, url, box, byId, point, master: manifest.master ? dir + manifest.master : null, headroom };
+  return { dir, P, ITEMS, ASPECT, url, box, byId, point, master: manifest.master ? dir + manifest.master : null, masterAspect: manifest.masterAspect ?? 1.5, headroom };
 }
 export type Scene = ReturnType<typeof makeScene>;
 
@@ -98,7 +98,7 @@ export function useDebug() {
 export function DebugMaster({ scene }: { scene: Scene }) {
   if (!scene.master) return null;
   const top = (scene.headroom / scene.ASPECT) * 100;
-  return <img className="ms-debug" src={scene.master} alt="" style={{ top: `${top}%`, height: `${(1.5 / scene.ASPECT) * 100}%` }} />;
+  return <img className="ms-debug" src={scene.master} alt="" style={{ top: `${top}%`, height: `${(scene.masterAspect / scene.ASPECT) * 100}%` }} />;
 }
 
 /** CSS z-index for a layout z (layout z may be fractional, e.g. 5.5 → 55) */

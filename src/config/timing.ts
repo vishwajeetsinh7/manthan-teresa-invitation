@@ -196,8 +196,22 @@ export const timing = {
     scene: {
       /** from the Mehndi node down to the stage's top */
       offset: 86,
-      /** the pieces come in one by one, all within this long (s), as the page arrives; reverses faster */
-      assemble: 3.2,
+      /** the pieces come in one by one (the carpet spins open, bride, toran, groom, props, henna)
+       *  within this long (s) as the page arrives; reverses faster */
+      assemble: 7.5,
+      /** then the hidden initial: he leans in, a script letter draws on her palm, a heart, his
+       *  hand to his heart (s) */
+      initialSeconds: 2.8,
+      /** the letter hidden in her henna */
+      hiddenInitial: "M",
+      /** idle: his lean towards her, a heart rising between them, a glint across the letter (s between) */
+      lean: [6, 9] as [number, number],
+      hearts: [8, 12] as [number, number],
+      glint: 10,
+      /** the carpet slowly turns once every 90 s while idle */
+      carpetIdleSpin: false as boolean,
+      /** the carpet's tilt (°): a circle seen as master-v2's oval (acos 250 / 1075) */
+      carpetTilt: 76.5,
       reverseSpeed: 1.8,
       /** it starts once the stage's top is this far up the screen */
       startAt: "96%",
@@ -205,8 +219,7 @@ export const timing = {
       /** the flower girl's dash across the front (s), and the least time between dashes */
       girlRun: 3.6,
       girlEvery: 30,
-      /** where petals leave the Kerala friend's fingers / the girl's basket (share of the piece) */
-      fingers: [0.13, 0.33] as [number, number],
+      /** where petals leave the girl's basket (share of the piece) */
       basket: [0.85, 0.56] as [number, number],
     },
     /** the Haldi scene ("The Golden Swing"), same placement as the Mehndi scene */

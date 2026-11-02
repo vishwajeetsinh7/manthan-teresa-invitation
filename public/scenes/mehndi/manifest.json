@@ -3,8 +3,8 @@
   "pieces": {
     "bride-plain": {
       "src": "bride-plain.webp",
-      "w": 740,
-      "h": 861,
+      "w": 630,
+      "h": 733,
       "aspect": 0.8595,
       "pivot": [
         0.5,
@@ -21,7 +21,17 @@
           "y": 0.3301,
           "r": 0.3799
         }
-      ]
+      ],
+      "points": {
+        "palm": [
+          0.7905,
+          0.2822
+        ],
+        "palmEdge": [
+          0.8432,
+          0.2822
+        ]
+      }
     },
     "bride-henna": {
       "src": "bride-henna.webp",
@@ -33,30 +43,10 @@
         0.9954
       ]
     },
-    "friend-gujarati": {
-      "src": "friend-gujarati.webp",
-      "w": 595,
-      "h": 962,
-      "aspect": 0.6185,
-      "pivot": [
-        0.5,
-        0.9958
-      ]
-    },
-    "friend-kerala": {
-      "src": "friend-kerala.webp",
-      "w": 417,
-      "h": 960,
-      "aspect": 0.4344,
-      "pivot": [
-        0.5,
-        0.9958
-      ]
-    },
     "flower-girl": {
       "src": "flower-girl.webp",
-      "w": 310,
-      "h": 473,
+      "w": 257,
+      "h": 392,
       "aspect": 0.655,
       "pivot": [
         0.5,
@@ -65,8 +55,8 @@
     },
     "uruli": {
       "src": "uruli.webp",
-      "w": 550,
-      "h": 290,
+      "w": 444,
+      "h": 234,
       "aspect": 1.8987,
       "pivot": [
         0.5,
@@ -75,8 +65,8 @@
     },
     "lamp": {
       "src": "lamp.webp",
-      "w": 192,
-      "h": 589,
+      "w": 142,
+      "h": 436,
       "aspect": 0.326,
       "pivot": [
         0.5,
@@ -112,8 +102,8 @@
     },
     "cone-basket": {
       "src": "cone-basket.webp",
-      "w": 257,
-      "h": 232,
+      "w": 222,
+      "h": 200,
       "aspect": 1.11,
       "pivot": [
         0.5,
@@ -122,8 +112,8 @@
     },
     "dholak": {
       "src": "dholak.webp",
-      "w": 308,
-      "h": 186,
+      "w": 232,
+      "h": 140,
       "aspect": 1.6599,
       "pivot": [
         0.5,
@@ -132,8 +122,8 @@
     },
     "bolster": {
       "src": "bolster.webp",
-      "w": 358,
-      "h": 149,
+      "w": 278,
+      "h": 116,
       "aspect": 2.4015,
       "pivot": [
         0.5,
@@ -150,10 +140,69 @@
         0.9876
       ]
     },
+    "groom-a": {
+      "src": "groom-a.webp",
+      "w": 580,
+      "h": 756,
+      "aspect": 0.7675,
+      "pivot": [
+        0.5,
+        0.9956
+      ],
+      "points": {
+        "fingertip": [
+          0.0058,
+          0.3037
+        ]
+      }
+    },
+    "groom-b": {
+      "src": "groom-b.webp",
+      "w": 564,
+      "h": 756,
+      "aspect": 0.7456,
+      "pivot": [
+        0.5,
+        0.9956
+      ],
+      "align": {
+        "to": "groom-a",
+        "x": 0.0275,
+        "y": -0.0011,
+        "w": 0.9725,
+        "h": 1.0011
+      },
+      "points": {
+        "heart": [
+          0.4292,
+          0.3733
+        ]
+      }
+    },
+    "carpet": {
+      "src": "carpet.webp",
+      "w": 1131,
+      "h": 1127,
+      "aspect": 1.0035,
+      "pivot": [
+        0.4978,
+        0.5191
+      ],
+      "points": {
+        "rimL": [
+          0.0539,
+          0.5191
+        ],
+        "rimR": [
+          0.9416,
+          0.5191
+        ]
+      }
+    },
     "strand-1": {
       "src": "strand-1.webp",
-      "w": 97,
-      "h": 650,
+      "w": 68,
+      "h": 456,
       "aspect": 0.1492,
       "pivot": [
         0.4861,
@@ -162,8 +211,8 @@
     },
     "strand-2": {
       "src": "strand-2.webp",
-      "w": 97,
-      "h": 594,
+      "w": 68,
+      "h": 416,
       "aspect": 0.1634,
       "pivot": [
         0.5143,
@@ -172,8 +221,8 @@
     },
     "strand-3": {
       "src": "strand-3.webp",
-      "w": 97,
-      "h": 511,
+      "w": 68,
+      "h": 358,
       "aspect": 0.1898,
       "pivot": [
         0.5075,
@@ -192,8 +241,8 @@
     },
     "strand-5": {
       "src": "strand-5.webp",
-      "w": 97,
-      "h": 336,
+      "w": 68,
+      "h": 236,
       "aspect": 0.2885,
       "pivot": [
         0.5038,
@@ -202,8 +251,8 @@
     },
     "banana": {
       "src": "banana.webp",
-      "w": 434,
-      "h": 787,
+      "w": 273,
+      "h": 495,
       "aspect": 0.5517,
       "pivot": [
         0.5,
@@ -462,8 +511,8 @@
     },
     "bride-palms": {
       "src": "bride-palms.webp",
-      "w": 740,
-      "h": 861,
+      "w": 630,
+      "h": 733,
       "aspect": 0.8595,
       "pivot": [
         0.5,
@@ -483,5 +532,6 @@
       ]
     }
   },
-  "master": "master.webp"
+  "master": "master.webp",
+  "masterAspect": 1.1943
 }
