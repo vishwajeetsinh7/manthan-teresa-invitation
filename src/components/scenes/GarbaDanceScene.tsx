@@ -163,7 +163,7 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
       let H = stage.clientHeight;
       const k = () => W / 390;
       const px = (p: { x: number; y: number }) => ({ x: (p.x / 100) * W, y: (p.y / 100) * H });
-      const { spawn, setTicking, count } = createParticles(q(".ms-particle") as HTMLImageElement[], () => H, url);
+      const { spawn, setTicking, count, parts } = createParticles(q(".ms-particle") as HTMLImageElement[], () => H, url);
 
       /* ── elements ─────────────────────────────────────────────────── */
       const sky = q(".gd-sky")[0] as HTMLElement;
@@ -260,7 +260,8 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
       };
 
       /* ── hidden until their moment ────────────────────────────────── */
-      gsap.set([...danceEls, lightBall, ...beams, ...pools, ...dots], { autoAlpha: 0 });
+      gsap.set([...danceEls, lightBall, ...beams, ...pools], { autoAlpha: 0 });
+      gsap.set(dots, { opacity: 0 });
       gsap.set(disco, { transformOrigin: `${DB.ball[0] * 100}% ${DB.ball[1] * 100}%` });
 
       /* ── canvases: the string lights (stage) and the floor lights (on the floor plane) ── */
@@ -521,7 +522,12 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
       const ENTRY: Record<string, number> = { "crew-couple": 0.7, "crew-gujarati": -0.6, "crew-kerala": 0.6, "crew-flowergirl": -0.6 };
       const djDrop = () => H * 0.12;
 
+      /** at a switch: everything still in the air fades out now (one look's things never linger in the other) */
+      const clearAir = () => {
+        for (const pt of parts) if (pt.on) pt.life = Math.min(pt.life, pt.t + 0.35);
+      };
       const drop = () => {
+        clearAir();
         busy = true;
         mode = "dance";
         modeBeats = 0;
@@ -539,6 +545,7 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
         T2.to(st, { ringSpeed: 2.6, ringR: 1.25, duration: 1.2, ease: "power1.in" }, 0);
         // 2. the flame flares; 3. a ball of light lifts from it and rises to the disco ball's place
         T2.to(st, { flame: 1.6, duration: 0.35, ease: "power2.out" }, 0.2);
+        T2.to(dholGlow, { opacity: 0, duration: 0.3 }, 0);
         const lb = { p: 0 };
         T2.set(lightBall, { autoAlpha: 1 }, 0.5);
         T2.fromTo(
@@ -591,6 +598,7 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
       };
 
       const ret = () => {
+        clearAir();
         busy = true;
         mode = "garba";
         modeBeats = 0;
@@ -630,11 +638,12 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
           T2.to(pools[i], { autoAlpha: 0, duration: 0.25 }, 0.15 + i * 0.18);
         });
         T2.set(beams, { autoAlpha: 0 }, 1.0);
-        T2.to(st, { reflect: 0, duration: 0.5 }, 0.1);
-        T2.to(truss, { y: () => -H * 0.3, duration: 0.7, ease: "power2.in" }, 0.9);
-        T2.set(truss, { autoAlpha: 0 }, 1.6);
-        T2.to(st, { floorOn: 0, duration: 0.9, ease: "sine.inOut" }, 0.3);
-        T2.to(st, { sky: 0, duration: 1.4, ease: "sine.inOut" }, 0.4);
+        T2.to(st, { reflect: 0, duration: 0.3 }, 0);
+        T2.to(truss, { y: () => -H * 0.3, duration: 0.6, ease: "power2.in" }, 0.5);
+        T2.set(truss, { autoAlpha: 0 }, 1.1);
+        T2.to(st, { floorOn: 0, duration: 0.6, ease: "sine.inOut" }, 0.1);
+        T2.to(st, { sky: 0, duration: 1.0, ease: "sine.inOut" }, 0.2);
+        T2.to(dholGlow, { opacity: 0.35, duration: 0.4 }, 1.4);
         // 3. the crew dances off; the DJ sinks out
         crew.forEach((c, i) => T2.to(c.el, { x: () => W * ENTRY[c.id], autoAlpha: 0, duration: 0.6, ease: "power2.in" }, 0.3 + i * 0.08));
         T2.to([djCon, djBoy], { y: djDrop, duration: 0.6, ease: "power2.in" }, 0.3);
@@ -679,7 +688,9 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
         ring.phi = 0;
         Object.assign(st, { sky: 0, ringSpeed: 1, ringR: 1, flame: 1, flameOn: 1, b0: 0, b1: 0, b2: 0, b3: 0, floorOn: 0, reflect: 0, center: 0 });
         gsap.set([...danceEls, lightBall, ...beams, ...pools], { autoAlpha: 0, x: 0, y: 0 });
+        gsap.set(dots, { opacity: 0 });
         gsap.set(disco, { scale: 1 });
+        gsap.set(dholGlow, { opacity: 0.35 });
         gsap.set(decorEls, { autoAlpha: 1, y: 0 });
         gsap.set(dhol, { autoAlpha: 1, x: 0, y: 0 });
         gsap.set(garboIn, { yPercent: 0 });

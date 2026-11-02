@@ -14,24 +14,23 @@ import { LotusPetals, buildPetals, petalTransform, petalZ, pose, type Petal, typ
 /**
  * The Hindu wedding on a heavenly lotus — "Swarg Kamal". Clouds sail in from
  * both sides and a whirl of flowers spins into the heart of the sky; a great
- * lotus rises from the clouds as a bud and opens (its petals, in 3D, turning
- * clockwise as seen from above); a floral arch builds itself from flying
- * flowers; a golden canopy floats down and its own lotus crown opens, turning
- * the other way; its jasmine strands unroll. The havan kund rises from the
+ * lotus rises from the clouds as a bud and opens (its petals in 3D, each in
+ * its place); a floral arch builds itself from flying flowers; a golden canopy
+ * floats down and its crown of petals fans open; its jasmine strands unroll. The havan kund rises from the
  * lotus heart and the fire is lit, the pandit takes his seat, the diyas settle
  * on four petal tips; the couple appear, wedded, and the diyas light one by
- * one; jasmine and petals rain as both lotuses make one full turn.
+ * one; jasmine and petals rain.
  *
- * Then it lives: both lotuses turn slowly (opposite ways), their petals
- * breathe, the stage and the canopy float, clouds drift (and lean with the
+ * Then it lives: the lotus's petals lean slowly in and out, a wave round the
+ * flower (they never turn: turning, they swapped places and glitched); the
+ * crown's petals sway, the stage and the canopy float, clouds drift (and lean with the
  * phone's tilt, as does the camera), buds and floating diyas rise, the arch
  * sheds a petal now and then, the fire flickers and the pandit offers ghee.
  *
- * Guests can play: tap the lotus (a ripple runs round it, it spins faster),
- * the canopy (the same, the other way), the arch (petals fall), a cloud (it
+ * Guests can play: tap the lotus (a ripple runs round it), the canopy, the arch (petals fall), a cloud (it
  * drifts away and back), the fire (it flares), a diya (it jumps), a strand
  * (it swings), or anywhere else (a burst of flowers). Shake the phone (after
- * the "Shake to shower blessings" pill): the lotuses whirl, the clouds puff
+ * the "Shake to shower blessings" pill): a wave runs round the lotus, the clouds puff
  * out, petals storm down from the canopy. Taps never block scrolling.
  *
  * No halo, glow or light rays behind anyone: the only warm light near the
@@ -178,7 +177,8 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         const qv = Math.min(1, Math.max(0, o * 1.5 - (pt.i / pt.n) * 0.5));
         const oe = 1 - (1 - qv) * (1 - qv);
         let lean = -12 + (pt.lean + 12) * oe;
-        if (breathe) lean += 2 * Math.sin((clock * Math.PI * 2) / 5 - (a * Math.PI) / 90);
+        // the slow wave: each petal leans out and back in, one after another round the flower
+        if (breathe) lean += S.petalSway.amp * Math.sin((clock * Math.PI * 2) / S.petalSway.seconds - (a * Math.PI) / 90);
         const an = (((a % 360) + 360) % 360) / 360;
         const rt = clock - L.rip - an * 0.6;
         if (rt > 0 && rt < 0.7) lean += 8 * Math.sin((Math.PI * rt) / 0.7);
@@ -253,8 +253,9 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         root.style.setProperty("--tadj", `${tadj.toFixed(2)}deg`);
         root.style.setProperty("--cloudx", cloudX.toFixed(3));
         for (const L of lotuses) {
-          L.phi += L.dir * L.rate * L.mult.v * L.on.v * dt;
-          const ang = L.phi + L.extra.v;
+          // still: the petals never turn round the ring (turning, they swapped places in front of
+          // and behind each other); they only lean in and out (leanOf)
+          const ang = 0;
           const tilt = L.view.tilt + (L === crownL ? tadj * 0.3 : tadj);
           for (const e of L.els) {
             const a = e.p.theta + ang;
@@ -273,7 +274,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         }
         // the four diyas ride on their petals' tips (in front of the people on the near half)
         if (stageL) {
-          const ang = stageL.phi + stageL.extra.v;
+          const ang = 0;
           diyas.forEach((d, i) => {
             const pt = diyaPetals[i];
             const a = pt.theta + ang;
@@ -336,7 +337,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       /** a wave round a lotus: each petal leans a little further and back, one after another */
       const ripple = (L: L) => {
         L.rip = clock;
-        gsap.timeline().to(L.mult, { v: 3, duration: 0.3, ease: "power2.out" }).to(L.mult, { v: 1, duration: 1.2, ease: "power2.inOut" }, 0.3);
       };
 
       /* ── hidden until their moment ── */
@@ -383,9 +383,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       tl.fromTo(stageGroup, { scale: 0.35, y: () => H() * 0.08, autoAlpha: 0 }, { scale: 1, y: 0, autoAlpha: 1, duration: ACT.bloom, ease: "power2.out" }, t - 0.2);
       if (stageL) {
         [0, 1, 2].forEach((ring, j) => openRing(stageL, ring, t + j * 0.35, ACT.bloom - 0.6));
-        tl.fromTo(stageL.extra, { v: -120 }, { v: 0, duration: ACT.bloom + 0.2, ease: "power2.out" }, t - 0.2);
         tl.fromTo(q(".lt-floor"), { opacity: 0 }, { opacity: 1, duration: 0.8 }, t + 0.4);
-        tl.to(stageL.on, { v: 1, duration: 1.2, ease: "sine.in" }, t + ACT.bloom - 0.2);
       }
       t += ACT.bloom;
 
@@ -429,8 +427,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         tl.fromTo(el, { autoAlpha: 0, scale: 0.3, rotation: 0 }, { autoAlpha: 1, scale: 1, rotation: rot, duration: 0.8, ease: "back.out(1.6)" }, t + 0.2 + (Math.abs(rot) / 60) * 0.35);
       });
       [0, 1].forEach((ring, j) => openRing(crownL, ring, t + 0.25 + j * 0.2, 1.0));
-      tl.fromTo(crownL.extra, { v: 120 }, { v: 0, duration: 1.3, ease: "power2.out" }, t + 0.2);
-      tl.to(crownL.on, { v: 1, duration: 1, ease: "sine.in" }, t + 1.2);
       strands.forEach((s, i) => {
         tl.to(s, { autoAlpha: 1, duration: 0.05 }, t + 0.7 + i * 0.1);
         tl.to(s, { scaleY: 1, duration: 0.45, ease: "power2.out" }, t + 0.7 + i * 0.1);
@@ -472,12 +468,11 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       });
       t += ACT.diyas;
 
-      // 8. the blessing: jasmine and petals rain from the strand tips and the arch; both lotuses
-      //    make one full turn (opposite ways); the fire flares
+      // 8. the blessing: jasmine and petals rain from the strand tips and the arch; a wave runs
+      //    round the lotus; the fire flares
       tl.call(() => fall([...strandTips, ...ARCH_PTS.slice(4, 20)], 26), undefined, t + 0.1);
       tl.call(flare, undefined, t + 0.3);
-      if (stageL) tl.fromTo(stageL.extra, { v: 0 }, { v: 360, duration: ACT.blessing, ease: "power2.inOut", immediateRender: false }, t);
-      tl.fromTo(crownL.extra, { v: 0 }, { v: -360, duration: ACT.blessing, ease: "power2.inOut", immediateRender: false }, t);
+      if (stageL) tl.call(() => ripple(stageL), undefined, t + 0.2);
       t += ACT.blessing;
 
       /* ── idle ─────────────────────────────────────────────────────────── */
@@ -487,7 +482,12 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         idleStarted = true;
         assembled = true;
         assembledOnce.current = true;
-        breathe = quality === 0;
+        breathe = true;
+        // the crown's petals sway slowly from their bases, each a little out of step
+        fan.forEach((el, i) => {
+          const rot = +(el.dataset.rot ?? 0);
+          idle.fromTo(el, { rotation: rot - 2.5 }, { rotation: rot + 2.5, duration: rnd(3.2, 4.4), ease: "sine.inOut", yoyo: true, repeat: -1 }, i * 0.35);
+        });
         // clouds drift (the nearer, the further and faster)
         clouds.forEach((c, i) => {
           const near = CLOUDS[i].z > 7;
@@ -596,8 +596,7 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         const now = performance.now();
         if (now - lastShower < S.shake.cooldown * 1000) return;
         lastShower = now;
-        if (stageL) gsap.to(stageL.extra, { v: "+=90", duration: 1.4, ease: "power3.out" });
-        gsap.to(crownL.extra, { v: "-=90", duration: 1.4, ease: "power3.out" });
+        if (stageL) ripple(stageL);
         clouds.forEach((c, i) => {
           const out = CLOUDS[i].x < 50 ? -1 : 1;
           gsap.to(c, { keyframes: [{ xPercent: out * 16, scale: 1.06, duration: 0.35, ease: "power2.out" }, { xPercent: 0, scale: 1, duration: 1.6, ease: "sine.inOut" }], overwrite: false });
