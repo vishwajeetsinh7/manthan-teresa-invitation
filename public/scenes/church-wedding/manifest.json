@@ -13,8 +13,8 @@
     },
     "altar-back": {
       "src": "altar-back.webp",
-      "w": 551,
-      "h": 594,
+      "w": 426,
+      "h": 460,
       "aspect": 0.9269,
       "pivot": [
         0.5,
@@ -23,8 +23,8 @@
     },
     "altar-table": {
       "src": "altar-table.webp",
-      "w": 588,
-      "h": 299,
+      "w": 455,
+      "h": 231,
       "aspect": 1.9684,
       "pivot": [
         0.5,
@@ -43,8 +43,8 @@
     },
     "bell-1": {
       "src": "bell-1.webp",
-      "w": 51,
-      "h": 65,
+      "w": 46,
+      "h": 58,
       "aspect": 0.7879,
       "pivot": [
         0.5038,
@@ -53,8 +53,8 @@
     },
     "bell-2": {
       "src": "bell-2.webp",
-      "w": 51,
-      "h": 67,
+      "w": 46,
+      "h": 60,
       "aspect": 0.7662,
       "pivot": [
         0.5,
@@ -63,8 +63,8 @@
     },
     "bell-3": {
       "src": "bell-3.webp",
-      "w": 51,
-      "h": 66,
+      "w": 46,
+      "h": 59,
       "aspect": 0.7764,
       "pivot": [
         0.492,
@@ -83,8 +83,8 @@
     },
     "candle-tall": {
       "src": "candle-tall.webp",
-      "w": 58,
-      "h": 214,
+      "w": 48,
+      "h": 177,
       "aspect": 0.2714,
       "pivot": [
         0.5,
@@ -99,8 +99,8 @@
     },
     "candle-short": {
       "src": "candle-short.webp",
-      "w": 51,
-      "h": 206,
+      "w": 41,
+      "h": 166,
       "aspect": 0.2473,
       "pivot": [
         0.5,
@@ -115,134 +115,112 @@
     },
     "flower-stand": {
       "src": "flower-stand.webp",
-      "w": 167,
-      "h": 282,
+      "w": 147,
+      "h": 248,
       "aspect": 0.5925,
       "pivot": [
         0.5,
         0.9884
       ]
     },
-    "bride-father": {
-      "src": "bride-father.webp",
-      "w": 680,
-      "h": 936,
-      "aspect": 0.7265,
-      "pivot": [
-        0.5,
-        0.9957
-      ],
-      "points": {
-        "bride": [
-          0.3132,
-          0.2831
-        ]
-      }
-    },
     "couple-walk": {
       "src": "couple-walk.webp",
-      "w": 657,
-      "h": 948,
-      "aspect": 0.693,
+      "w": 651,
+      "h": 1068,
+      "aspect": 0.6093,
       "pivot": [
         0.5,
-        0.9958
+        0.9968
+      ]
+    },
+    "couple-altar-a": {
+      "src": "couple-altar-a.webp",
+      "w": 191,
+      "h": 363,
+      "aspect": 0.5259,
+      "pivot": [
+        0.5,
+        0.9959
       ],
       "points": {
-        "hands": [
-          0.2694,
-          0.347
+        "neck": [
+          0.4458,
+          0.2365
         ]
       }
     },
-    "couple-veil": {
-      "src": "couple-veil.webp",
-      "w": 246,
-      "h": 445,
-      "aspect": 0.5522,
+    "couple-altar-b": {
+      "src": "couple-altar-b.webp",
+      "w": 204,
+      "h": 364,
+      "aspect": 0.5606,
       "pivot": [
         0.5,
-        0.9958
-      ],
-      "points": {
-        "bride": [
-          0.3081,
-          0.2307
-        ],
-        "groom": [
-          0.6389,
-          0.1837
-        ]
-      }
-    },
-    "couple-kodi": {
-      "src": "couple-kodi.webp",
-      "w": 238,
-      "h": 441,
-      "aspect": 0.5401,
-      "pivot": [
-        0.5,
-        0.9958
+        0.9959
       ],
       "align": {
-        "to": "couple-veil",
-        "x": -0.0378,
-        "y": 0.0021,
-        "w": 0.9679,
-        "h": 0.9896
+        "to": "couple-altar-a",
+        "x": 0.002,
+        "y": -0.001,
+        "w": 1.0671,
+        "h": 1.001
+      },
+      "points": {
+        "ring": [
+          0.7283,
+          0.2756
+        ]
       }
     },
-    "groom": {
-      "src": "groom.webp",
-      "w": 128,
-      "h": 438,
-      "aspect": 0.2923,
+    "pew-guests-1": {
+      "src": "pew-guests-1.webp",
+      "w": 479,
+      "h": 345,
+      "aspect": 1.3871,
       "pivot": [
         0.5,
-        0.9972
+        0.9914
+      ]
+    },
+    "pew-guests-2": {
+      "src": "pew-guests-2.webp",
+      "w": 441,
+      "h": 324,
+      "aspect": 1.3629,
+      "pivot": [
+        0.5,
+        0.9916
+      ]
+    },
+    "pew-guests-3": {
+      "src": "pew-guests-3.webp",
+      "w": 479,
+      "h": 345,
+      "aspect": 1.3868,
+      "pivot": [
+        0.5,
+        0.9915
+      ]
+    },
+    "pew-guests-4": {
+      "src": "pew-guests-4.webp",
+      "w": 441,
+      "h": 319,
+      "aspect": 1.3812,
+      "pivot": [
+        0.5,
+        0.9914
       ]
     },
     "priest": {
       "src": "priest.webp",
-      "w": 281,
-      "h": 475,
+      "w": 187,
+      "h": 316,
       "aspect": 0.5913,
       "pivot": [
         0.5,
         0.9917
       ]
-    },
-    "bridesmaid-pink": {
-      "src": "bridesmaid-pink.webp",
-      "w": 371,
-      "h": 704,
-      "aspect": 0.527,
-      "pivot": [
-        0.5,
-        0.9943
-      ],
-      "points": {
-        "basket": [
-          0.6981,
-          0.3494
-        ]
-      }
-    },
-    "bridesmaid-kerala": {
-      "src": "bridesmaid-kerala.webp",
-      "w": 298,
-      "h": 690,
-      "aspect": 0.4319,
-      "pivot": [
-        0.5,
-        0.9942
-      ],
-      "points": {
-        "basket": [
-          0.3859,
-          0.3507
-        ]
-      }
     },
     "girl-back": {
       "src": "girl-back.webp",
@@ -298,42 +276,22 @@
     },
     "pew": {
       "src": "pew.webp",
-      "w": 378,
-      "h": 233,
+      "w": 290,
+      "h": 179,
       "aspect": 1.6239,
       "pivot": [
         0.5,
         0.9908
       ]
     },
-    "pew-guests": {
-      "src": "pew-guests.webp",
-      "w": 404,
-      "h": 329,
-      "aspect": 1.2274,
-      "pivot": [
-        0.5,
-        0.9931
-      ]
-    },
     "pew-bouquet": {
       "src": "pew-bouquet.webp",
-      "w": 69,
-      "h": 169,
+      "w": 82,
+      "h": 201,
       "aspect": 0.4075,
       "pivot": [
         0.4236,
         0.0071
-      ]
-    },
-    "kodi": {
-      "src": "kodi.webp",
-      "w": 153,
-      "h": 189,
-      "aspect": 0.8104,
-      "pivot": [
-        0.5,
-        0
       ]
     },
     "flame-1": {
@@ -557,5 +515,6 @@
       ]
     }
   },
-  "master": "master.webp"
+  "master": "master.webp",
+  "masterAspect": 1.5
 }

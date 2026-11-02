@@ -2,7 +2,7 @@
  * Church wedding scene ("The Aisle"): where every cut-out comes from and
  * where it stands. Used by scripts/build-scene-assets.mjs
  * (npm run scene:church-wedding). Sheet coordinates are pixels on the sheets;
- * placements below are in master pixels (master = 1024 × 1536).
+ * placements below are in master pixels (master-v2 = 1024 × 1536).
  */
 const particles = [
   ["flame", [[957, 200], [1136, 200], [1314, 200]], 10, { warm: 0.12 }],
@@ -13,7 +13,7 @@ const particles = [
   ["sparkle", [[974, 830], [1101, 830], [1233, 830], [1364, 830]], 14, { warm: 0.3 }],
 ];
 
-// the bridesmaid's pallu and the little girl's basket touch on the sheet: cut between them
+// a bridesmaid's pallu and the little girl's basket touch on the people sheet: cut between them
 const GIRL_LINE = [[857, 470], [862, 640], [884, 690], [871, 760], [868, 880]];
 
 /* ── master px → stage % (the stage is the master plus 15 % headroom on top) */
@@ -23,8 +23,10 @@ const X = (mx) => +((mx / 1024) * 100).toFixed(2);
 const Y = (my) => +(((my + HEAD) / (A * 1024)) * 100).toFixed(2);
 const Wd = (mw) => +((mw / 1024) * 100).toFixed(2);
 
-/** where the couple stand at the altar (feet), and how small they are there */
-export const ALTAR = { x: 512, feet: 770, scale: 0.42 };
+/** where the couple stand at the altar (feet), and how small they are there (× their size at the front) */
+export const ALTAR = { x: 512, feet: 652, scale: 0.34 };
+/** the four guest pews (2 × 2 on guests.png) */
+const GUESTS = [[395, 300], [1140, 300], [395, 780], [1140, 780]];
 
 const config = {
   name: "church-wedding",
@@ -38,12 +40,16 @@ const config = {
   attachGap: 18,
   attachGapBySheet: { altar: -1, pews: 2, people: 6, particles: -1 },
   pad: 4,
+  /** the layout reference and the ?debug=1 overlay (no bridesmaids, no red cloth, a smaller
+   *  priest, varied guests); master.png, the first version, is kept */
+  master: "master-v2.png",
   sheets: {
     backdrop: "church-backdrop.png",
     altar: "altar.png",
-    aisle: "couple-aisle.png",
-    vows: "couple-altar.png",
-    groom: "groom.png",
+    // (couple-aisle.png, couple-altar.png and groom.png are no longer used)
+    walk: "couple-walk-v2.png",
+    vows: "couple-altar-v2.png",
+    guests: "guests.png",
     people: "people.png",
     pews: "pews.png",
     particles: "particles.png",
@@ -63,43 +69,38 @@ const config = {
     { name: "candle-short", sheet: "altar", at: [1296, 820], clip: [1270, 600, 1340, 980], points: { wick: [1296, 692] } },
     { name: "flower-stand", sheet: "altar", at: [1430, 720] },
 
-    { name: "bride-father", sheet: "aisle", at: [560, 500], points: { bride: [240, 300] } },
-    { name: "couple-walk", sheet: "aisle", at: [1000, 600], points: { hands: [1030, 360] } },
-    { name: "couple-veil", sheet: "vows", at: [480, 600], points: { bride: [335, 245], groom: [510, 200] } },
-    { name: "couple-kodi", sheet: "vows", at: [1230, 600] },
-    { name: "groom", sheet: "groom", at: [500, 700] },
+    // the couple walking towards us, arm in arm
+    { name: "couple-walk", sheet: "walk", at: [512, 800] },
+    // at the altar: A — he ties the minnu (neck: its glint); B — he slips the ring on her finger
+    { name: "couple-altar-a", sheet: "vows", at: [330, 600], points: { neck: [330, 257] } },
+    { name: "couple-altar-b", sheet: "vows", at: [1070, 600], points: { ring: [1242, 295] } },
+    ...GUESTS.map((at, i) => ({ name: `pew-guests-${i + 1}`, sheet: "guests", at, gather: 20 })),
 
     // (cut at the waist: the altar table hides the rest)
     { name: "priest", sheet: "people", at: [140, 500], clip: [0, 0, 300, 640] },
-    { name: "bridesmaid-pink", sheet: "people", at: [430, 600], points: { basket: [505, 420] } },
-    { name: "bridesmaid-kerala", sheet: "people", at: [740, 600], split: { line: GIRL_LINE, keep: "left" }, points: { basket: [705, 430] } },
+    // (the two bridesmaids on this sheet are no longer in the scene)
     { name: "girl-back", sheet: "people", at: [1000, 650], split: { line: GIRL_LINE, keep: "right" }, points: { basket: [900, 600] } },
     { name: "girl-front", sheet: "people", at: [1250, 650], points: { basket: [1265, 610] } },
     { name: "ring-boy", sheet: "people", at: [1440, 650] },
 
     { name: "runner", sheet: "pews", at: [300, 500] },
     { name: "pew", sheet: "pews", at: [900, 250] },
-    { name: "pew-guests", sheet: "pews", at: [900, 800] },
     { name: "pew-bouquet", sheet: "pews", at: [1400, 520], gather: 30, pivot: "top" },
 
-    { name: "kodi", sheet: "particles", at: [200, 300], pivot: "topcenter" },
     ...particles.flatMap(([base, points, screen, extra]) =>
       points.map((at, k) => ({ name: `${base}-${k + 1}`, sheet: "particles", at, screen, pivot: "center", ...extra })),
     ),
   ],
 
-  /** the two altar poses overlap exactly (aligned on the saree hem and the groom's legs) */
-  pairs: [{ a: "couple-veil", b: "couple-kodi", rows: [0.72, 1] }],
+  /** the two altar poses overlap exactly (aligned on their legs and the saree; the arms left out) */
+  pairs: [{ a: "couple-altar-a", b: "couple-altar-b", rows: [0.62, 1] }],
 
   fit: {
     stage: { aspect: A, headroom: 0.15 },
     items: [
-      { piece: "couple-walk", box: [280, 460, 810, 1280], z: 6 },
+      { piece: "couple-walk", box: [278, 470, 812, 1290], z: 6 },
       { piece: "girl-front", box: [75, 990, 335, 1450], z: 7 },
-      { piece: "ring-boy", box: [765, 990, 920, 1455], z: 7 },
-      // the bridesmaids are cut off by the pews in the master: placed by their faces
-      { piece: "bridesmaid-pink", fixed: { x: X(136), y: Y(1118), w: Wd(362) }, z: 4.2 },
-      { piece: "bridesmaid-kerala", fixed: { x: X(899), y: Y(1143), w: Wd(280) }, z: 4.2 },
+      { piece: "ring-boy", box: [765, 1060, 920, 1432], z: 7 },
     ],
     extra: (items, P) => {
       const out = [];
@@ -111,12 +112,13 @@ const config = {
       out.push({ id: "backdrop", piece: "backdrop", x: 50, y: Y(1536), w: 100, z: 0 });
       out.push(put("window-l", "window", 172, 485, 128, 1), put("window-r", "window", 852, 485, 128, 1));
 
-      // the altar (back + table), drawn at 0.75 of its sheet size, centred, its steps ending at 730
-      const AS = 0.75;
+      // the altar (back + table), set far back as in master-v2: drawn at 0.58 of its sheet size,
+      // centred, its steps ending at y 612
+      const AS = 0.58;
       const altarAt = (name) => {
         const p = P[name];
         const left = 512 + (p.x0 - 316.5) * AS;
-        const top = 730 + (p.y0 - 952) * AS;
+        const top = 612 + (p.y0 - 952) * AS;
         const w = p.w * AS;
         const h = p.h * AS;
         return { left, top, w, h, x: left + p.pivot[0] * w, y: top + p.pivot[1] * h };
@@ -124,75 +126,76 @@ const config = {
       const ab = altarAt("altar-back");
       const at = altarAt("altar-table");
       out.push(put("altar-back", "altar-back", ab.x, ab.y, ab.w, 2), put("altar-table", "altar-table", at.x, at.y, at.w, 3));
-      // the priest behind the table: his head ~160 px above it, his waist cut hidden behind it
-      const PS = 0.78;
+      // the priest behind the table, two thirds of his first size: his head ~105 px above it,
+      // his waist cut hidden behind it
+      const PS = 0.52;
       const pr = P.priest;
-      const prTop = at.top - 160; // where his head (sheet y 166) is
+      const prTop = at.top - 92; // where his head (sheet y 166) is
       const prLeft = 500 - (145 - pr.x0) * PS;
       out.push(put("priest", "priest", prLeft + pr.pivot[0] * pr.w * PS, prTop + (pr.y0 + pr.pivot[1] * pr.h - 166) * PS, pr.w * PS, 2.5));
 
-      out.push(put("arch", "arch", 512, 46, 600, 3.5));
-      [450, 512, 574].forEach((x, i) => out.push(put(`bell-${i + 1}`, `bell-${i + 1}`, x, 122, 40, 3.6)));
-      out.push(put("candle-l1", "candle-tall", 262, 738, 46, 3.8), put("candle-r1", "candle-tall", 762, 738, 46, 3.8));
-      out.push(put("candle-l2", "candle-short", 318, 742, 40, 3.8), put("candle-r2", "candle-short", 706, 742, 40, 3.8));
-      out.push(put("stand-l", "flower-stand", 62, 610, 132, 3.4), put("stand-r", "flower-stand", 962, 610, 132, 3.4, { flip: true }));
+      out.push(put("arch", "arch", 512, 142, 580, 3.5));
+      [447, 512, 577].forEach((x, i) => out.push(put(`bell-${i + 1}`, `bell-${i + 1}`, x, 198, 36, 3.6)));
+      out.push(put("candle-l1", "candle-tall", 250, 600, 38, 3.8), put("candle-r1", "candle-tall", 774, 600, 38, 3.8));
+      out.push(put("candle-l2", "candle-short", 318, 604, 32, 3.8), put("candle-r2", "candle-short", 706, 604, 32, 3.8));
+      out.push(put("stand-l", "flower-stand", 52, 470, 116, 3.4), put("stand-r", "flower-stand", 972, 470, 116, 3.4, { flip: true }));
 
       // the aisle runner, from the altar steps to the front (stretched to the floor's depth)
-      out.push({ id: "runner", piece: "runner", x: 50, y: Y(1536), w: Wd(800), h: +(((1536 - 728) / (A * 1024)) * 100).toFixed(2), z: 1.5 });
+      out.push({ id: "runner", piece: "runner", x: 50, y: Y(1536), w: Wd(800), h: +(((1536 - 612) / (A * 1024)) * 100).toFixed(2), z: 1.5 });
 
-      // pews down each side (left: the aisle end on the right; right: flipped), a bouquet on each end
+      // pews down each side (left: the aisle end on the right; right: flipped), a bouquet on each
+      // end; guests vary — no pew shows the guests of the one in front or behind it, and the right
+      // side never mirrors the left at the same depth; the front pews are empty
       const rows = [
-        { piece: "pew-guests", end: 384, bottom: 862, w: 300, z: 3.9 },
-        { piece: "pew-guests", end: 326, bottom: 1046, w: 320, z: 4.5 },
-        { piece: "pew", end: 268, bottom: 1262, w: 300, z: 5.5 },
+        { l: "pew", r: "pew", end: 392, bottom: 690, w: 230, z: 3.8 },
+        { l: "pew-guests-1", r: "pew-guests-3", end: 368, bottom: 770, w: 260, z: 3.85 },
+        { l: "pew-guests-2", r: "pew-guests-4", end: 320, bottom: 870, w: 290, z: 3.9 },
+        { l: "pew-guests-3", r: "pew-guests-1", end: 252, bottom: 990, w: 320, z: 4.2 },
+        { l: "pew-guests-4", r: "pew-guests-2", end: 172, bottom: 1135, w: 350, z: 4.5 },
+        { l: "pew-guests-1", r: "pew-guests-3", end: 96, bottom: 1310, w: 380, z: 5.5 },
       ];
       rows.forEach((r, i) => {
-        const h = r.w / asp(r.piece);
         for (const side of ["l", "r"]) {
+          const piece = r[side];
+          // (the pew itself is the lower part of a guests piece: size it by the pew)
+          const pewShare = piece === "pew" ? 1 : 0.62;
+          const h = r.w / asp(piece);
           const end = side === "l" ? r.end : 1024 - r.end;
           const cx = side === "l" ? end - r.w / 2 : end + r.w / 2;
-          out.push(put(`pew-${side}${i + 1}`, r.piece, cx, r.bottom, r.w, r.z, side === "r" ? { flip: true } : {}));
+          out.push(put(`pew-${side}${i + 1}`, piece, cx, r.bottom, r.w, r.z, side === "r" ? { flip: true } : {}));
+          void pewShare;
           // the bouquet hangs on the pew's end post
           const bx = side === "l" ? end - r.w * 0.06 : end + r.w * 0.06;
-          out.push(put(`bouquet-${side}${i + 1}`, "pew-bouquet", bx, r.bottom - h * 0.78, r.w * 0.17, r.z + 0.05, side === "r" ? { flip: true } : {}));
+          const postTop = piece === "pew" ? h * 0.78 : h * 0.62; // the end post's top, up from the floor
+          // (drawn over all the pews: each hangs on the aisle end, which moves outwards row by row, so
+          // no nearer pew is behind it)
+          out.push(put(`bouquet-${side}${i + 1}`, "pew-bouquet", bx, r.bottom - postTop, r.w * 0.17, 5.7 + i * 0.01, side === "r" ? { flip: true } : {}));
         }
       });
 
-      // the couple's other figures, at couple-walk's sheet scale (same artist scale), at the altar
+      // the couple at the altar: as tall as the walking couple × ALTAR.scale (matched by height —
+      // the sheets are drawn at different scales), groom on the left as he walks out
       const cw = byId["couple-walk"];
-      const scale = cw.w / P["couple-walk"].w; // stage-% width per sheet px (front, full size)
-      const altarW = (piece, k = 1) => +(P[piece].w * scale * ALTAR.scale * k).toFixed(2);
-      // the altar poses face us; flipped so the groom is on the left, as he walks out
-      out.push({ id: "couple-veil", piece: "couple-veil", x: X(ALTAR.x), y: Y(ALTAR.feet), w: altarW("couple-veil"), z: 3.7, flip: true });
-      // the second pose sits exactly over the first (pair alignment, mirrored)
-      const veil = out[out.length - 1];
-      const al = P["couple-kodi"].extra.align;
+      const cwH = cw.w / asp("couple-walk") / A; // stage-% height at the front
+      const altarH = cwH * ALTAR.scale;
+      const ca = { id: "couple-altar-a", piece: "couple-altar-a", x: X(ALTAR.x), y: Y(ALTAR.feet), w: 0, z: 3.7 };
+      ca.w = +(altarH * A * asp("couple-altar-a")).toFixed(2);
+      out.push(ca);
+      // the ring pose sits exactly over the first (pair alignment)
       {
-        const vw = veil.w;
-        const vh = vw / asp("couple-veil") / A;
-        const vleft = veil.x - (1 - P["couple-veil"].pivot[0]) * vw;
-        const vtop = veil.y - P["couple-veil"].pivot[1] * vh;
-        const w = vw * al.w;
-        const h = w / asp("couple-kodi") / A;
-        const left = vleft + (1 - al.x - al.w) * vw; // mirrored
-        const top = vtop + al.y * vh;
-        out.push({ id: "couple-kodi", piece: "couple-kodi", x: +(left + (1 - P["couple-kodi"].pivot[0]) * w).toFixed(2), y: +(top + P["couple-kodi"].pivot[1] * h).toFixed(2), w: +w.toFixed(2), z: 3.7, flip: true });
+        const al = P["couple-altar-b"].extra.align;
+        const ah = ca.w / asp("couple-altar-a") / A;
+        const aleft = ca.x - P["couple-altar-a"].pivot[0] * ca.w;
+        const atop = ca.y - P["couple-altar-a"].pivot[1] * ah;
+        const w = ca.w * al.w;
+        const h = w / asp("couple-altar-b") / A;
+        const piv = P["couple-altar-b"].pivot;
+        out.push({ id: "couple-altar-b", piece: "couple-altar-b", x: +(aleft + al.x * ca.w + piv[0] * w).toFixed(2), y: +(atop + al.y * ah + piv[1] * h).toFixed(2), w: +w.toFixed(2), z: 3.7 });
       }
-      // the groom waits at the altar, left of centre, looking towards the aisle (his figure is
-      // drawn bigger on its own sheet: matched to the groom in couple-walk by height)
-      const groomK = (970 - 35) / (1474 - 36);
-      // (where the groom stands in the flipped altar pose: his sheet x ≈ 510 on the vows sheet)
-      const vp = P["couple-veil"];
-      const groomX = veil.x + (0.5 - (510 - vp.x0) / vp.w) * veil.w;
-      out.push({ id: "groom", piece: "groom", x: +groomX.toFixed(2), y: Y(ALTAR.feet), w: altarW("groom", groomK), z: 3.7, flip: true });
-      // bride + father, and the little flower girl, start at the front of the aisle (the timeline
-      // walks them up, smaller and smaller); full size here
-      out.push({ id: "bride-father", piece: "bride-father", x: X(560), y: Y(1500), w: +(P["bride-father"].w * scale).toFixed(2), z: 6.5 });
+      // the little flower girl starts at the front of the aisle (the timeline walks her up)
       const gf = byId["girl-front"];
       const gscale = gf.w / P["girl-front"].w;
       out.push({ id: "girl-back", piece: "girl-back", x: X(500), y: Y(1500), w: +(P["girl-back"].w * gscale).toFixed(2), z: 6.6 });
-      // the manthrakodi, laid over the bride's shoulders by the groom (hidden until then)
-      out.push({ id: "kodi", piece: "kodi", x: X(560), y: Y(ALTAR.feet - 300), w: +(altarW("couple-veil") * 0.62).toFixed(2), z: 3.75 });
 
       // a static scatter of petals along the runner
       const kinds = ["petal-white-1", "petal-pink-2", "petal-white-3", "petal-pink-4", "petal-white-2", "petal-pink-1", "petal-white-4", "petal-pink-3", "petal-white-1", "petal-pink-2"];

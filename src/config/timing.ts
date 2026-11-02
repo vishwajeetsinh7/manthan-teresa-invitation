@@ -270,15 +270,15 @@ export const timing = {
     },
     /** the church wedding scene ("The Aisle"): the story plays (timed) as its page arrives */
     church: {
-      /** seconds for each act: the church builds, the aisle (runner, pews, candles), the groom
-       *  waits, the procession (flower girl, bride + father), the vows (veil, manthrakodi), the
-       *  recessional (they walk out between the bridesmaids), the blessing */
-      acts: { church: 1.6, aisle: 1.6, groom: 1.1, procession: 3.4, vows: 2.8, recessional: 3.2, blessing: 1.6 },
+      /** seconds for each act: the church appears; pews and guests, candles; the runner and the
+       *  priest; the flower girl walks up the aisle; the couple appear in a beam of light; the
+       *  minnu; the rings; the bells and the walk back down the aisle; the finale */
+      acts: { church: 1.6, aisle: 1.6, runner: 1.0, girl: 2.0, couple: 1.2, minnu: 1.3, rings: 1.4, recessional: 3.0, finale: 1.6 },
       reverseSpeed: 6,
       startAt: "96%",
       maxAmbient: 8,
-      /** the bridesmaids' petal tosses once it idles (s between) */
-      toss: [3, 5] as [number, number],
+      /** the flower girl's petal tosses once it idles (s between) */
+      toss: [5, 7] as [number, number],
     },
     /** the one rose that travels down the vine to the event in focus */
     traveler: { pxPerSecond: 320, minDur: 0.7, maxDur: 1.6, roll: 0.6 },
