@@ -36,11 +36,13 @@ import {
  * Then it idles — the swing a real pendulum, strands swaying — and a little
  * boy with a pichkari pops in now and then to squirt the couple.
  *
- * Shake the phone (or tap the swing) and the swing goes back and up, away from
- * us, then comes forward and down towards us — a damped pendulum in depth
- * (rotateX about the beam, in perspective) that settles over a few swings. A
- * strong push puffs turmeric from the seat, shakes marigold petals off the
- * beam and sets the umbrellas dancing. Upside down, shakes leave it alone.
+ * Tap the swing and it goes back and up, away from us, then forward and down
+ * towards us — a damped pendulum in depth (rotateX about the beam, in
+ * perspective). Shake the phone and it swings side to side the way the phone
+ * jolted, and everything reacts: strands and umbrellas swing, the banana
+ * plants and curtains sway, things on the floor hop, petals jump off the
+ * pookalam; a strong shake puffs turmeric and shakes petals off the beam.
+ * Upside down, shakes leave it all alone.
  *
  * Built on the shared scene engine (./engine), placed like the Mehndi scene:
  * in the bottom part of the Haldi page, assembling (timed) as the page
@@ -186,6 +188,7 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
       // the swing: a real pendulum about the beam (sine of a steady phase); `amp` can jolt
       const amp = { v: S.swingAmp };
       const osc = { p: 0 };
+      let oscRot = 0;
 
       const startIdle = () => {
         if (idleStarted) return;
@@ -195,7 +198,10 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
           duration: S.swingPeriod,
           ease: "none",
           repeat: -1,
-          onUpdate: () => gsap.set(swing, { rotation: amp.v * Math.sin(osc.p * Math.PI * 2) }),
+          onUpdate: () => {
+            oscRot = amp.v * Math.sin(osc.p * Math.PI * 2);
+            gsap.set(swing, { rotation: oscRot + side.a });
+          },
         }, 0);
         // strands and umbrellas: little pendulums from their tops; umbrellas slowly "turn"
         [...items("strand-"), ...items("umbrella-")].forEach((el) => {
@@ -241,8 +247,10 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
         gate.run();
       };
 
-      /* ── the swing in depth: a damped pendulum (θ, °) pushed by shakes / taps ── */
-      const pend = { a: 0, v: 0, armed: false };
+      /* ── the swing: two damped pendulums about the beam — a tap pushes it in depth (away from us,
+            then towards us: rotateX), a shake swings it side to side (rotation) ── */
+      const depth = { a: 0, v: 0, armed: false };
+      const side = { a: 0, v: 0 };
       const w0 = (2 * Math.PI) / SH.period;
       const shadow = q(".hs-shadow")[0] as HTMLElement;
       const swingPuff = q(".hs-swing-puff")[0] as HTMLElement;
@@ -250,49 +258,88 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
       const umbrellas = items("umbrella-");
       let upsideDown = false;
       const unTilt = onTilt(({ angle, strength }) => (upsideDown = strength > 0.5 && Math.abs(angle) > 120));
-      let lastA = 0;
+      const settled = (p: { a: number; v: number }) => Math.abs(p.a) < 0.02 && Math.abs(p.v) < 0.05;
+      const swingStep = (p: { a: number; v: number }, max: number, dt: number) => {
+        p.v += (-w0 * w0 * (180 / Math.PI) * Math.sin((p.a * Math.PI) / 180) - SH.damping * p.v) * dt;
+        p.a += p.v * dt;
+        // (pushed past its furthest: it stops there softly and falls back)
+        if (Math.abs(p.a) > max) {
+          p.a = Math.sign(p.a) * max;
+          p.v = 0;
+        }
+      };
+      const SEAT = ((byId["couple"].y - PIVOT.y) / 100) * 1; // the seat's drop below the beam (share of the stage height)
       const step = (_t: number, dms: number) => {
         if (!assembled || idle.paused()) return;
-        if (Math.abs(pend.a) < 0.02 && Math.abs(pend.v) < 0.05) {
-          if (pend.a !== 0) {
-            pend.a = pend.v = 0;
-            gsap.set(swing, { rotationX: 0 });
-            gsap.set(shadow, { scale: 1, y: 0, opacity: 1 });
+        if (settled(depth) && settled(side)) {
+          if (depth.a !== 0 || side.a !== 0) {
+            depth.a = depth.v = side.a = side.v = 0;
+            gsap.set(swing, { rotationX: 0, rotation: oscRot });
+            gsap.set(shadow, { scale: 1, x: 0, y: 0, opacity: 1 });
           }
           return;
         }
         const dt = Math.min(0.05, dms / 1000);
-        const acc = -w0 * w0 * (180 / Math.PI) * Math.sin((pend.a * Math.PI) / 180) - SH.damping * pend.v;
-        pend.v += acc * dt;
-        pend.a += pend.v * dt;
-        // (pushed past its furthest: it stops there softly and falls back)
-        if (Math.abs(pend.a) > SH.maxAngle) {
-          pend.a = Math.sign(pend.a) * SH.maxAngle;
-          pend.v = 0;
-        }
-        // + = towards us (nearer, lower); − = away (further, higher): rotateX about the beam
-        gsap.set(swing, { rotationX: pend.a });
+        swingStep(depth, SH.maxAngle, dt);
+        swingStep(side, SH.sideMax, dt);
+        // depth: + = towards us (nearer, lower), − = away (further, higher); side: + = the seat to the left
+        gsap.set(swing, { rotationX: depth.a, rotation: oscRot + side.a });
         // the seat's shadow on the floor follows it
-        gsap.set(shadow, { scale: 1 + pend.a / 70, y: (pend.a / 100) * H() * 0.25, opacity: 1 - Math.abs(pend.a) / 50 });
-        // at its furthest towards us after a strong push: a turmeric puff from the seat, the sun brightens
-        if (pend.armed && pend.v < 0 && pend.a > 8 && lastA <= pend.a + 0.5) {
-          pend.armed = false;
-          gsap.fromTo(swingPuff, { scale: 0.3, opacity: 0.9, y: 0 }, { scale: 1.15, opacity: 0, y: () => H() * 0.04, duration: 1.2, ease: "power2.out" });
-          gsap.fromTo(sun, { opacity: 0.6 }, { opacity: 1, duration: 0.3, yoyo: true, repeat: 1, ease: "sine.inOut" });
+        gsap.set(shadow, {
+          scale: 1 + depth.a / 70,
+          x: -Math.sin((side.a * Math.PI) / 180) * SEAT * H(),
+          y: (depth.a / 100) * H() * 0.25,
+          opacity: 1 - (Math.abs(depth.a) + Math.abs(side.a)) / 50,
+        });
+        // at its furthest towards us after a tap: a turmeric puff from the seat, the sun brightens
+        if (depth.armed && depth.v < 0 && depth.a > 8) {
+          depth.armed = false;
+          puff();
         }
-        lastA = pend.a;
       };
       gsap.ticker.add(step);
-      /** push the swing away from us (it then comes back towards us); k01: 0 … 1 strength */
-      const push = (k01: number, speed?: number) => {
-        if (!assembled) return;
-        pend.v -= speed ?? SH.push[0] + (SH.push[1] - SH.push[0]) * k01;
+      const puff = () => {
+        gsap.fromTo(swingPuff, { scale: 0.3, opacity: 0.9, y: 0 }, { scale: 1.15, opacity: 0, y: () => H() * 0.04, duration: 1.2, ease: "power2.out" });
+        gsap.fromTo(sun, { opacity: 0.6 }, { opacity: 1, duration: 0.3, yoyo: true, repeat: 1, ease: "sine.inOut" });
+      };
+      /** sway an element by a CSS variable (its `rotate` / `translate`): out, back past, settle */
+      const kick = (el: Element, prop: "--kick" | "--hop", amp: number, delay = 0) =>
+        gsap.to(el, {
+          keyframes: [{ [prop]: amp, duration: 0.22 }, { [prop]: -amp * 0.55, duration: 0.38 }, { [prop]: amp * 0.25, duration: 0.4 }, { [prop]: 0, duration: 0.5 }],
+          ease: "sine.inOut",
+          delay,
+          overwrite: "auto",
+        });
+      /** everything in the picture reacts to a shake (k01: 0 … 1 strength; dir: which way it jolted) */
+      const react = (k01: number, dir: number) => {
+        // hanging strands swing on their loops (their pendulums: engine useHangingTilt)
+        root.dispatchEvent(new CustomEvent("hang:kick", { detail: { v: dir * (25 + 45 * k01) } }));
+        // umbrellas swing from their tops, one after another
+        umbrellas.forEach((u, i) => kick(u, "--kick", dir * (3 + 5 * k01) * (i % 2 ? 0.8 : 1), i * 0.07));
+        // banana plants sway from their pots (their tops lag behind the jolt); the tied-back curtains stir
+        for (const id of ["banana-left", "banana-right"]) kick(item(id), "--kick", -dir * (1.5 + 2.5 * k01), rnd(0, 0.08));
+        for (const id of ["curtain-left", "curtain-right"]) kick(item(id), "--kick", dir * (0.6 + 1.2 * k01), rnd(0.05, 0.15));
+        // the things on the floor give a little hop; the loose flowers jiggle
+        ["matkis", "basket", "urli", "haldi-bowl"].forEach((id, i) => kick(item(id), "--hop", -(2 + 4 * k01) * k(), 0.03 * i));
+        items("scatter-").forEach((el) => kick(el, "--kick", rnd(-1, 1) * (10 + 20 * k01), rnd(0, 0.12)));
+        // a few petals jump off the pookalam
+        if (k01 > 0.3) {
+          const pk = box(byId["pookalam"]);
+          for (let i = 0; i < Math.round(2 + 3 * k01); i++)
+            spawn(gsap.utils.random(KINDS.petals), ((pk.left + pk.w * rnd(0.2, 0.8)) / 100) * W(), ((pk.top + pk.h * 0.4) / 100) * H(), {
+              vx: rnd(-40, 40) * k(),
+              vy: -rnd(40, 80) * k(),
+              g: 260 * k(),
+              s: rnd(0.4, 0.55),
+              life: 1.4,
+              land: ((pk.top + pk.h * rnd(0.5, 0.9)) / 100) * H(),
+            });
+        }
         if (k01 < 0.6) return;
-        // a strong push: the puff is armed, petals shake off the beam, the umbrellas dance, a buzz
-        pend.armed = true;
+        // a strong shake: petals shake off the beam, a turmeric puff from the seat, a buzz
         navigator.vibrate?.(12);
-        const n = Math.round(rnd(5, 8));
-        for (let i = 0; i < n; i++)
+        puff();
+        for (let i = 0; i < Math.round(rnd(5, 8)); i++)
           spawn(gsap.utils.random([...KINDS.petals.slice(0, 4), ...KINDS.rare]), rnd(0.2, 0.8) * W(), (BAR_Y / 100) * H() + rnd(0, 6), {
             vy: rnd(10, 30) * k(),
             vx: rnd(-10, 10) * k(),
@@ -300,24 +347,26 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
             life: rnd(3, 4),
             s: rnd(0.4, 0.6),
           });
-        umbrellas.forEach((u, i) =>
-          gsap.to(u, {
-            keyframes: [{ "--kick": 7 * (i % 2 ? -1 : 1), duration: 0.25 }, { "--kick": -4, duration: 0.4 }, { "--kick": 2, duration: 0.4 }, { "--kick": 0, duration: 0.5 }],
-            ease: "sine.inOut",
-            delay: i * 0.08,
-          }),
-        );
       };
+      // a shake: the swing goes side to side, the way the phone jolted, and everything reacts
       const unShake = onShake(
-        (m) => {
-          if (upsideDown) return; // upside down: leave the swing alone
-          push(Math.min(1, Math.max(0, (m - SH.threshold) / (SH.strong - SH.threshold))));
+        (m, acc) => {
+          if (upsideDown || !assembled) return; // upside down: leave it all alone
+          const k01 = Math.min(1, Math.max(0, (m - SH.threshold) / (SH.strong - SH.threshold)));
+          const dir = acc.x === 0 ? (Math.random() < 0.5 ? -1 : 1) : Math.sign(acc.x);
+          side.v += dir * (SH.sidePush[0] + (SH.sidePush[1] - SH.sidePush[0]) * k01);
+          react(k01, dir);
         },
         SH.threshold,
         SH.cooldown,
       );
-      // no sensors (desktop) or no permission: a tap on the swing pushes it
-      const onTap = () => push(0.7, SH.tapPush);
+      // a tap on the couple pushes the swing in depth: away from us, then towards us (a puff at the front)
+      const onTap = () => {
+        if (!assembled) return;
+        depth.v -= SH.tapPush;
+        depth.armed = true;
+        navigator.vibrate?.(8);
+      };
       const coupleEl = item("couple");
       coupleEl.addEventListener("click", onTap);
 
@@ -384,8 +433,8 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
           idle.clear();
           idleStarted = false;
           amp.v = S.swingAmp;
-          pend.a = pend.v = 0;
-          pend.armed = false;
+          depth.a = depth.v = side.a = side.v = 0;
+          depth.armed = false;
           gsap.set(swing, { rotationX: 0 });
           gsap.set(boy, { autoAlpha: 0, x: 0, scaleX: 1 });
           gate.run();

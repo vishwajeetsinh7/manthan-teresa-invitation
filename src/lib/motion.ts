@@ -6,7 +6,8 @@
  * iOS asks the guest for permission, which may only happen during a tap:
  * call requestMotion() from the opening tap. Elsewhere it just starts.
  */
-type ShakeListener = { f: (strength: number) => void; threshold: number; cooldown: number; last: number };
+type Vec = { x: number; y: number; z: number };
+type ShakeListener = { f: (strength: number, acc: Vec) => void; threshold: number; cooldown: number; last: number };
 
 let listening = false;
 let active = false;
@@ -34,7 +35,7 @@ function onMotion(e: DeviceMotionEvent) {
   subs.forEach((s) => {
     if (m >= s.threshold && now - s.last >= s.cooldown * 1000) {
       s.last = now;
-      s.f(m);
+      s.f(m, { x, y, z });
     }
   });
 }
@@ -61,8 +62,8 @@ export function requestMotion() {
 /** Has any motion reading arrived (sensors present and allowed)? */
 export const motionActive = () => active;
 
-/** Call f(strength) on each shake stronger than `threshold` m/s², at most once per `cooldown` s. */
-export function onShake(f: (strength: number) => void, threshold: number, cooldown: number) {
+/** Call f(strength, acceleration) on each shake stronger than `threshold` m/s², at most once per `cooldown` s. */
+export function onShake(f: (strength: number, acc: Vec) => void, threshold: number, cooldown: number) {
   if (typeof window !== "undefined" && "DeviceMotionEvent" in window && !(DeviceMotionEvent as unknown as PermissionRequest).requestPermission) listen();
   const s: ShakeListener = { f, threshold, cooldown, last: 0 };
   subs.add(s);

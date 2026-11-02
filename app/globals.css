@@ -1852,9 +1852,16 @@ body {
   pointer-events: auto;
   cursor: pointer;
 }
-/* the umbrellas dance when the swing is pushed hard (--kick, in degrees) */
-.hs-scene [data-id^="umbrella-"] {
+/* a shake: umbrellas, banana plants, curtains and the loose flowers sway (--kick, in degrees,
+   about each one's own hanging or standing point); the things on the floor hop (--hop, px).
+   This goes on the picture inside each piece: GSAP owns the piece's own transform (and sets
+   its rotate / translate to none) */
+.hs-scene :is([data-id^="umbrella-"], [data-id^="banana-"], [data-id^="curtain-"], [data-id^="scatter-"]) > img {
   rotate: calc(var(--kick, 0) * 1deg);
+  transform-origin: inherit;
+}
+.hs-scene :is([data-id="matkis"], [data-id="basket"], [data-id="urli"], [data-id="haldi-bowl"]) > img {
+  translate: 0 calc(var(--hop, 0) * 1px);
 }
 .hs-swing-puff {
   position: absolute;

@@ -405,9 +405,16 @@ export function useHangingTilt(wrap: RefObject<HTMLElement | null>, selector: st
         }
       }
     };
+    // a shake (from the scene): each strand gets a push, a little different each
+    const onKick = (e: Event) => {
+      const v = (e as CustomEvent<{ v: number }>).detail.v;
+      sw.forEach((p) => (p.v += v * (0.75 + Math.random() * 0.5)));
+    };
+    root.addEventListener("hang:kick", onKick);
     gsap.ticker.add(tick);
     return () => {
       gsap.ticker.remove(tick);
+      root.removeEventListener("hang:kick", onKick);
       unsub();
       sw.forEach((p) => (p.el.style.rotate = ""));
     };
