@@ -27,9 +27,8 @@ import {
 /**
  * The Hindu wedding scene: the mandap builds, the havan kund rises onto its
  * platform and the sacred fire is lit, the pandit takes his seat beside it.
- * The antarpat comes down from under the canopy on two gold cords and hangs
- * in front of the couple; it is lowered — they see each other, hand in hand —
- * the four diyas light one by one and a blessing of petals falls. Then it
+ * Then the couple appear, wedded, hand in hand (sparkles, petals from the
+ * canopy), the four diyas light one by one and a blessing of petals falls. Then it
  * idles: a living fire (three flickering flame layers, glow, sparks, smoke),
  * the pandit's ghee offerings, swaying swags, petals.
  *
@@ -57,8 +56,9 @@ const KINDS = {
   fires: ["fire-1", "fire-2", "fire-3"],
   flames: ["diya-flame-1", "diya-flame-2", "diya-flame-3"],
 };
-/** pieces that are not in this story any more (no pheras, no varmala: no separate figures) */
-const UNUSED = /^(groom-|bride-|varmala-|couple-walk)/;
+/** pieces that are not in this story any more (no pheras, no varmala, no antarpat: only the
+ *  wedded couple, shown as they are) */
+const UNUSED = /^(groom-|bride-|varmala-|couple-walk|antarpat)/;
 const RUNTIME = [...new Set([...ITEMS.filter((i) => !UNUSED.test(i.id)).map((i) => i.piece), "ghee-drop", ...Object.values(KINDS).flat()])].map(url);
 
 // the sacred fire on the kund
@@ -68,17 +68,9 @@ const kund = box(byId["havan-kund"]);
 const FIRE_W = kund.w * 0.62;
 const DIYAS = ITEMS.filter((i) => i.id.startsWith("diya-"));
 const WICK = (manifest.pieces.diya as unknown as { points: { wick: number[] } }).points.wick;
-// the antarpat: its rod, the canopy's underside its cords hang from, the platform's front edge it sinks behind
-const AN = byId["antarpat"];
-const anBox = box(AN);
-const ROD = { l: point("antarpat", "rodL"), r: point("antarpat", "rodR") };
+// the canopy's underside (petals fall from along it)
 const canopyBox = box(byId["canopy"]);
 const CANOPY_UNDER = canopyBox.top + canopyBox.h * 0.8;
-const RISE = ROD.l.y - CANOPY_UNDER; // how far the rod rises to tuck under the canopy (stage %)
-const PLATFORM_EDGE = (() => {
-  const b = box(byId["platform"]);
-  return b.top + b.h * 0.62; // the front edge of its top (where the face begins)
-})();
 /** the flame layers: back (fire-1, full), middle (fire-2, 85 %, a touch to the side), front (fire-3, 70 %) */
 const LAYERS = [
   { w: 100, left: 0, first: 0 },
@@ -115,11 +107,9 @@ export function HinduWeddingScene({ scrollerRef, style, reduce, page }: { scroll
       const glow = q(".hw-fire-glow")[0] as HTMLElement;
       const wash = q(".hw-fire-wash")[0] as HTMLElement;
       const final = item("couple-final");
-      const antar = item("antarpat");
-      const cords = q(".hw-cord");
       const pill = q(".hw-pill")[0] as HTMLElement;
       const swags = [item("swag-wide"), item("swag-narrow")];
-      gsap.set([final, antar, ...cords], { autoAlpha: 0 });
+      gsap.set(final, { autoAlpha: 0 });
       gsap.set(q(".hw-diya-flame"), { scale: 0, autoAlpha: 0 });
       gsap.set([fire, glow, wash], { autoAlpha: 0 });
       gsap.set(pill, { autoAlpha: 0, y: 6 });
@@ -139,22 +129,6 @@ export function HinduWeddingScene({ scrollerRef, style, reduce, page }: { scroll
       };
       const twinkle = (els: Element[], stagger = 0.08) =>
         gsap.fromTo(els, { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.3 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.4 }], stagger });
-
-      /* ── the antarpat on its cords: `drop` (stage %) moves the rod down (− = tucked up under the
-            canopy); the cords run from the canopy to the rod; below the platform's front edge the
-            cloth is hidden (it sinks behind it) ── */
-      const veil = { drop: -RISE, unroll: 0.04 };
-      const setVeil = () => {
-        const dy = (veil.drop / 100) * H();
-        const rodY = ROD.l.y + veil.drop;
-        const clothH = anBox.h * veil.unroll;
-        const bottom = anBox.top + veil.drop + clothH; // the cloth's lowest point
-        const hide = Math.max(0, Math.min(1, (bottom - PLATFORM_EDGE) / clothH));
-        gsap.set(antar, { y: dy, scaleY: veil.unroll, clipPath: `inset(0 0 ${(hide * 100).toFixed(2)}% 0)` });
-        cords.forEach((c) => c.setAttribute("y2", (rodY * SC.ASPECT).toFixed(2)));
-      };
-      gsap.set(antar, { transformOrigin: `${SC.P["antarpat"].pivot[0] * 100}% 0%` });
-      setVeil();
 
       /** petals and florets falling from along the canopy's edge */
       const canopyShower = (n: number) => {
@@ -209,22 +183,12 @@ export function HinduWeddingScene({ scrollerRef, style, reduce, page }: { scroll
       tl.fromTo(items("scatter-"), { opacity: 0 }, { opacity: 1, duration: 0.4, stagger: 0.03 }, t + 1.1);
       t += ACT.ritual;
 
-      // 3. the antarpat comes down from under the canopy on its cords, unrolling as it comes
-      tl.to([antar, ...cords], { autoAlpha: 1, duration: 0.2 }, t);
-      tl.fromTo(veil, { drop: -RISE, unroll: 0.04 }, { drop: 0, unroll: 1, duration: ACT.veil - 0.2, ease: "power2.inOut", onUpdate: setVeil }, t);
-      t += ACT.veil;
-
-      // 4. behind it, the couple take their place
-      tl.fromTo(final, { autoAlpha: 0 }, { autoAlpha: 1, duration: ACT.couple }, t);
+      // 3. the couple appear, wedded, hand in hand — rising gently into place in a soft glow of
+      //    sparkles, petals falling from the canopy
+      tl.fromTo(final, { autoAlpha: 0, y: () => H() * 0.025 }, { autoAlpha: 1, y: 0, duration: 0.9, ease: "power2.out" }, t);
+      tl.fromTo(q(".hw-sight img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.3 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.4 }], stagger: 0.08 }, t + 0.45);
+      tl.call(() => canopyShower(10), undefined, t + 0.5);
       t += ACT.couple;
-
-      // 5. it is lowered — sliding straight down behind the platform's front edge as it fades, the
-      //    cords lengthening — and they see each other: a burst of sparkles, petals from the canopy
-      tl.to(veil, { drop: PLATFORM_EDGE - anBox.top + 2, duration: 1.1, ease: "power2.in", onUpdate: setVeil }, t);
-      tl.to([antar, ...cords], { autoAlpha: 0, duration: 0.45, ease: "power1.in" }, t + 0.75);
-      tl.fromTo(q(".hw-sight img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.3 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.4 }], stagger: 0.08 }, t + 0.7);
-      tl.call(() => canopyShower(10), undefined, t + 0.8);
-      t += ACT.reveal;
 
       // 6. together: the knot sparkles, the four diyas light one by one
       tl.fromTo(q(".hw-knot img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.3 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.4 }], stagger: 0.07 }, t + 0.1);
@@ -576,12 +540,6 @@ export function HinduWeddingScene({ scrollerRef, style, reduce, page }: { scroll
                 ) : null
               }
             />
-            {/* the antarpat's two gold cords, from the canopy's underside down to its rod */}
-            <svg className="hw-cords" viewBox={`0 0 100 ${100 * SC.ASPECT}`} preserveAspectRatio="none">
-              {[ROD.l, ROD.r].map((p, i) => (
-                <line key={i} className="hw-cord" x1={p.x} y1={CANOPY_UNDER * SC.ASPECT} x2={p.x} y2={p.y * SC.ASPECT} />
-              ))}
-            </svg>
             {/* the sacred fire on the kund: three flame layers, its glow, a warm wash over the couple and the pandit, faint smoke */}
             <div className="hw-fire-wash" style={{ left: `${FIRE.x}%`, top: `${FIRE.y}%`, width: `${FIRE_W * 5}%` }} />
             <div className="hw-fire-glow" style={{ left: `${FIRE.x}%`, top: `${FIRE.y}%`, width: `${FIRE_W * 2.6}%` }} />

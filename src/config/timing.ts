@@ -251,10 +251,9 @@ export const timing = {
     },
     /** the Hindu wedding scene ("Four Rounds of Fire"): the story plays (timed) as its page arrives */
     hindu: {
-      /** seconds for each act: the mandap builds; the kund and the fire, the pandit; the antarpat
-       *  comes down from the canopy; the couple (behind it); it is lowered — first sight; together
-       *  (the knot, the diyas); the blessing */
-      acts: { mandap: 1.5, ritual: 1.8, veil: 1.5, couple: 0.5, reveal: 1.6, together: 2.2, blessing: 1.6 },
+      /** seconds for each act: the mandap builds; the kund and the fire, the pandit; the couple
+       *  appear, wedded; together (the knot, the diyas); the blessing */
+      acts: { mandap: 1.5, ritual: 1.8, couple: 1.4, together: 2.2, blessing: 1.6 },
       /** leaving back up rewinds this much faster */
       reverseSpeed: 6,
       startAt: "96%",
