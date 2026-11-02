@@ -155,6 +155,27 @@ const config = {
       out.push(put("canopy-rim", "canopy-rim", 512, 272 - rimTop[1] * rimH + rp.pivot[1] * rimH, rimW, 4.6));
       out.push(put("kalash-finial", "kalash-finial", 512, 276, 236, 4.3));
 
+      // the crown: a still fan of petals round the kalash (they never turn, so nothing swaps
+      // places): a back row of pink petals, a front row of ivory ones between them; rot = how far
+      // each leans out from its base on the rim
+      [
+        [150, 278, 140, -58],
+        [252, 268, 160, -36],
+        [378, 260, 175, -15],
+        [512, 256, 185, 0],
+        [646, 260, 175, 15],
+        [772, 268, 160, 36],
+        [874, 278, 140, 58],
+      ].forEach(([x, y, w, rot], i) => out.push(put(`crown-b${i + 1}`, "crown-petal-outer", x, y, w, 4.2, { rot })));
+      [
+        [204, 286, 112, -48],
+        [318, 280, 126, -28],
+        [433, 276, 132, -10],
+        [591, 276, 132, 10],
+        [706, 280, 126, 28],
+        [820, 286, 112, 48],
+      ].forEach(([x, y, w, rot], i) => out.push(put(`crown-f${i + 1}`, "crown-petal-inner", x, y, w, 4.45, { rot })));
+
       // jasmine strands hanging from the rim, at the back and the sides (never across the couple)
       [
         ["strand-long", 150, 34],

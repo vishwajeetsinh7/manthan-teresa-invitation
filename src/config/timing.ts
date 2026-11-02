@@ -282,8 +282,9 @@ export const timing = {
       stageSpinSeconds: 60,
       crownSpinSeconds: 45,
       rangoliSpinSeconds: 120,
-      /** "3d": petals built in 3D and turning; "painted": the still painted lotus (low-power fallback) */
-      lotusMode: "3d" as "3d" | "painted",
+      /** "painted": the painted lotus (one drawing, the people between its back and its front);
+       *  "3d": petals built in 3D and turning (they swap places as they turn: it glitches) */
+      lotusMode: "painted" as "3d" | "painted",
       /** the camera: perspective (× the stage width), its tilt onto each lotus (°), how much the
        *  phone's own tilt nudges it (°) and the clouds (px) */
       camera: { perspective: 2.6, stageTilt: 74, crownTilt: 87, tiltNudge: 3, cloudNudge: 10 },

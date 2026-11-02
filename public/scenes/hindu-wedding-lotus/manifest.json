@@ -85,8 +85,8 @@
     },
     "crown-petal-outer": {
       "src": "crown-petal-outer.webp",
-      "w": 487,
-      "h": 505,
+      "w": 234,
+      "h": 243,
       "aspect": 0.9644,
       "pivot": [
         0.5031,
@@ -101,8 +101,8 @@
     },
     "crown-petal-inner": {
       "src": "crown-petal-inner.webp",
-      "w": 367,
-      "h": 406,
+      "w": 167,
+      "h": 185,
       "aspect": 0.9039,
       "pivot": [
         0.4986,

@@ -110,12 +110,129 @@
       "z": 3.2
     },
     {
+      "id": "crown-b1",
+      "piece": "crown-petal-outer",
+      "x": 14.65,
+      "y": 18.1,
+      "w": 13.67,
+      "z": 4.2,
+      "rot": -58
+    },
+    {
+      "id": "crown-b2",
+      "piece": "crown-petal-outer",
+      "x": 24.61,
+      "y": 17.45,
+      "w": 15.63,
+      "z": 4.2,
+      "rot": -36
+    },
+    {
+      "id": "crown-b3",
+      "piece": "crown-petal-outer",
+      "x": 36.91,
+      "y": 16.93,
+      "w": 17.09,
+      "z": 4.2,
+      "rot": -15
+    },
+    {
+      "id": "crown-b4",
+      "piece": "crown-petal-outer",
+      "x": 50,
+      "y": 16.67,
+      "w": 18.07,
+      "z": 4.2,
+      "rot": 0
+    },
+    {
+      "id": "crown-b5",
+      "piece": "crown-petal-outer",
+      "x": 63.09,
+      "y": 16.93,
+      "w": 17.09,
+      "z": 4.2,
+      "rot": 15
+    },
+    {
+      "id": "crown-b6",
+      "piece": "crown-petal-outer",
+      "x": 75.39,
+      "y": 17.45,
+      "w": 15.63,
+      "z": 4.2,
+      "rot": 36
+    },
+    {
+      "id": "crown-b7",
+      "piece": "crown-petal-outer",
+      "x": 85.35,
+      "y": 18.1,
+      "w": 13.67,
+      "z": 4.2,
+      "rot": 58
+    },
+    {
       "id": "kalash-finial",
       "piece": "kalash-finial",
       "x": 50,
       "y": 17.97,
       "w": 23.05,
       "z": 4.3
+    },
+    {
+      "id": "crown-f1",
+      "piece": "crown-petal-inner",
+      "x": 19.92,
+      "y": 18.62,
+      "w": 10.94,
+      "z": 4.45,
+      "rot": -48
+    },
+    {
+      "id": "crown-f2",
+      "piece": "crown-petal-inner",
+      "x": 31.05,
+      "y": 18.23,
+      "w": 12.3,
+      "z": 4.45,
+      "rot": -28
+    },
+    {
+      "id": "crown-f3",
+      "piece": "crown-petal-inner",
+      "x": 42.29,
+      "y": 17.97,
+      "w": 12.89,
+      "z": 4.45,
+      "rot": -10
+    },
+    {
+      "id": "crown-f4",
+      "piece": "crown-petal-inner",
+      "x": 57.71,
+      "y": 17.97,
+      "w": 12.89,
+      "z": 4.45,
+      "rot": 10
+    },
+    {
+      "id": "crown-f5",
+      "piece": "crown-petal-inner",
+      "x": 68.95,
+      "y": 18.23,
+      "w": 12.3,
+      "z": 4.45,
+      "rot": 28
+    },
+    {
+      "id": "crown-f6",
+      "piece": "crown-petal-inner",
+      "x": 80.08,
+      "y": 18.62,
+      "w": 10.94,
+      "z": 4.45,
+      "rot": 48
     },
     {
       "id": "canopy-rim",

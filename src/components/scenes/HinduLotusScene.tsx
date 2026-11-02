@@ -70,6 +70,8 @@ const RUNTIME = [
 // where things are
 const ST = META.stage;
 const CR = META.crown;
+/** the crown's still fan of petals (layout items crown-b… behind the kalash, crown-f… in front) */
+const CROWN_FAN = SC.ITEMS.filter((i) => /^crown-[bf]\d/.test(i.id));
 const FIRE = point("havan-kund", "fire");
 const kund = box(byId["havan-kund"]);
 const FIRE_W = kund.w * 0.6;
@@ -96,7 +98,8 @@ function Pc({ id, z, className, children, style }: { id: string; z?: number; cla
     <div
       className={`ms-item${className ? ` ${className}` : ""}`}
       data-id={id}
-      style={{ left: `${b.left}%`, top: `${b.top}%`, width: `${b.w}%`, height: `${b.h}%`, zIndex: z ?? zOf(it.z), transformOrigin: b.origin, ...style }}
+      data-rot={it.rot}
+      style={{ left: `${b.left}%`, top: `${b.top}%`, width: `${b.w}%`, height: `${b.h}%`, zIndex: z ?? zOf(it.z), transformOrigin: b.origin, ...(it.rot ? { transform: `rotate(${it.rot}deg)` } : {}), ...style }}
     >
       <img src={url(it.piece)} alt="" draggable={false} style={t ? { transform: t } : undefined} />
       {children}
@@ -114,7 +117,8 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
   const assembledOnce = useRef(false);
   const painted = quality >= 2;
   const stagePetals = useMemo(() => buildPetals(S.stageRings, aspectOf, 11, quality >= 1), [quality]);
-  const crownPetals = useMemo(() => buildPetals(S.crownRings, aspectOf, 23, quality >= 1), [quality]);
+  // the crown is a still, hand-placed fan now (CROWN_FAN), not a turning ring
+  const crownPetals = useMemo<Petal[]>(() => [], []);
   const diyaPetals = useMemo(() => {
     const outer = stagePetals.filter((p) => p.piece === "petal-outer");
     return S.diyaPetals.map((i) => outer[Math.round((i / 14) * outer.length) % outer.length]);
@@ -418,7 +422,12 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       //    the jasmine strands unroll one by one, with a little swing
       tl.fromTo(canopyGroup, { y: () => -H() * 0.2 }, { y: 0, duration: 0.9, ease: "back.out(1.4)" }, t);
       tl.to(rim, { autoAlpha: 1, duration: 0.35 }, t);
-      tl.fromTo(q(".lt-crown"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, t + 0.15);
+      // the crown's petals open out from the middle, each from upright to its lean
+      const fan = q(".lt-fan") as HTMLElement[];
+      fan.forEach((el) => {
+        const rot = +(el.dataset.rot ?? 0);
+        tl.fromTo(el, { autoAlpha: 0, scale: 0.3, rotation: 0 }, { autoAlpha: 1, scale: 1, rotation: rot, duration: 0.8, ease: "back.out(1.6)" }, t + 0.2 + (Math.abs(rot) / 60) * 0.35);
+      });
       [0, 1].forEach((ring, j) => openRing(crownL, ring, t + 0.25 + j * 0.2, 1.0));
       tl.fromTo(crownL.extra, { v: 120 }, { v: 0, duration: 1.3, ease: "power2.out" }, t + 0.2);
       tl.to(crownL.on, { v: 1, duration: 1, ease: "sine.in" }, t + 1.2);
@@ -772,7 +781,13 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
                 <Pc key={s.id} id={s.id} z={200} className="lt-strand" />
               ))}
               <LotusPetals className="lt-crown" view={CROWN_VIEW} petals={crownPetals} url={url} />
+              {CROWN_FAN.filter((c) => c.id.startsWith("crown-b")).map((c) => (
+                <Pc key={c.id} id={c.id} z={300} className="lt-crown lt-fan" />
+              ))}
               <Pc id="kalash-finial" z={400} />
+              {CROWN_FAN.filter((c) => c.id.startsWith("crown-f")).map((c) => (
+                <Pc key={c.id} id={c.id} z={450} className="lt-crown lt-fan" />
+              ))}
               <Pc id="canopy-rim" z={600} />
             </div>
 

@@ -2408,7 +2408,8 @@ body {
   display: block;
 }
 .lt-painted-front {
-  z-index: 90;
+  /* in front of the people (430s), the kund and the fire (436–440), the kalash and thali (470) */
+  z-index: 480;
   clip-path: inset(64% 0 0 0);
 }
 /* the rangoli: turned in its own plane, then squashed into the camera's oval */
