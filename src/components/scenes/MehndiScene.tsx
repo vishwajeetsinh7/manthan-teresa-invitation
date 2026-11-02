@@ -19,6 +19,7 @@ import {
   revealTween,
   stageVars,
   useDebug,
+  useHangingTilt,
   useSceneAssets,
   zOf,
   type Layout,
@@ -82,6 +83,8 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
   const wrap = useRef<HTMLDivElement>(null);
   const ready = useSceneAssets(wrap, scrollerRef, RUNTIME);
   const debug = useDebug();
+  // the toran strands swing to follow the phone's tilt
+  useHangingTilt(wrap, '[data-id^="toran-"]', ready && !reduce);
 
   useGSAP(
     () => {
@@ -98,13 +101,16 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       const rnd = gsap.utils.random;
       const { spawn, setTicking, count } = createParticles(q(".ms-particle") as HTMLImageElement[], H, url);
 
-      /* ── assembly: laid out in % (0–93) of S.assemble seconds, then the hidden initial ── */
+      /* ── assembly: the carpet (0–15 %) in S.carpetSeconds, the rest (15–93 %) in S.assemble
+            seconds, then the hidden initial ── */
       let assembled = false;
       let lastRun = -Infinity;
       const tl = gsap.timeline({ paused: true, defaults: { ease: "power2.out" } });
-      const u = S.assemble / 93; // seconds per %
-      const at = (pct: number) => pct * u;
+      const C = S.carpetSeconds;
+      const u = S.assemble / 78; // seconds per % after the carpet
+      const at = (pct: number) => (pct <= 15 ? (pct / 15) * C : C + (pct - 15) * u);
       const dur = (pct: number) => pct * u;
+      const cd = (pct: number) => (pct / 15) * C; // within the carpet's act
 
       const groomA = item("groom");
       const groomB = item("groom-b");
@@ -115,18 +121,19 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       const carpet = q(".mh-carpet")[0] as HTMLElement | undefined;
       if (HAS_CARPET && carpet) {
         const spins = q(".mh-carpet-spin");
-        tl.fromTo(carpet, { scale: 0.15, opacity: 0 }, { scale: 1, duration: dur(12), ease: "power2.out" }, 0);
-        tl.to(carpet, { opacity: 1, duration: dur(2), ease: "none" }, 0);
-        tl.fromTo(spins, { rotation: -540 }, { rotation: 0, duration: dur(14.5), ease: "power3.out" }, 0);
-        tl.fromTo(carpet, { y: 0 }, { y: () => -12 * k(), duration: dur(6), ease: "sine.out" }, dur(1));
-        tl.to(carpet, { y: 0, duration: dur(8), ease: "back.out(1.3)" }, dur(7));
+        // (one slow turn and a little more, easing out — then it keeps turning slowly while idle)
+        tl.fromTo(carpet, { scale: 0.15, opacity: 0 }, { scale: 1, duration: cd(12), ease: "power2.out" }, 0);
+        tl.to(carpet, { opacity: 1, duration: cd(2), ease: "none" }, 0);
+        tl.fromTo(spins, { rotation: -420 }, { rotation: 0, duration: cd(14.5), ease: "power2.out" }, 0);
+        tl.fromTo(carpet, { y: 0 }, { y: () => -12 * k(), duration: cd(6), ease: "sine.out" }, cd(1));
+        tl.to(carpet, { y: 0, duration: cd(8), ease: "back.out(1.3)" }, cd(7));
         // on landing: petals fly out from its edge along the oval; a ring of gold dust spreads
-        tl.call(() => carpetPetals(), undefined, at(14));
-        tl.fromTo(q(".mh-dust"), { scale: 0.92, opacity: 0 }, { keyframes: [{ opacity: 0.9, scale: 1, duration: 0.15 }, { opacity: 0, scale: 1.16, duration: 0.85, ease: "power2.out" }] }, at(14));
+        tl.call(() => carpetPetals(), undefined, cd(14));
+        tl.fromTo(q(".mh-dust"), { scale: 0.92, opacity: 0 }, { keyframes: [{ opacity: 0.9, scale: 1, duration: 0.15 }, { opacity: 0, scale: 1.16, duration: 0.85, ease: "power2.out" }] }, cd(14));
       } else {
         const rug = item("rug");
         gsap.set(rug, { transformOrigin: "50% 60%" });
-        tl.fromTo(rug, { scaleX: 0.12, scaleY: 0.3, opacity: 0 }, { scaleX: 1, scaleY: 1, opacity: 1, duration: dur(13), ease: "power3.out" }, 0);
+        tl.fromTo(rug, { scaleX: 0.12, scaleY: 0.3, opacity: 0 }, { scaleX: 1, scaleY: 1, opacity: 1, duration: cd(13), ease: "power3.out" }, 0);
       }
       tl.fromTo(q(".ms-shadow"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: dur(10) }, at(12));
 
@@ -195,13 +202,16 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       tl.to(henna, { opacity: 0.85, duration: 0.45 }, t0 + 1.5);
       tl.to(q(".mh-initial-gold"), { opacity: 0, duration: 0.45 }, t0 + 1.55);
       tl.fromTo(q(".mh-palm-sparks img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.25 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.35 }], stagger: 0.07 }, t0 + 1.75);
-      // 4. a little heart pops up between them and floats away; 5. he straightens, his hand to his heart
+      // 4. a little heart pops up between them and floats away; 5. he straightens (and, if the
+      //    config says "b", puts his hand to his heart; "a" keeps him pointing at her palm)
       const heart = q(".mh-heart")[0];
       tl.fromTo(heart, { scale: 0, y: 0, opacity: 0 }, { keyframes: [{ scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2.6)" }, { y: () => -H() * 0.12, opacity: 0, duration: 1, ease: "sine.in" }] }, t0 + 1.8);
       tl.to(grooms, { rotation: 0, duration: 0.4, ease: "sine.inOut" }, t0 + 1.8);
-      tl.to(groomA, { autoAlpha: 0, duration: 0.28, ease: "sine.inOut" }, t0 + 1.9);
-      tl.to(groomB, { autoAlpha: 1, duration: 0.28, ease: "sine.inOut" }, t0 + 1.9);
-      tl.fromTo(q(".mh-heart-sparks img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.22 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.3 }], stagger: 0.08 }, t0 + 2.1);
+      if (S.groomFinal === "b") {
+        tl.to(groomA, { autoAlpha: 0, duration: 0.28, ease: "sine.inOut" }, t0 + 1.9);
+        tl.to(groomB, { autoAlpha: 1, duration: 0.28, ease: "sine.inOut" }, t0 + 1.9);
+      }
+      tl.fromTo(q(S.groomFinal === "b" ? ".mh-heart-sparks img" : ".mh-tip-sparks img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.22 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.3 }], stagger: 0.08 }, t0 + 2.1);
       tl.to({}, { duration: 0.01 }, t0 + S.initialSeconds);
       gsap.set(item("flower-girl"), { opacity: 0 });
 
@@ -257,8 +267,8 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
         every(S.glint * 0.9, S.glint * 1.1, () => {
           gsap.fromTo(glint, { attr: { x1: -30, x2: -6 } }, { attr: { x1: 66, x2: 90 }, duration: 1.3, ease: "sine.inOut" });
         }, 2);
-        // the carpet slowly turns (off by default)
-        if (S.carpetIdleSpin) idle.to(q(".mh-carpet-spin"), { rotation: "+=360", duration: 90, ease: "none", repeat: -1 }, 0);
+        // the carpet keeps turning, slowly
+        if (S.carpetIdleSpin) idle.to(q(".mh-carpet-spin"), { rotation: "+=360", duration: S.carpetSpinSeconds, ease: "none", repeat: -1 }, 0);
         // lamp flames: cycle the three shapes, flicker, glow
         q(".ms-flame").forEach((f) => {
           const imgs = f.querySelectorAll("img");
@@ -369,7 +379,7 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
   const letterW = PALM_W * 0.8; // its final size in her palm (stage %)
 
   return (
-    <div ref={wrap} className="ms-wrap mh-scene" data-page="mehndi" data-reduce={reduce || undefined} style={{ ...style, ...stageVars(SC.ASPECT) }} aria-hidden>
+    <div ref={wrap} className="ms-wrap mh-scene" data-page="mehndi" data-final={S.groomFinal} data-reduce={reduce || undefined} style={{ ...style, ...stageVars(SC.ASPECT) }} aria-hidden>
       <div className="ms-stage" data-ready={ready || undefined}>
         {debug && <DebugMaster scene={SC} />}
         {ready && (
@@ -440,6 +450,11 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
                 <path className="mh-heart-shine" d="M7.2 6.4 C6 6.8 5.3 7.9 5.4 9.2" />
               </svg>
             ))}
+            <div className="mh-heart-sparks mh-tip-sparks" style={{ left: `${TIP.x}%`, top: `${TIP.y}%` }}>
+              {[0, 1, 2].map((i) => (
+                <img key={i} src={url(PARTICLE_KINDS.sparkles[i + 1])} alt="" style={{ left: `${[-80, 90, 10][i]}%`, top: `${[-20, -40, 90][i]}%` }} />
+              ))}
+            </div>
             <div className="mh-heart-sparks" style={{ left: `${GROOM_HEART.x}%`, top: `${GROOM_HEART.y}%` }}>
               {[0, 1, 2].map((i) => (
                 <img key={i} src={url(PARTICLE_KINDS.sparkles[i + 1])} alt="" style={{ left: `${[-80, 90, 10][i]}%`, top: `${[-20, -40, 90][i]}%` }} />

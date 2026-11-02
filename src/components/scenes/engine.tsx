@@ -366,3 +366,50 @@ export function playOnArrival(o: {
 
 /** a wrapper style for a scene's stage (its height:width ratio, for the shared CSS) */
 export const stageVars = (aspect: number): CSSProperties => ({ ["--sa" as string]: aspect }) as CSSProperties;
+
+/**
+ * Hanging things (garland strands) follow the phone's tilt: each is a little
+ * pendulum about its hanging point (its transform-origin) that swings to
+ * where "down" is — turn the phone upside down and they hang the other way.
+ * Uses the CSS `rotate` property, so it adds to any GSAP sway on the same
+ * element. Nothing happens without tilt sensors (desktop) or while off.
+ */
+export function useHangingTilt(wrap: RefObject<HTMLElement | null>, selector: string, on: boolean) {
+  useEffect(() => {
+    const root = wrap.current;
+    if (!on || !root) return;
+    const els = [...root.querySelectorAll<HTMLElement>(selector)];
+    if (!els.length) return;
+    // each strand a touch different (its own stiffness), so they don't move as one
+    const sw = els.map((el, i) => ({ el, a: 0, v: 0, k: 26 + ((i * 7) % 5) * 3, shown: NaN }));
+    let target = 0;
+    let unsub = () => {};
+    import("@/src/lib/tilt").then(({ onTilt }) => {
+      unsub = onTilt(({ angle, strength }) => {
+        // fade the effect out as the phone lies flat (no clear "down")
+        const s = Math.min(1, Math.max(0, (strength - 0.2) / 0.5));
+        target = -angle * s;
+      });
+    });
+    const tick = (_t: number, dms: number) => {
+      const dt = Math.min(0.05, dms / 1000);
+      for (const p of sw) {
+        // the shortest way round to the target (−180 … 180)
+        const d = ((target - p.a + 540) % 360) - 180;
+        p.v += (p.k * d - 4.2 * p.v) * dt;
+        p.a += p.v * dt;
+        const r = Math.round(p.a * 10) / 10;
+        if (r !== p.shown) {
+          p.el.style.rotate = `${r}deg`;
+          p.shown = r;
+        }
+      }
+    };
+    gsap.ticker.add(tick);
+    return () => {
+      gsap.ticker.remove(tick);
+      unsub();
+      sw.forEach((p) => (p.el.style.rotate = ""));
+    };
+  }, [wrap, selector, on]);
+}

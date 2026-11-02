@@ -19,6 +19,7 @@ import {
   revealTween,
   stageVars,
   useDebug,
+  useHangingTilt,
   useSceneAssets,
   type Layout,
   type Manifest,
@@ -62,6 +63,8 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
   const wrap = useRef<HTMLDivElement>(null);
   const ready = useSceneAssets(wrap, scrollerRef, RUNTIME);
   const debug = useDebug();
+  // the hanging strands swing to follow the phone's tilt
+  useHangingTilt(wrap, '[data-id^="strand-"]', ready && !reduce);
 
   useGSAP(
     () => {

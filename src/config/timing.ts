@@ -196,9 +196,11 @@ export const timing = {
     scene: {
       /** from the Mehndi node down to the stage's top */
       offset: 86,
-      /** the pieces come in one by one (the carpet spins open, bride, toran, groom, props, henna)
-       *  within this long (s) as the page arrives; reverses faster */
-      assemble: 7.5,
+      /** the carpet spins open and lands (s) as the page arrives… */
+      carpetSeconds: 2.8,
+      /** …then the bride, toran, groom, props and henna come in one by one within this long (s);
+       *  going back up reverses it faster */
+      assemble: 6.3,
       /** then the hidden initial: he leans in, a script letter draws on her palm, a heart, his
        *  hand to his heart (s) */
       initialSeconds: 2.8,
@@ -208,8 +210,11 @@ export const timing = {
       lean: [6, 9] as [number, number],
       hearts: [8, 12] as [number, number],
       glint: 10,
-      /** the carpet slowly turns once every 90 s while idle */
-      carpetIdleSpin: false as boolean,
+      /** the carpet keeps turning slowly while idle: once every carpetSpinSeconds */
+      carpetIdleSpin: true as boolean,
+      carpetSpinSeconds: 40,
+      /** the groom's pose at the end: "a" still pointing at her palm (as he arrives), "b" hand on heart */
+      groomFinal: "a" as "a" | "b",
       /** the carpet's tilt (°): a circle seen as master-v2's oval (acos 250 / 1075) */
       carpetTilt: 76.5,
       reverseSpeed: 1.8,
