@@ -169,8 +169,13 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       gsap.set(q(".drape-tl .drape-in"), { xPercent: -105, yPercent: -105, rotation: -9, transformOrigin: "0 0" });
       gsap.set(q(".drape-br .drape-in"), { xPercent: 105, yPercent: 105, rotation: -9, transformOrigin: "100% 100%" });
       gsap.set(q(".vine .draw, .divider .draw, .flourish .draw"), { drawSVG: "0%" });
-      gsap.set(q(".vine .pop, .divider .pop, .flourish .pop"), { scale: 0, transformOrigin: "50% 50%" });
-      gsap.set(q(".vine g > .pop"), { transformOrigin: "0% 50%" });
+      // (each vine leaf grows from its stalk on the stem — 0% 59.5% of its box is the stalk at
+      //  (0, 0); set in one go: changing the origin
+      //  after the scale makes GSAP shift the leaf to compensate, off the stem)
+      gsap.set(q(".vine .pop, .divider .pop, .flourish .pop"), {
+        scale: 0,
+        transformOrigin: (_: number, el: Element) => (el.classList.contains("leaf") ? "0% 59.5%" : "50% 50%"),
+      });
       gsap.set(q(".seal"), { opacity: 0, scale: 1.4, y: -40 });
       gsap.set(q(".seal-shadow"), { opacity: 0, scale: 0.55 });
       gsap.set(q(".seal-ring"), { opacity: 0, scale: 0.9 });

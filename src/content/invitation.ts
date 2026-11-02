@@ -84,7 +84,7 @@ export const invitation = {
       note: "Wear yellow",
       mood: "haldi",
       icons: ["haldi"],
-      flower: { kind: 4 }, // pale pink rose
+      flower: { kind: 2 }, // flower-3
     },
     {
       day: "24",

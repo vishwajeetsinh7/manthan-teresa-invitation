@@ -5,56 +5,142 @@
 const GOLD = "#b08a4a";
 const GOLD_LIGHT = "#d4b577";
 
-const LEAF = "M0 0 C4 -5.5 12 -5.5 17 0 C12 5.5 4 5.5 0 0 Z";
+/* ── the corner vines: every leaf and tendril grows out of the stem itself ── */
 
-/** Corner vine for the top-left; rotate 180° for bottom-right. Draws from the side edge to the top edge. */
-export function CornerVine() {
-  const stems = [
-    "M6 248 C14 214 30 178 52 150 C80 114 120 86 156 54 C176 36 192 20 206 4",
-    "M52 150 C62 158 76 158 82 148 C86 140 80 133 73 137",
-    "M108 100 C118 110 134 110 138 99 C141 91 134 86 128 90",
-    "M156 54 C166 62 180 60 183 50 C185 43 179 40 175 44",
-    "M24 200 C34 206 46 204 48 194 C49 187 43 184 39 188",
-    "M86 122 C80 108 84 96 94 92",
-  ];
-  const leaves: [number, number, number, number][] = [
-    // x, y, rotation, scale
-    [14, 222, 20, 0.9],
-    [22, 206, -110, 0.8],
-    [36, 176, 15, 1],
-    [44, 162, -115, 0.85],
-    [66, 134, 10, 1],
-    [92, 112, -100, 0.9],
-    [124, 82, 5, 1],
-    [136, 72, -105, 0.85],
-    [170, 40, 0, 0.9],
-    [188, 24, -110, 0.75],
-    [82, 148, 70, 0.6],
-    [138, 99, 60, 0.6],
-  ];
-  const dots: [number, number][] = [
-    [73, 137],
-    [128, 90],
-    [175, 44],
-    [39, 188],
-    [94, 92],
-  ];
+type Pt = { x: number; y: number };
+/** an absolute "M … C … C …" path → its cubic segments */
+function cubics(d: string): Pt[][] {
+  const n = d.match(/-?\d*\.?\d+/g)!.map(Number);
+  const segs: Pt[][] = [];
+  let p0 = { x: n[0], y: n[1] };
+  for (let i = 2; i + 5 < n.length; i += 6) {
+    const seg = [p0, { x: n[i], y: n[i + 1] }, { x: n[i + 2], y: n[i + 3] }, { x: n[i + 4], y: n[i + 5] }];
+    segs.push(seg);
+    p0 = seg[3];
+  }
+  return segs;
+}
+const bez = (s: Pt[], t: number) => {
+  const [a, b, c, e] = s;
+  const m = 1 - t;
+  return { x: m * m * m * a.x + 3 * m * m * t * b.x + 3 * m * t * t * c.x + t * t * t * e.x, y: m * m * m * a.y + 3 * m * m * t * b.y + 3 * m * t * t * c.y + t * t * t * e.y };
+};
+/** a point on a stem (u: share of its length, 0 = its start, 1 = its end) and the direction it grows there (degrees) */
+function onStem(d: string, u: number) {
+  const segs = cubics(d);
+  // measure the stem, so leaves spaced evenly in u are spaced evenly along it
+  const N = 48;
+  const marks: { k: number; t: number; at: number }[] = [];
+  let len = 0;
+  let prev = segs[0][0];
+  segs.forEach((sg, k) => {
+    for (let j = 1; j <= N; j++) {
+      const q = bez(sg, j / N);
+      len += Math.hypot(q.x - prev.x, q.y - prev.y);
+      marks.push({ k, t: j / N, at: len });
+      prev = q;
+    }
+  });
+  const want = Math.min(Math.max(u, 0), 1) * len;
+  const hit = marks.find((mk) => mk.at >= want) ?? marks[marks.length - 1];
+  const [a, b, c, e] = segs[hit.k];
+  const t = Math.max(0, hit.t - (hit.at - want) / ((len / marks.length) * N));
+  const m = 1 - t;
+  const x = m * m * m * a.x + 3 * m * m * t * b.x + 3 * m * t * t * c.x + t * t * t * e.x;
+  const y = m * m * m * a.y + 3 * m * m * t * b.y + 3 * m * t * t * c.y + t * t * t * e.y;
+  const dx = 3 * m * m * (b.x - a.x) + 6 * m * t * (c.x - b.x) + 3 * t * t * (e.x - c.x);
+  const dy = 3 * m * m * (b.y - a.y) + 6 * m * t * (c.y - b.y) + 3 * t * t * (e.y - c.y);
+  return { x: +x.toFixed(2), y: +y.toFixed(2), deg: (Math.atan2(dy, dx) * 180) / Math.PI };
+}
+
+/** a leaf, its stalk at (0, 0), pointing along +x (≈ 21 long) */
+const LEAF_BODY =
+  "M0 0 C1.4 -0.3 2.6 -0.5 3.4 -0.6 C6 -4.8 11.5 -6.6 16 -4.8 C18.5 -3.8 20.3 -1.8 21.6 0.3 C18.6 2.6 14.4 4.5 10 4.2 C6.6 3.9 4.4 2.3 3.4 0.6 C2.6 0.5 1.4 0.3 0 0 Z";
+const LEAF_VEIN = "M3.4 0 C8 -0.5 14 -0.4 20.4 0.3";
+const LEAF_SIDE_VEINS = "M8 -0.4 C9.4 -2 10.8 -3 12.4 -3.6 M12.6 -0.3 C14 -1.8 15.2 -2.6 16.6 -3 M9.6 -0.3 C11 1.2 12.4 2 14 2.4";
+/** a tendril leaving the stem at (0, 0), curling to its tip dot */
+const TENDRIL = "M0 0 C8 1 18 -1 23 -8 C26.5 -13 23.5 -19 18 -17.6 C14.4 -16.6 14.6 -12 17.6 -11.6";
+const TENDRIL_TIP: Pt = { x: 17.6, y: -11.6 };
+
+/** [where on the stem (0–1), which side (1 = right of its growth, -1 = left), angle off the stem, size] */
+type LeafAt = [number, 1 | -1, number, number];
+type TendrilAt = [number, 1 | -1, number];
+
+function GoldVine({ id, viewBox, stem, leaves, tendrils }: { id: string; viewBox: string; stem: string; leaves: LeafAt[]; tendrils: TendrilAt[] }) {
+  const grad = `${id}-leaf`;
   return (
-    <svg viewBox="0 0 214 250" aria-hidden>
-      <g fill="none" stroke={GOLD} strokeWidth="1.25" strokeLinecap="round">
-        {stems.map((d, i) => (
-          <path key={i} className="draw" d={d} strokeWidth={i === 0 ? 1.5 : 1.05} />
-        ))}
+    <svg viewBox={viewBox} aria-hidden>
+      <defs>
+        <linearGradient id={grad} x1="0" y1="-6" x2="0" y2="5" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#ecd393" />
+          <stop offset="0.5" stopColor="#c99d4f" />
+          <stop offset="1" stopColor="#97722f" />
+        </linearGradient>
+      </defs>
+      <g fill="none" stroke={GOLD} strokeLinecap="round" strokeLinejoin="round">
+        <path className="draw" d={stem} strokeWidth="1.5" />
+        {tendrils.map(([u, side, size], i) => {
+          const p = onStem(stem, u);
+          return (
+            <g key={i} transform={`translate(${p.x} ${p.y}) rotate(${(p.deg + side * 50).toFixed(1)}) scale(${size} ${-side * size})`}>
+              <path className="draw" d={TENDRIL} strokeWidth={1.05 / size} />
+            </g>
+          );
+        })}
       </g>
-      {leaves.map(([x, y, r, s], i) => (
-        <g key={i} transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`}>
-          <path className="pop" d={LEAF} fill={GOLD_LIGHT} fillOpacity="0.55" stroke={GOLD} strokeWidth="0.9" />
-        </g>
-      ))}
-      {dots.map(([x, y], i) => (
-        <circle key={i} className="pop" cx={x} cy={y} r="2" fill={GOLD} />
-      ))}
+      {leaves.map(([u, side, angle, size], i) => {
+        const p = onStem(stem, u);
+        return (
+          <g key={i} transform={`translate(${p.x} ${p.y}) rotate(${(p.deg + side * angle).toFixed(1)}) scale(${size} ${side * size})`}>
+            <g className="pop leaf">
+              <path d={LEAF_BODY} fill={`url(#${grad})`} stroke="#8a6a32" strokeWidth={0.7 / size} strokeLinejoin="round" />
+              <path d={LEAF_VEIN} fill="none" stroke="#7d5f28" strokeWidth={0.6 / size} strokeLinecap="round" />
+              <path d={LEAF_SIDE_VEINS} fill="none" stroke="#7d5f28" strokeOpacity="0.6" strokeWidth={0.4 / size} strokeLinecap="round" />
+            </g>
+          </g>
+        );
+      })}
+      {tendrils.map(([u, side, size], i) => {
+        const p = onStem(stem, u);
+        return (
+          <g key={i} transform={`translate(${p.x} ${p.y}) rotate(${(p.deg + side * 50).toFixed(1)}) scale(${size} ${-side * size})`}>
+            <circle className="pop" cx={TENDRIL_TIP.x} cy={TENDRIL_TIP.y} r={1.9 / size} fill={GOLD} />
+          </g>
+        );
+      })}
     </svg>
+  );
+}
+
+/** Corner vine for the top-left. Grows from the side edge up to the top edge. */
+export function CornerVine() {
+  return (
+    <GoldVine
+      id="cv"
+      viewBox="0 0 214 250"
+      stem="M6 248 C14 214 30 178 52 150 C80 114 120 86 156 54 C176 36 192 20 206 4"
+      leaves={[
+        [0.06, -1, 48, 0.95],
+        [0.12, 1, 46, 0.9],
+        [0.2, -1, 44, 1],
+        [0.27, 1, 48, 0.95],
+        [0.38, -1, 42, 1],
+        [0.46, 1, 46, 0.95],
+        [0.55, -1, 44, 0.95],
+        [0.63, 1, 48, 0.9],
+        [0.72, -1, 42, 0.85],
+        [0.8, 1, 46, 0.8],
+        [0.88, -1, 40, 0.72],
+        [0.95, 1, 42, 0.62],
+      ]}
+      tendrils={[
+        [0.16, 1, 0.9],
+        [0.34, 1, 1.05],
+        [0.5, -1, 0.85],
+        [0.59, 1, 1],
+        [0.84, 1, 0.8],
+      ]}
+    />
   );
 }
 
@@ -64,51 +150,32 @@ export function CornerVine() {
  * Same 178-wide box as the drape ("br" shape); y = 214 is the screen bottom.
  */
 export function TailVine() {
-  const stems = [
-    "M170 -6 C156 24 134 52 108 76 C72 110 20 146 -2 190 C-18 222 18 266 90 292 C126 304 156 308 178 312",
-    "M108 76 C112 64 124 60 130 66 C134 71 129 77 124 74",
-    "M44 128 C36 120 26 124 26 132 C26 138 33 140 36 135",
-    "M-6 236 C-16 240 -18 252 -10 254 C-4 256 -1 249 -5 246",
-    "M58 282 C56 294 64 302 72 298",
-    "M140 40 C150 34 158 40 154 48",
-  ];
-  const leaves: [number, number, number, number][] = [
-    [152, 26, -150, 0.85],
-    [128, 54, -40, 0.75],
-    [92, 92, -160, 1],
-    [66, 110, -60, 0.85],
-    [30, 144, -170, 0.9],
-    [10, 172, -70, 0.8],
-    [-8, 212, 175, 0.9],
-    [-4, 242, 80, 0.8],
-    [30, 274, 150, 0.95],
-    [64, 288, 50, 0.8],
-    [112, 302, 160, 0.85],
-    [146, 308, 70, 0.75],
-  ];
-  const dots: [number, number][] = [
-    [124, 74],
-    [36, 135],
-    [-5, 246],
-    [72, 298],
-    [154, 48],
-  ];
   return (
-    <svg viewBox="0 0 178 312" aria-hidden>
-      <g fill="none" stroke={GOLD} strokeLinecap="round">
-        {stems.map((d, i) => (
-          <path key={i} className="draw" d={d} strokeWidth={i === 0 ? 1.5 : 1.05} />
-        ))}
-      </g>
-      {leaves.map(([x, y, r, s], i) => (
-        <g key={i} transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`}>
-          <path className="pop" d={LEAF} fill={GOLD_LIGHT} fillOpacity="0.55" stroke={GOLD} strokeWidth="0.9" />
-        </g>
-      ))}
-      {dots.map(([x, y], i) => (
-        <circle key={i} className="pop" cx={x} cy={y} r="2" fill={GOLD} />
-      ))}
-    </svg>
+    <GoldVine
+      id="tv"
+      viewBox="0 0 178 312"
+      stem="M170 -6 C156 24 134 52 108 76 C72 110 20 146 -2 190 C-18 222 18 266 90 292 C126 304 156 308 178 312"
+      leaves={[
+        [0.05, 1, 44, 0.8],
+        [0.11, -1, 46, 0.85],
+        [0.18, 1, 42, 0.95],
+        [0.25, -1, 46, 0.95],
+        [0.33, 1, 44, 1],
+        [0.41, -1, 46, 0.95],
+        [0.5, 1, 42, 0.95],
+        [0.58, -1, 46, 0.9],
+        [0.66, 1, 44, 0.9],
+        [0.74, -1, 46, 0.85],
+        [0.82, 1, 42, 0.8],
+        [0.9, -1, 44, 0.75],
+      ]}
+      tendrils={[
+        [0.22, -1, 0.9],
+        [0.38, 1, 1],
+        [0.62, -1, 0.95],
+        [0.78, 1, 0.85],
+      ]}
+    />
   );
 }
 
