@@ -108,7 +108,7 @@ export const invitation = {
       time: "4:00 PM onwards", // PLACEHOLDER
       place: "St. Mary's Church", // PLACEHOLDER
       note: "Formal / Gowns & Suits", // PLACEHOLDER
-      icons: ["church", "cheers"],
+      icons: ["church"],
       flower: { kind: 2 }, // ivory — white wedding
     },
   ],
