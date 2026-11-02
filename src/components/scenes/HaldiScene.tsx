@@ -31,11 +31,10 @@ import {
 
 /**
  * The Haldi scene, "The Golden Swing": curtains part on a canopy of marigold
- * strands and umbrellas; the couple's swing descends from the beam; friends
- * arrive, the pookalam blooms, props settle, and haldi lands on the couple in
- * soft dabs. Then it idles — the swing a real pendulum, strands swaying,
- * water drops from the Kerala friend's pot — and a little boy with a pichkari
- * pops in now and then to squirt the couple.
+ * strands and umbrellas; the couple's swing descends from the beam; the
+ * pookalam blooms, props settle, and haldi lands on the couple in soft dabs.
+ * Then it idles — the swing a real pendulum, strands swaying — and a little
+ * boy with a pichkari pops in now and then to squirt the couple.
  *
  * Shake the phone (or tap the swing) and the swing goes back and up, away from
  * us, then comes forward and down towards us — a damped pendulum in depth
@@ -126,13 +125,7 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
         .fromTo(swing, { rotation: 4 }, { rotation: 0, duration: 8, ease: "power2.inOut" }, 25)
         .fromTo(q(".hs-shadow"), { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 10 }, 24);
 
-      // 32–55 %: the friends glide in with a walking bob; banana plants grow; the pookalam blooms
-      const walk = (el: HTMLElement, from: number, at: number) => {
-        tl.fromTo(el, { x: () => from * W(), opacity: 0 }, { x: 0, opacity: 1, duration: 18, ease: "power3.out" }, at);
-        tl.fromTo(el, { y: 0 }, { y: () => -3.5 * k(), duration: 2.2, ease: "sine.inOut", repeat: 7, yoyo: true }, at);
-      };
-      walk(item("friend-gujarati"), -0.6, 32);
-      walk(item("friend-kerala"), 0.6, 34);
+      // 32–55 %: banana plants grow; the pookalam blooms
       for (const id of ["banana-left", "banana-right"]) tl.fromTo(item(id), { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 16, ease: "power3.out" }, id.endsWith("left") ? 33 : 36);
       const pook = item("pookalam");
       tl.fromTo(pook, { clipPath: "ellipse(0% 0% at 50% 50%)", scale: 0.92 }, { clipPath: "ellipse(52% 52% at 50% 50%)", scale: 1, duration: 14, ease: "power2.out" }, 38);
@@ -155,9 +148,7 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
         tl.fromTo(el, { y: () => -H() * 0.1, opacity: 0, rotation: rnd(-90, 90) }, { y: 0, opacity: 1, rotation: 0, duration: 6, ease: "power2.out" }, 64 + i * 0.9),
       );
 
-      // 78–100 %: the haldi moment — she leans in, haldi lands in dabs, a puff bursts, petals shower
-      const guj = item("friend-gujarati");
-      tl.to(guj, { rotation: 2, x: () => 4 * k(), duration: 6, ease: "power2.inOut" }, 78);
+      // 78–100 %: the haldi moment — haldi lands in dabs, a puff bursts, petals shower
       q(".ms-reveal").forEach((el, i) => {
         revealTween(tl, el, 80 + i * 2.4, 4.5);
         const sp = el.parentElement!.querySelector<HTMLElement>(`.hs-dab-splat[data-i="${i}"]`);
@@ -216,24 +207,7 @@ export function HaldiScene({ scrollerRef, style, reduce, page }: { scrollerRef: 
         for (const id of ["curtain-left", "curtain-right"]) idle.fromTo(item(id), { skewX: -0.6 }, { skewX: 0.6, duration: rnd(2.8, 3.2), ease: "sine.inOut", yoyo: true, repeat: -1 }, rnd(0, 2));
         // banana plants sway from the base; everyone breathes (from their feet / the seat)
         for (const id of ["banana-left", "banana-right"]) idle.fromTo(item(id), { rotation: -1 }, { rotation: 1, duration: rnd(2.5, 3), ease: "sine.inOut", yoyo: true, repeat: -1 }, rnd(0, 2));
-        for (const id of ["couple", "friend-kerala"]) idle.fromTo(item(id), { scaleY: 1 }, { scaleY: 1.006, duration: rnd(1.75, 2.25), ease: "sine.inOut", yoyo: true, repeat: -1 }, rnd(0, 2));
-        // the Kerala friend pours: pearly drops arc out of her pot and land with a tiny bounce
-        every(4, 6, () => {
-          const at = px(point("friend-kerala", "pour"));
-          const n = Math.round(rnd(3, 5));
-          for (let i = 0; i < n; i++)
-            spawn(gsap.utils.random(KINDS.drops), at.x + rnd(-2, 2), at.y + rnd(-2, 2), {
-              vx: -rnd(28, 60) * k(),
-              vy: -rnd(18, 46) * k(),
-              g: 520 * k(),
-              vr: 0,
-              r: rnd(-15, 15),
-              sw: 0,
-              s: rnd(0.4, 0.7),
-              life: 3,
-              land: at.y + H() * rnd(0.16, 0.26),
-            });
-        }, 1.2);
+        idle.fromTo(item("couple"), { scaleY: 1 }, { scaleY: 1.006, duration: rnd(1.75, 2.25), ease: "sine.inOut", yoyo: true, repeat: -1 }, rnd(0, 2));
         // ambient: petals drifting (8 at most), the odd marigold
         every(1.1, 2, () => {
           if (count("ambient") >= S.maxAmbient) return;

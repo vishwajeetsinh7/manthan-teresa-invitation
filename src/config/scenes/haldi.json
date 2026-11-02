@@ -159,22 +159,6 @@
       "group": "swing"
     },
     {
-      "id": "friend-gujarati",
-      "piece": "friend-gujarati",
-      "x": 11.9,
-      "y": 77.4,
-      "w": 51.9,
-      "z": 8
-    },
-    {
-      "id": "friend-kerala",
-      "piece": "friend-kerala",
-      "x": 81.8,
-      "y": 74.3,
-      "w": 34.5,
-      "z": 8
-    },
-    {
       "id": "matkis",
       "piece": "matkis",
       "x": 2.73,

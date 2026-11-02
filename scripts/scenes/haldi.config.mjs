@@ -48,8 +48,7 @@ const config = {
     { name: "couple-clean", sheet: "couple", at: [390, 600], pivotAt: [390, 615] },
     { name: "couple-haldi", sheet: "couple", at: [1140, 600], pivotAt: [1140, 615] },
 
-    { name: "friend-gujarati", sheet: "friends", at: [310, 650], points: { hand: [632, 190] } },
-    { name: "friend-kerala", sheet: "friends", at: [870, 650], points: { pour: [648, 272] } },
+    // (the two friends on this sheet are no longer in the scene — only the couple and the boy)
     { name: "boy", sheet: "friends", at: [1350, 660], points: { nozzle: [1085, 452] } },
 
     { name: "beam", sheet: "canopy", at: [760, 90], pivot: "center", gather: 12 },
@@ -117,11 +116,6 @@ const config = {
       { piece: "umbrella-green", fixed: { x: 50.6, y: 12, w: 21.5 }, z: 4 },
       { piece: "umbrella-red", fixed: { x: 82.9, y: 13.2, w: 19.5 }, z: 4 },
       { id: "couple", piece: "couple-clean", box: [300, 420, 860, 1125], z: 6, group: "swing" },
-      // the friends' poses differ from the master's: placed by their height there
-      // (Gujarati: head 345 → hem 1165, haldi fingertips at x 375; Kerala: bun 365 → hem
-      // 1115, pot mouth at x 672)
-      { piece: "friend-gujarati", fixed: { x: 11.9, y: 77.4, w: 51.9 }, z: 8 },
-      { piece: "friend-kerala", fixed: { x: 81.8, y: 74.3, w: 34.5 }, z: 8 },
       { piece: "pookalam", fixed: { x: 54.88, y: 79.61, w: 70.7 }, z: 3 }, // (as fitted the first time)
       { piece: "matkis", box: [0, 960, 168, 1272], z: 9 },
       { piece: "basket", box: [92, 1215, 388, 1388], z: 10 },
@@ -180,7 +174,7 @@ const config = {
           const w = 96.6 * A * (P[id].w / P[id].h);
           return { id, piece: id, x: +(edge + (side * w) / 2).toFixed(2), y: 0, w: +w.toFixed(2), z: 1 };
         }),
-        // banana plants behind the friends (pots hidden)
+        // banana plants at the sides (pots hidden)
         { id: "banana-left", piece: "banana", x: 6, y: 74, w: 34, z: 2 },
         { id: "banana-right", piece: "banana", x: 94, y: 74, w: 34, z: 2, flip: true },
         ...strands,
