@@ -71,3 +71,23 @@ export function onShake(f: (strength: number, acc: Vec) => void, threshold: numb
     subs.delete(s);
   };
 }
+
+/**
+ * Ask for motion (iOS: call it inside a tap) and start listening; resolves true when motion is
+ * allowed (or needs no permission), false when it was refused or there is no such API.
+ */
+export function enableMotion(): Promise<boolean> {
+  if (typeof window === "undefined" || !("DeviceMotionEvent" in window)) return Promise.resolve(false);
+  const ask = (DeviceMotionEvent as unknown as PermissionRequest).requestPermission;
+  if (typeof ask !== "function") {
+    listen();
+    return Promise.resolve(true);
+  }
+  return ask
+    .call(DeviceMotionEvent)
+    .then((r) => {
+      if (r === "granted") listen();
+      return r === "granted";
+    })
+    .catch(() => false);
+}

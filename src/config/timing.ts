@@ -251,18 +251,23 @@ export const timing = {
     },
     /** the Hindu wedding scene ("Four Rounds of Fire"): the story plays (timed) as its page arrives */
     hindu: {
-      /** seconds for each act: mandap, pots + fire, arrive (friends, groom, bride — when the antarpat
-       *  is off), antarpat, first sight, varmala, together (+ diyas), blessing */
-      acts: { mandap: 1.5, ritual: 1.6, arrive: 2.7, antarpat: 2.2, sight: 1.5, varmala: 1.8, together: 2.4, blessing: 1.6 },
-      /** the antarpat (friends hold a cloth between groom and bride, then it drops) — off for now */
-      antarpat: false as boolean,
+      /** seconds for each act: the mandap builds; the kund and the fire, the pandit; the antarpat
+       *  comes down from the canopy; the couple (behind it); it is lowered — first sight; together
+       *  (the knot, the diyas); the blessing */
+      acts: { mandap: 1.5, ritual: 1.8, veil: 1.5, couple: 0.5, reveal: 1.6, together: 2.2, blessing: 1.6 },
       /** leaving back up rewinds this much faster */
       reverseSpeed: 6,
       startAt: "96%",
       maxAmbient: 8,
-      /** the pandit's ghee offering and the friends' petal tosses (s between) */
+      /** the pandit's ghee offering (s between) */
       offering: [5, 7] as [number, number],
-      toss: [3, 5] as [number, number],
+      /** taps: at most this many tap petals on screen (the oldest fade early) */
+      tapMax: 40,
+      /** shake to shower blessings: a jolt over `threshold` m/s² on `hits` readings within
+       *  `window` s, at most once per `cooldown` s */
+      shake: { threshold: 15, hits: 2, window: 0.4, cooldown: 1.5 },
+      /** a subtle heat shimmer over the flames (off: only if it stays smooth on iPhone) */
+      heatShimmer: false as boolean,
     },
     /** the church wedding scene ("The Aisle"): the story plays (timed) as its page arrives */
     church: {

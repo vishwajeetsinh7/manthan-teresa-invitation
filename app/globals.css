@@ -2023,7 +2023,14 @@ body {
 .hw-scene {
   left: calc(50% - var(--sw) / 2);
 }
-.hw-scene[data-reduce] :is([data-id^="groom-"], [data-id^="bride-"], [data-id="gujarati-a"], [data-id="kerala-a"], [data-id="antarpat"], [data-id^="varmala-"], [data-id="couple-walk"]) {
+/* taps on the stage (flowers, the fire, swags, diyas) — but never in the way of scrolling */
+.hw-scene .ms-stage {
+  pointer-events: auto;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+.hw-scene[data-reduce] :is([data-id="antarpat"]),
+.hw-scene[data-reduce] .hw-cords {
   display: none;
 }
 .hw-fire {
@@ -2038,26 +2045,54 @@ body {
 .hw-scene [data-id="havan-kund"] {
   z-index: 70 !important;
 }
-.hw-fire > img {
+/* three flame layers (back, middle, front), each scaled from its bottom centre; their shapes cross-fade. */
+.hw-flame-layer {
+  position: absolute;
+  bottom: 0;
+  aspect-ratio: 1;
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+}
+.hw-flame-layer img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
   object-position: 50% 100%;
+  transition: opacity 0.25s ease;
 }
-.ms-wrap[data-reduce] .hw-fire > img:not(:first-child) {
-  display: none;
-}
-.hw-fire-glow {
+/* the glow behind the fire and the warm wash over the couple and the pandit: their strength
+   follows the flicker (--flick, set by the scene); the element itself fades in / out */
+.hw-fire-glow,
+.hw-fire-wash {
   position: absolute;
-  z-index: 70;
   aspect-ratio: 1;
   translate: -50% -58%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(255 190 90 / 0.55), rgb(255 150 60 / 0.22) 55%, rgb(255 150 60 / 0));
-  mix-blend-mode: screen;
   pointer-events: none;
+}
+.hw-fire-glow {
+  z-index: 70;
+  mix-blend-mode: screen;
+}
+.hw-fire-wash {
+  z-index: 60;
+  mix-blend-mode: soft-light;
+}
+.hw-fire-glow::before,
+.hw-fire-wash::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: var(--flick, 0.8);
+}
+.hw-fire-glow::before {
+  background: radial-gradient(closest-side, rgb(255 190 90 / 0.6), rgb(255 150 60 / 0.24) 55%, rgb(255 150 60 / 0));
+}
+.hw-fire-wash::before {
+  background: radial-gradient(closest-side, rgb(255 150 60 / 0.55), rgb(255 120 40 / 0.18) 60%, rgb(255 120 40 / 0));
 }
 .hw-smoke {
   position: absolute;
@@ -2066,7 +2101,93 @@ body {
   aspect-ratio: 1;
   border-radius: 50%;
   background: radial-gradient(closest-side, rgb(150 130 120 / 0.07), rgb(150 130 120 / 0));
+  filter: blur(2px);
   opacity: 0;
+}
+/* the antarpat's gold cords (from the canopy to its rod) */
+.hw-cords {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  z-index: 45;
+  pointer-events: none;
+}
+.hw-cord {
+  stroke: var(--gold);
+  stroke-width: 1.3px;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+}
+/* a tap on a swag or the canopy's bells: it swings (--kick, degrees, on its picture) */
+.hw-scene [data-id^="swag-"] > img {
+  rotate: calc(var(--kick, 0) * 1deg);
+  transform-origin: inherit;
+}
+/* a tap on a diya: its flame jumps brighter (--jump) */
+.hw-diya-flame img {
+  scale: var(--jump, 1);
+  transform-origin: 50% 100%;
+  filter: brightness(var(--jump, 1));
+}
+.hw-ripple {
+  position: absolute;
+  z-index: 130;
+  width: 9%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 1.5px solid var(--gold);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+.hw-tap-sparks {
+  position: absolute;
+  z-index: 130;
+  width: 10%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+.hw-tap-sparks img {
+  position: absolute;
+  width: 40%;
+  opacity: 0;
+}
+/* reduced motion: a few petals fade in and out in place */
+.hw-still {
+  position: absolute;
+  z-index: 140;
+  width: 3.6%;
+  translate: -50% -50%;
+  opacity: 0;
+  pointer-events: none;
+}
+/* "Shake to shower blessings" — under the stage, in the invitation's ivory, gold and maroon */
+.hw-pill {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + var(--u) * 6);
+  translate: -50% 0;
+  z-index: 150;
+  padding: calc(var(--u) * 7) calc(var(--u) * 16);
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  background: #fbf6ec;
+  box-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 8) rgb(107 15 26 / 0.12);
+  color: var(--color-burgundy);
+  font-family: var(--font-serif);
+  font-size: calc(var(--u) * 13);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  pointer-events: auto;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+.hw-scene:not([data-reduce]) .hw-pill {
+  opacity: 0;
+  visibility: hidden;
 }
 .hw-diya-flame {
   position: absolute;

@@ -3,8 +3,8 @@
   "pieces": {
     "groom-a": {
       "src": "groom-a.webp",
-      "w": 320,
-      "h": 962,
+      "w": 287,
+      "h": 863,
       "aspect": 0.3326,
       "pivot": [
         0.5,
@@ -19,8 +19,8 @@
     },
     "groom-b": {
       "src": "groom-b.webp",
-      "w": 296,
-      "h": 962,
+      "w": 266,
+      "h": 865,
       "aspect": 0.3077,
       "pivot": [
         0.5,
@@ -42,8 +42,8 @@
     },
     "bride-a": {
       "src": "bride-a.webp",
-      "w": 390,
-      "h": 865,
+      "w": 350,
+      "h": 776,
       "aspect": 0.4509,
       "pivot": [
         0.5,
@@ -58,8 +58,8 @@
     },
     "bride-b": {
       "src": "bride-b.webp",
-      "w": 367,
-      "h": 866,
+      "w": 329,
+      "h": 776,
       "aspect": 0.4238,
       "pivot": [
         0.5,
@@ -81,8 +81,8 @@
     },
     "couple-walk": {
       "src": "couple-walk.webp",
-      "w": 816,
-      "h": 901,
+      "w": 732,
+      "h": 808,
       "aspect": 0.9057,
       "pivot": [
         0.5,
@@ -97,8 +97,8 @@
     },
     "couple-final": {
       "src": "couple-final.webp",
-      "w": 596,
-      "h": 927,
+      "w": 535,
+      "h": 832,
       "aspect": 0.6429,
       "pivot": [
         0.5,
@@ -111,88 +111,10 @@
         ]
       }
     },
-    "gujarati-a": {
-      "src": "gujarati-a.webp",
-      "w": 403,
-      "h": 886,
-      "aspect": 0.4549,
-      "pivot": [
-        0.5,
-        0.9955
-      ],
-      "points": {
-        "hand": [
-          0.9529,
-          0.0214
-        ]
-      }
-    },
-    "gujarati-b": {
-      "src": "gujarati-b.webp",
-      "w": 426,
-      "h": 824,
-      "aspect": 0.517,
-      "pivot": [
-        0.5,
-        0.9951
-      ],
-      "align": {
-        "to": "gujarati-a",
-        "x": -0.0695,
-        "y": 0.0677,
-        "w": 1.0571,
-        "h": 0.93
-      },
-      "points": {
-        "thali": [
-          0.662,
-          0.3447
-        ]
-      }
-    },
-    "kerala-a": {
-      "src": "kerala-a.webp",
-      "w": 383,
-      "h": 880,
-      "aspect": 0.4352,
-      "pivot": [
-        0.5,
-        0.9955
-      ],
-      "points": {
-        "hand": [
-          0.0366,
-          0.0193
-        ]
-      }
-    },
-    "kerala-b": {
-      "src": "kerala-b.webp",
-      "w": 299,
-      "h": 823,
-      "aspect": 0.3633,
-      "pivot": [
-        0.5,
-        0.9951
-      ],
-      "align": {
-        "to": "kerala-a",
-        "x": 0.1775,
-        "y": 0.0716,
-        "w": 0.7807,
-        "h": 0.9352
-      },
-      "points": {
-        "thali": [
-          0.3144,
-          0.3439
-        ]
-      }
-    },
     "pandit": {
       "src": "pandit.webp",
-      "w": 454,
-      "h": 431,
+      "w": 401,
+      "h": 381,
       "aspect": 1.0535,
       "pivot": [
         0.5,
@@ -207,8 +129,8 @@
     },
     "havan-kund": {
       "src": "havan-kund.webp",
-      "w": 389,
-      "h": 224,
+      "w": 338,
+      "h": 194,
       "aspect": 1.7398,
       "pivot": [
         0.5,
@@ -223,8 +145,8 @@
     },
     "kalash": {
       "src": "kalash.webp",
-      "w": 333,
-      "h": 367,
+      "w": 262,
+      "h": 289,
       "aspect": 0.9071,
       "pivot": [
         0.5,
@@ -233,8 +155,8 @@
     },
     "thali": {
       "src": "thali.webp",
-      "w": 278,
-      "h": 165,
+      "w": 247,
+      "h": 147,
       "aspect": 1.6832,
       "pivot": [
         0.5,
@@ -243,8 +165,8 @@
     },
     "varmala-loose": {
       "src": "varmala-loose.webp",
-      "w": 217,
-      "h": 507,
+      "w": 195,
+      "h": 456,
       "aspect": 0.428,
       "pivot": [
         0.5046,
@@ -273,8 +195,8 @@
     },
     "platform": {
       "src": "platform.webp",
-      "w": 929,
-      "h": 206,
+      "w": 1243,
+      "h": 276,
       "aspect": 4.5046,
       "pivot": [
         0.5,
@@ -283,8 +205,8 @@
     },
     "diya": {
       "src": "diya.webp",
-      "w": 80,
-      "h": 82,
+      "w": 71,
+      "h": 73,
       "aspect": 0.9731,
       "pivot": [
         0.5,
@@ -299,8 +221,8 @@
     },
     "canopy": {
       "src": "canopy.webp",
-      "w": 1047,
-      "h": 254,
+      "w": 978,
+      "h": 237,
       "aspect": 4.1217,
       "pivot": [
         0.5,
@@ -319,8 +241,8 @@
     },
     "pillar": {
       "src": "pillar.webp",
-      "w": 93,
-      "h": 434,
+      "w": 71,
+      "h": 331,
       "aspect": 0.2142,
       "pivot": [
         0.5,
@@ -359,8 +281,8 @@
     },
     "pot-1": {
       "src": "pot-1.webp",
-      "w": 147,
-      "h": 160,
+      "w": 132,
+      "h": 143,
       "aspect": 0.9213,
       "pivot": [
         0.5,
@@ -369,8 +291,8 @@
     },
     "pot-2": {
       "src": "pot-2.webp",
-      "w": 124,
-      "h": 137,
+      "w": 111,
+      "h": 123,
       "aspect": 0.9039,
       "pivot": [
         0.5,
@@ -379,8 +301,8 @@
     },
     "pot-3": {
       "src": "pot-3.webp",
-      "w": 109,
-      "h": 121,
+      "w": 98,
+      "h": 109,
       "aspect": 0.901,
       "pivot": [
         0.5,
@@ -389,8 +311,8 @@
     },
     "pot-4": {
       "src": "pot-4.webp",
-      "w": 89,
-      "h": 100,
+      "w": 148,
+      "h": 166,
       "aspect": 0.8916,
       "pivot": [
         0.5,
@@ -399,8 +321,8 @@
     },
     "pot-5": {
       "src": "pot-5.webp",
-      "w": 78,
-      "h": 89,
+      "w": 70,
+      "h": 80,
       "aspect": 0.8784,
       "pivot": [
         0.5,
@@ -419,8 +341,8 @@
     },
     "pot-7": {
       "src": "pot-7.webp",
-      "w": 80,
-      "h": 125,
+      "w": 72,
+      "h": 113,
       "aspect": 0.6381,
       "pivot": [
         0.5,
@@ -778,5 +700,6 @@
       ]
     }
   },
-  "master": "master.webp"
+  "master": "master.webp",
+  "masterAspect": 1.5
 }
