@@ -46,9 +46,12 @@ const config = {
   sheets: {
     backdrop: "church-backdrop.png",
     altar: "altar.png",
-    // (couple-aisle.png, couple-altar.png and groom.png are no longer used)
-    walk: "couple-walk-v2.png",
-    vows: "couple-altar-v2.png",
+    // the couple in their new clothes (gold kasavu saree; cream shirt, kasavu mundu and veshti):
+    // walking out, at the altar (minnu / ring), and the bride walking up the aisle + the groom
+    // waiting (couple-aisle, couple-altar, groom and the *-v2 sheets are no longer used)
+    walk: "couple-walk-v3.png",
+    vows: "couple-altar-v3.png",
+    arrive: "bride-groom-arrive.png",
     guests: "guests.png",
     people: "people.png",
     pews: "pews.png",
@@ -72,8 +75,11 @@ const config = {
     // the couple walking towards us, arm in arm
     { name: "couple-walk", sheet: "walk", at: [512, 800] },
     // at the altar: A — he ties the minnu (neck: its glint); B — he slips the ring on her finger
-    { name: "couple-altar-a", sheet: "vows", at: [330, 600], points: { neck: [330, 257] } },
-    { name: "couple-altar-b", sheet: "vows", at: [1070, 600], points: { ring: [1242, 295] } },
+    { name: "couple-altar-a", sheet: "vows", at: [300, 700], points: { neck: [298, 258] } },
+    { name: "couple-altar-b", sheet: "vows", at: [1050, 700], points: { ring: [1232, 317] } },
+    // the bride walking away from us up the aisle; the groom waiting at the altar, facing us
+    { name: "bride-back", sheet: "arrive", at: [420, 600] },
+    { name: "groom-wait", sheet: "arrive", at: [1090, 700] },
     ...GUESTS.map((at, i) => ({ name: `pew-guests-${i + 1}`, sheet: "guests", at, gather: 20 })),
 
     // (cut at the waist: the altar table hides the rest)
@@ -98,7 +104,6 @@ const config = {
   fit: {
     stage: { aspect: A, headroom: 0.15 },
     items: [
-      { piece: "couple-walk", box: [278, 470, 812, 1290], z: 6 },
       { piece: "girl-front", box: [75, 990, 335, 1450], z: 7 },
       { piece: "ring-boy", box: [765, 1060, 920, 1432], z: 7 },
     ],
@@ -106,6 +111,14 @@ const config = {
       const out = [];
       const byId = Object.fromEntries(items.map((i) => [i.id, i]));
       const asp = (n) => P[n].w / P[n].h;
+      // the couple walking out, where they are in master-v2 (their clothes differ from it now, so
+      // placed by height: heads at y 470, feet at 1290, centred at x 545)
+      {
+        const hPx = 1290 - 470;
+        const cwItem = { id: "couple-walk", piece: "couple-walk", x: X(545), y: Y(1290), w: Wd(hPx * asp("couple-walk")), z: 6 };
+        out.push(cwItem);
+        byId["couple-walk"] = cwItem;
+      }
       /** an item from a master-px box: centre x, pivot y, width */
       const put = (id, piece, mx, my, mw, z, more = {}) => ({ id, piece, x: X(mx), y: Y(my), w: Wd(mw), z, ...more });
 
@@ -191,6 +204,16 @@ const config = {
         const h = w / asp("couple-altar-b") / A;
         const piv = P["couple-altar-b"].pivot;
         out.push({ id: "couple-altar-b", piece: "couple-altar-b", x: +(aleft + al.x * ca.w + piv[0] * w).toFixed(2), y: +(atop + al.y * ah + piv[1] * h).toFixed(2), w: +w.toFixed(2), z: 3.7 });
+      }
+      // the groom waits at the altar where he stands in the minnu pose, at its size (matched by his
+      // height: 945 px there, 955 px on the arrive sheet); the bride ends her walk where she stands
+      // in it (890 px there, 900 px here) — the timeline walks her up from the front
+      {
+        const pa = P["couple-altar-a"];
+        const sc = ca.w / pa.w; // stage-% per sheet px at the altar
+        const xAt = (sheetX) => +(ca.x - ca.w / 2 + ((sheetX - pa.x0) / pa.w) * ca.w).toFixed(2);
+        out.push({ id: "groom-wait", piece: "groom-wait", x: xAt(478), y: ca.y, w: +(P["groom-wait"].w * sc * (945 / 955)).toFixed(2), z: 3.7 });
+        out.push({ id: "bride-back", piece: "bride-back", x: xAt(290), y: ca.y, w: +(P["bride-back"].w * sc * (890 / 900)).toFixed(2), z: 3.72 });
       }
       // the little flower girl starts at the front of the aisle (the timeline walks her up)
       const gf = byId["girl-front"];

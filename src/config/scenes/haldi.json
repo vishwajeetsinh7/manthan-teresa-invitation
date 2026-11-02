@@ -8,14 +8,6 @@
   },
   "items": [
     {
-      "id": "curtain-left",
-      "piece": "curtain-left",
-      "x": -17.88,
-      "y": 0,
-      "w": 61.76,
-      "z": 1
-    },
-    {
       "id": "banana-left",
       "piece": "banana",
       "x": 6,
@@ -299,14 +291,6 @@
       "z": 12
     },
     {
-      "id": "curtain-right",
-      "piece": "curtain-right",
-      "x": 117.65,
-      "y": 0,
-      "w": 61.31,
-      "z": 12.5
-    },
-    {
       "id": "panel-left",
       "piece": "curtain-panel",
       "x": 28.8,
@@ -324,6 +308,22 @@
       "h": 100,
       "z": 30,
       "flip": true
+    },
+    {
+      "id": "curtain-left",
+      "piece": "curtain-left",
+      "x": -17.88,
+      "y": 0,
+      "w": 61.76,
+      "z": 50
+    },
+    {
+      "id": "curtain-right",
+      "piece": "curtain-right",
+      "x": 117.65,
+      "y": 0,
+      "w": 61.31,
+      "z": 50
     }
   ]
 }

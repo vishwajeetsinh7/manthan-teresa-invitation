@@ -125,52 +125,72 @@
     },
     "couple-walk": {
       "src": "couple-walk.webp",
-      "w": 651,
-      "h": 1068,
-      "aspect": 0.6093,
+      "w": 543,
+      "h": 1035,
+      "aspect": 0.5247,
       "pivot": [
         0.5,
-        0.9968
+        0.9969
       ]
     },
     "couple-altar-a": {
       "src": "couple-altar-a.webp",
-      "w": 191,
-      "h": 363,
-      "aspect": 0.5259,
+      "w": 157,
+      "h": 351,
+      "aspect": 0.4469,
       "pivot": [
         0.5,
         0.9959
       ],
       "points": {
         "neck": [
-          0.4458,
-          0.2365
+          0.3311,
+          0.2429
         ]
       }
     },
     "couple-altar-b": {
       "src": "couple-altar-b.webp",
-      "w": 204,
-      "h": 364,
-      "aspect": 0.5606,
+      "w": 179,
+      "h": 352,
+      "aspect": 0.5082,
       "pivot": [
         0.5,
         0.9959
       ],
       "align": {
         "to": "couple-altar-a",
-        "x": 0.002,
-        "y": -0.001,
-        "w": 1.0671,
-        "h": 1.001
+        "x": -0.0137,
+        "y": -0.0041,
+        "w": 1.137,
+        "h": 1
       },
       "points": {
         "ring": [
-          0.7283,
-          0.2756
+          0.6667,
+          0.3031
         ]
       }
+    },
+    "bride-back": {
+      "src": "bride-back.webp",
+      "w": 118,
+      "h": 331,
+      "aspect": 0.3562,
+      "pivot": [
+        0.5,
+        0.9957
+      ]
+    },
+    "groom-wait": {
+      "src": "groom-wait.webp",
+      "w": 101,
+      "h": 344,
+      "aspect": 0.294,
+      "pivot": [
+        0.5,
+        0.9959
+      ]
     },
     "pew-guests-1": {
       "src": "pew-guests-1.webp",

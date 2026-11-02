@@ -172,8 +172,8 @@ const config = {
       return [
         // tied-back curtains at the far edges, full height (mostly outside the stage): as tall as the
         // first ones (96.6 % of the stage), their inner (border) edge where those had it (13 % in)
-        // (the right one in front of everything: the boy comes and goes behind it)
-        ...[["curtain-left", 13, -1, 1], ["curtain-right", 87, 1, 12.5]].map(([id, edge, side, z]) => {
+        // (both the top layer, in front of everything: the boy comes and goes behind the right one)
+        ...[["curtain-left", 13, -1, 50], ["curtain-right", 87, 1, 50]].map(([id, edge, side, z]) => {
           const w = 96.6 * A * (P[id].w / P[id].h);
           return { id, piece: id, x: +(edge + (side * w) / 2).toFixed(2), y: 0, w: +w.toFixed(2), z };
         }),

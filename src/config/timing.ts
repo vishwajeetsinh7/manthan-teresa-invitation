@@ -271,9 +271,10 @@ export const timing = {
     /** the church wedding scene ("The Aisle"): the story plays (timed) as its page arrives */
     church: {
       /** seconds for each act: the church appears; pews and guests, candles; the runner and the
-       *  priest; the flower girl walks up the aisle; the couple appear in a beam of light; the
-       *  minnu; the rings; the bells and the walk back down the aisle; the finale */
-      acts: { church: 1.6, aisle: 1.6, runner: 1.0, girl: 2.0, couple: 1.2, minnu: 1.3, rings: 1.4, recessional: 3.0, finale: 1.6 },
+       *  priest (the groom comes to wait); the flower girl walks up the aisle, the bride after her
+       *  (girl + bride); the beam of light, they turn to each other; the minnu; the rings; the
+       *  bells and the walk back down the aisle; the finale */
+      acts: { church: 1.6, aisle: 1.6, runner: 1.2, girl: 2.0, bride: 1.8, couple: 1.2, minnu: 1.3, rings: 1.4, recessional: 3.0, finale: 1.6 },
       reverseSpeed: 6,
       startAt: "96%",
       maxAmbient: 8,
