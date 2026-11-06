@@ -68,16 +68,11 @@ const SC = timing.sections.scene;
 const sceneOf = (i: number) => ("scene" in SCHEDULE[i] ? (SCHEDULE[i] as { scene?: string }).scene : undefined);
 
 /**
- * The vine: one node per event, a few vine-waves apart. Under the Haldi event it ends in its
- * flourish and starts again (its top curl) just before the next event, so none of it shows
- * below the Haldi curtains; the events stay exactly as far apart.
+ * The vine: one node per event, a few vine-waves apart, continuous all the way down (under the
+ * Haldi event it runs on behind the curtains, which are on top, and comes out below them).
  */
 function layoutThread() {
-  const haldi = SCHEDULE.findIndex((_, i) => sceneOf(i) === "haldi");
-  const wpg = timing.sections.wavesPerGap;
-  const waves = typeof wpg === "number" ? wpg : 4;
-  const gap = haldi >= 0 && haldi < SCHEDULE.length - 1 ? { after: haldi, units: waves * 188 - 144 } : undefined;
-  const thread = buildThread(SCHEDULE.length, wpg, gap, timing.sections.tailWaves);
+  const thread = buildThread(SCHEDULE.length, timing.sections.wavesPerGap, undefined, timing.sections.tailWaves);
   /** node positions as a share of the vine height */
   const node = thread.nodes.map((n) => n / thread.height);
   /** each event's scene sits in the bottom part of its page, under its details */
