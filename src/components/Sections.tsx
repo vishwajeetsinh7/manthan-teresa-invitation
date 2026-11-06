@@ -67,9 +67,17 @@ const SCHEDULE = C.events;
 const SC = timing.sections.scene;
 const sceneOf = (i: number) => ("scene" in SCHEDULE[i] ? (SCHEDULE[i] as { scene?: string }).scene : undefined);
 
-/** The vine: one node per event, a few vine-waves apart (continuous throughout). */
+/**
+ * The vine: one node per event, a few vine-waves apart. Under the Haldi event it ends in its
+ * flourish and starts again (its top curl) just before the next event, so none of it shows
+ * below the Haldi curtains; the events stay exactly as far apart.
+ */
 function layoutThread() {
-  const thread = buildThread(SCHEDULE.length, timing.sections.wavesPerGap, undefined, timing.sections.tailWaves);
+  const haldi = SCHEDULE.findIndex((_, i) => sceneOf(i) === "haldi");
+  const wpg = timing.sections.wavesPerGap;
+  const waves = typeof wpg === "number" ? wpg : 4;
+  const gap = haldi >= 0 && haldi < SCHEDULE.length - 1 ? { after: haldi, units: waves * 188 - 144 } : undefined;
+  const thread = buildThread(SCHEDULE.length, wpg, gap, timing.sections.tailWaves);
   /** node positions as a share of the vine height */
   const node = thread.nodes.map((n) => n / thread.height);
   /** each event's scene sits in the bottom part of its page, under its details */
@@ -657,7 +665,11 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
         strokes.forEach((p) => {
           // the scene's vine-less gap: the pen rests while the scroll passes it
           if (p.dataset.gap) grow.to({}, { duration: Number(p.dataset.gap) });
-          grow.to(p, { drawSVG: "100%", duration: p.getTotalLength(), ease: "none" });
+          if (p.classList.contains("leaf")) {
+            // a leaf / tendril appears whole as the vine reaches it (never half drawn)
+            gsap.set(p, { drawSVG: "100%" });
+            grow.fromTo(p, { opacity: 0 }, { opacity: 1, duration: 22, ease: "power1.out" }, ">-6");
+          } else grow.to(p, { drawSVG: "100%", duration: p.getTotalLength(), ease: "none" });
         });
       }
 
@@ -720,7 +732,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
               >
                 <div className="t-icons">
                   {("icons" in e ? (e.icons as readonly EventIconName[]) : []).map((name) => (
-                    <SvgArt key={name} svg={EVENT_ICONS[name]} className="event-icon" />
+                    <SvgArt key={name} svg={EVENT_ICONS[name]} className="event-icon" data-icon={name} />
                   ))}
                 </div>
                 <div className="t-text" data-page={i === 0 ? "mehndi" : `event-${i}`}>
@@ -731,7 +743,22 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                     <span className="wipe">{e.title}</span>
                   </h3>
                   <p className="t-line t-time">{e.time}</p>
-                  <p className="t-line t-place">{e.place}</p>
+                  <p className="t-line t-place">
+                    {e.place}
+                    <a
+                      className="t-map"
+                      href={"mapsUrl" in e ? (e as { mapsUrl: string }).mapsUrl : C.venue.mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${e.title}: open ${e.place} in Google Maps`}
+                    >
+                      <svg viewBox="0 0 16 16" aria-hidden>
+                        <path d="M8 15 C8 15 3 9.6 3 6.2 A5 5 0 0 1 13 6.2 C13 9.6 8 15 8 15 Z" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                        <circle cx="8" cy="6.2" r="1.7" fill="currentColor" />
+                      </svg>
+                      {C.eventMapLabel}
+                    </a>
+                  </p>
                   {e.note && <p className="t-line t-note">{e.note}</p>}
                 </div>
                 {mehndi && (

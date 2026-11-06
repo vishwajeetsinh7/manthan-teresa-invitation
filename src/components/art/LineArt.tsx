@@ -221,7 +221,15 @@ export function NameFlourish({ className = "" }: { className?: string }) {
  * wave ≈ 188 units of the 120-wide drawing). Paths are in drawing order
  * (top → bottom) so a scroll-scrubbed draw-on grows it downward.
  */
-export type ThreadPath = { d: string; node?: boolean; /** units of vine-less gap just before this path */ gapBefore?: number };
+export type ThreadPath = {
+  d: string;
+  node?: boolean;
+  /** a leaf or a tendril: it appears whole as the vine reaches it (drawn stroke by stroke, a
+   *  half-drawn leaf looked like a broken branch) */
+  leaf?: boolean;
+  /** units of vine-less gap just before this path */
+  gapBefore?: number;
+};
 export type Thread = {
   paths: ThreadPath[];
   height: number;
@@ -250,16 +258,16 @@ export function buildThread(
   const curl = (y0: number, gapBefore?: number) => {
     const t = (n: number) => r(y0 + n);
     paths.push({ d: `M51.5 ${t(20)} C53.5 ${t(22)} 51.5 ${t(25)} 48.5 ${t(24.2)} C44.5 ${t(23)} 45.5 ${t(17)} 50 ${t(16.5)} C56 ${t(16)} 60 ${t(22)} 60 ${t(34)} C60 ${t(58)} 52 ${t(68)} 52 ${t(89)} C52 ${t(110)} 60 ${t(120)} 60 ${t(144)}`, gapBefore });
-    paths.push({ d: `M52.2 ${t(83)} C48.1 ${t(76)} 41.8 ${t(68.9)} 31.4 ${t(71)} C35 ${t(78.8)} 43.6 ${t(83.8)} 52.2 ${t(83)} C47.3 ${t(79.5)} 42.3 ${t(76.1)} 37.9 ${t(73.8)}` });
-    paths.push({ d: `M56 ${t(115.4)} C61 ${t(113.5)} 66 ${t(110)} 70 ${t(105.5)} C73.5 ${t(101.5)} 72.5 ${t(96.5)} 68.8 ${t(96.6)} C65.6 ${t(96.7)} 65.2 ${t(100.6)} 67.6 ${t(101.2)} C69 ${t(101.6)} 69.8 ${t(100.2)} 69.2 ${t(99.4)}` });
+    paths.push({ leaf: true, d: `M52.2 ${t(83)} C48.1 ${t(76)} 41.8 ${t(68.9)} 31.4 ${t(71)} C35 ${t(78.8)} 43.6 ${t(83.8)} 52.2 ${t(83)} C47.3 ${t(79.5)} 42.3 ${t(76.1)} 37.9 ${t(73.8)}` });
+    paths.push({ leaf: true, d: `M56 ${t(115.4)} C61 ${t(113.5)} 66 ${t(110)} 70 ${t(105.5)} C73.5 ${t(101.5)} 72.5 ${t(96.5)} 68.8 ${t(96.6)} C65.6 ${t(96.7)} 65.2 ${t(100.6)} 67.6 ${t(101.2)} C69 ${t(101.6)} 69.8 ${t(100.2)} 69.2 ${t(99.4)}` });
   };
   /** end flourish hanging from Y (about 130 units long) */
   const flourish = (Y: number) => {
     paths.push({
       d: `M60 ${Y} C60 ${Y + 24} 68 ${Y + 34} 68 ${Y + 55} C68 ${Y + 76} 60 ${Y + 86} 60 ${Y + 110} C60 ${Y + 122} 64 ${Y + 128} 70 ${Y + 127.5} C74.5 ${Y + 127} 75.5 ${Y + 121} 71.5 ${Y + 119.8} C68.5 ${Y + 119} 66.5 ${Y + 122} 68.5 ${Y + 124}`,
     });
-    paths.push({ d: `M67.8 ${Y + 49} C71.9 ${Y + 42} 78.2 ${Y + 34.9} 88.6 ${Y + 37} C85 ${Y + 44.8} 76.4 ${Y + 49.8} 67.8 ${Y + 49} C72.7 ${Y + 45.5} 77.7 ${Y + 42.1} 82.1 ${Y + 39.8}` });
-    paths.push({ d: `M64 ${Y + 81.4} C59.9 ${Y + 74.4} 53.6 ${Y + 67.3} 43.2 ${Y + 69.4} C46.8 ${Y + 77.2} 55.4 ${Y + 82.2} 64 ${Y + 81.4} C59.1 ${Y + 77.9} 54.1 ${Y + 74.5} 49.7 ${Y + 72.2}` });
+    paths.push({ leaf: true, d: `M67.8 ${Y + 49} C71.9 ${Y + 42} 78.2 ${Y + 34.9} 88.6 ${Y + 37} C85 ${Y + 44.8} 76.4 ${Y + 49.8} 67.8 ${Y + 49} C72.7 ${Y + 45.5} 77.7 ${Y + 42.1} 82.1 ${Y + 39.8}` });
+    paths.push({ leaf: true, d: `M64 ${Y + 81.4} C59.9 ${Y + 74.4} 53.6 ${Y + 67.3} 43.2 ${Y + 69.4} C46.8 ${Y + 77.2} 55.4 ${Y + 82.2} 64 ${Y + 81.4} C59.1 ${Y + 77.9} 54.1 ${Y + 74.5} 49.7 ${Y + 72.2}` });
   };
   curl(0);
 
@@ -270,14 +278,17 @@ export function buildThread(
   const wave = (y: number, curlRight: boolean) => {
     paths.push({ d: `M60 ${r(y)} C60 ${r(y + 24)} 70 ${r(y + 39)} 70 ${r(y + 64)} C70 ${r(y + 92)} 50 ${r(y + 96)} 50 ${r(y + 124)} C50 ${r(y + 149)} 60 ${r(y + 164)} 60 ${r(y + 188)}` });
     paths.push({
+      leaf: true,
       d: `M69.7 ${r(y + 56.8)} C73.8 ${r(y + 49.8)} 80.1 ${r(y + 42.7)} 90.5 ${r(y + 44.8)} C86.9 ${r(y + 52.6)} 78.3 ${r(y + 57.6)} 69.7 ${r(y + 56.8)} C74.6 ${r(y + 53.3)} 79.6 ${r(y + 49.9)} 84 ${r(y + 47.6)}`,
     });
     paths.push({
+      leaf: true,
       d: curlRight
         ? `M60 ${r(y + 94)} C65 ${r(y + 97)} 71 ${r(y + 101)} 74.5 ${r(y + 106.5)} C77 ${r(y + 110.5)} 75.2 ${r(y + 115)} 71.4 ${r(y + 114.4)} C68.4 ${r(y + 113.9)} 68.4 ${r(y + 110.2)} 70.8 ${r(y + 109.8)} C72.2 ${r(y + 109.6)} 73 ${r(y + 111)} 72.4 ${r(y + 111.8)}`
         : `M60 ${r(y + 94)} C55 ${r(y + 91)} 49 ${r(y + 87)} 45.5 ${r(y + 81.5)} C43 ${r(y + 77.5)} 44.8 ${r(y + 73)} 48.6 ${r(y + 73.6)} C51.6 ${r(y + 74.1)} 51.6 ${r(y + 77.8)} 49.2 ${r(y + 78.2)} C47.8 ${r(y + 78.4)} 47 ${r(y + 77)} 47.6 ${r(y + 76.2)}`,
     });
     paths.push({
+      leaf: true,
       d: `M50.6 ${r(y + 116.3)} C46.5 ${r(y + 109.3)} 40.2 ${r(y + 102.2)} 29.8 ${r(y + 104.3)} C33.4 ${r(y + 112.1)} 42 ${r(y + 117.1)} 50.6 ${r(y + 116.3)} C45.7 ${r(y + 112.8)} 40.7 ${r(y + 109.4)} 36.3 ${r(y + 107.1)}`,
     });
   };
@@ -321,7 +332,7 @@ export function ScheduleThread({ thread }: { thread: Thread }) {
     <svg className="thread" viewBox={`0 0 120 ${thread.height}`} aria-hidden>
       <g fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
         {thread.paths.map((p, i) => (
-          <path key={i} className={p.node ? "draw node" : "draw"} d={p.d} data-gap={p.gapBefore} />
+          <path key={i} className={p.node ? "draw node" : p.leaf ? "draw leaf" : "draw"} d={p.d} data-gap={p.gapBefore} />
         ))}
       </g>
     </svg>

@@ -204,8 +204,9 @@ export const timing = {
       /** then the hidden initial: he leans in, a script letter draws on her palm, a heart, his
        *  hand to his heart (s) */
       initialSeconds: 2.8,
-      /** the letter hidden in her henna */
+      /** the letter hidden in her henna, and whether it is drawn on her palm at all */
       hiddenInitial: "M",
+      showInitial: false as boolean,
       /** idle: his lean towards her, a heart rising between them, a glint across the letter (s between) */
       lean: [6, 9] as [number, number],
       hearts: [8, 12] as [number, number],
@@ -296,9 +297,10 @@ export const timing = {
        *  counts when the phone is slow. The bowl hangs under the floor, as in the painting: the
        *  front petals rise just to its front edge, so the fire and the couple stay in view */
       stageRings: [
-        { piece: "petal-lower", n: 18, lite: 12, r: 0.86, h: 0.46, drop: 0.3, lean: 100, offset: 0 },
-        { piece: "petal-outer", n: 18, lite: 12, r: 1.02, h: 0.54, drop: 0.24, lean: 58, offset: 0.5 },
-        { piece: "petal-inner", n: 16, lite: 10, r: 0.92, h: 0.38, drop: 0.12, lean: 32, offset: 0 },
+        // the petals stand up round the stage like a cup (the "closed" lotus of the master)
+        { piece: "petal-lower", n: 18, lite: 12, r: 0.86, h: 0.46, drop: 0.3, lean: 72, offset: 0 },
+        { piece: "petal-outer", n: 18, lite: 12, r: 1.02, h: 0.54, drop: 0.24, lean: 30, offset: 0.5 },
+        { piece: "petal-inner", n: 16, lite: 10, r: 0.92, h: 0.38, drop: 0.12, lean: 12, offset: 0 },
       ],
       crownRings: [
         { piece: "crown-petal-outer", n: 14, lite: 10, r: 0.8, h: 0.42, drop: 0, lean: 35, offset: 0.5 },
@@ -339,10 +341,8 @@ export const timing = {
       assemble: 6.6,
       reverseSpeed: 6,
       startAt: "96%",
-      /** the ring: bars for one turn; the gap inside a pair (°) and how far each closes to click */
+      /** the ring: bars for one turn (the six dance solo, evenly spaced, each tapping their own dandiyas) */
       barsPerTurn: 8,
-      pairGap: 34,
-      clickClose: 7,
       /** at most this many drifting petals (garba) */
       maxAmbient: 8,
       /** disco reflections; confetti pieces in a burst (every 8 beats) */

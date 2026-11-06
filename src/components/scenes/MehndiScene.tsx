@@ -192,17 +192,22 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
       const goldLine = q(".mh-initial-gold .mh-line");
       const goldInk = q(".mh-initial-gold .mh-ink");
       const henna = q(".mh-initial-henna")[0];
-      gsap.set(letter, { autoAlpha: 0, scale: 2.4 });
-      gsap.set(henna, { opacity: 0 });
+      if (S.showInitial) {
+        gsap.set(letter, { autoAlpha: 0, scale: 2.4 });
+        gsap.set(henna, { opacity: 0 });
+      }
       // 1. he leans in towards her, about his cushion
       tl.to(grooms, { rotation: -2, duration: 0.5, ease: "sine.inOut" }, t0);
       // 2. on her palm a script letter draws itself, stroke by stroke, in glowing gold (big enough to read)…
-      tl.to(letter, { autoAlpha: 1, duration: 0.15 }, t0 + 0.3);
-      LETTER.forEach((_, i) => tl.fromTo([goldLine[i], goldInk[i]], { drawSVG: "0%" }, { drawSVG: "100%", duration: 0.34, ease: "power1.inOut" }, t0 + 0.3 + i * 0.3));
-      // 3. …then settles into her palm in henna brown, with a gold glint and sparkles
-      tl.to(letter, { scale: 1, duration: 0.55, ease: "power2.inOut" }, t0 + 1.35);
-      tl.to(henna, { opacity: 0.85, duration: 0.45 }, t0 + 1.5);
-      tl.to(q(".mh-initial-gold"), { opacity: 0, duration: 0.45 }, t0 + 1.55);
+      //    (unless it is switched off: S.showInitial)
+      if (S.showInitial) {
+        tl.to(letter, { autoAlpha: 1, duration: 0.15 }, t0 + 0.3);
+        LETTER.forEach((_, i) => tl.fromTo([goldLine[i], goldInk[i]], { drawSVG: "0%" }, { drawSVG: "100%", duration: 0.34, ease: "power1.inOut" }, t0 + 0.3 + i * 0.3));
+        // 3. …then settles into her palm in henna brown, with a gold glint and sparkles
+        tl.to(letter, { scale: 1, duration: 0.55, ease: "power2.inOut" }, t0 + 1.35);
+        tl.to(henna, { opacity: 0.85, duration: 0.45 }, t0 + 1.5);
+        tl.to(q(".mh-initial-gold"), { opacity: 0, duration: 0.45 }, t0 + 1.55);
+      }
       tl.fromTo(q(".mh-palm-sparks img"), { scale: 0, opacity: 0, rotation: 0 }, { keyframes: [{ scale: 1, opacity: 1, rotation: 45, duration: 0.25 }, { scale: 0, opacity: 0, rotation: 90, duration: 0.35 }], stagger: 0.07 }, t0 + 1.75);
       // 4. a little heart pops up between them and floats away; 5. he straightens (and, if the
       //    config says "b", puts his hand to his heart; "a" keeps him pointing at her palm)
@@ -266,9 +271,10 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
         }, 3);
         // a soft sweep of gold light across the letter
         const glint = q(".mh-glint-grad")[0];
-        every(S.glint * 0.9, S.glint * 1.1, () => {
-          gsap.fromTo(glint, { attr: { x1: -30, x2: -6 } }, { attr: { x1: 66, x2: 90 }, duration: 1.3, ease: "sine.inOut" });
-        }, 2);
+        if (glint)
+          every(S.glint * 0.9, S.glint * 1.1, () => {
+            gsap.fromTo(glint, { attr: { x1: -30, x2: -6 } }, { attr: { x1: 66, x2: 90 }, duration: 1.3, ease: "sine.inOut" });
+          }, 2);
         // the carpet keeps turning, slowly
         if (S.carpetIdleSpin) idle.to(q(".mh-carpet-spin"), { rotation: "+=360", duration: S.carpetSpinSeconds, ease: "none", repeat: -1 }, 0);
         // lamp flames: cycle the three shapes, flicker, glow
@@ -413,7 +419,7 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
               }
             />
             {/* the hidden initial in her palm: gold while it draws, then henna (and a glint now and then) */}
-            <svg className="mh-initial" viewBox="0 0 64 56" style={{ left: `${PALM.x}%`, top: `${PALM.y}%`, width: `${letterW}%` }}>
+            {S.showInitial && <svg className="mh-initial" viewBox="0 0 64 56" style={{ left: `${PALM.x}%`, top: `${PALM.y}%`, width: `${letterW}%` }}>
               <defs>
                 <linearGradient className="mh-glint-grad" id="mh-glint" gradientUnits="userSpaceOnUse" x1="-30" y1="0" x2="-6" y2="0">
                   <stop offset="0" stopColor="#fff3c4" stopOpacity="0" />
@@ -439,7 +445,7 @@ export function MehndiScene({ scrollerRef, style, reduce }: { scrollerRef: RefOb
                   <path key={`i${i}`} className="mh-ink" d={d} />
                 ))}
               </g>
-            </svg>
+            </svg>}
             <div className="mh-palm-sparks" style={{ left: `${PALM.x}%`, top: `${PALM.y}%` }}>
               {[0, 1, 2, 3, 4].map((i) => (
                 <img key={i} src={url(PARTICLE_KINDS.sparkles[i % 4])} alt="" style={{ left: `${[-90, 110, 10, -50, 70][i]}%`, top: `${[-40, -10, -120, 70, 80][i]}%` }} />

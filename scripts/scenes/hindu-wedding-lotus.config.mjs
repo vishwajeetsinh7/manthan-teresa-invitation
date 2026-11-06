@@ -186,34 +186,22 @@ const config = {
         ["strand-long", 874, 34],
       ].forEach(([piece, x, w], i) => out.push(put(`strand-${i + 1}`, piece, x, 316, w, 3.2)));
 
-      // clouds: far ones small and high behind the lotus; a bank in front of the lotus's base, so
-      // it rests in the clouds (nothing floats under it); near ones big and low at the corners, on
-      // top of everything (each shape used again only mirrored and resized, never beside itself)
+      // clouds: only a few small ones high in the sky, behind the lotus (below it is water now)
       [
         ["cloud-1", 95, 795, 230, 1, false],
         ["cloud-4", 930, 820, 220, 1, true],
         ["cloud-7", 40, 660, 150, 0.9, true],
         ["cloud-5", 990, 690, 150, 0.9, false],
-        ["cloud-3", 95, 1235, 220, 6.6, false],
-        ["cloud-8", 930, 1225, 210, 6.6, true],
-        ["cloud-2", 270, 1345, 300, 6.7, true],
-        ["cloud-6", 755, 1350, 320, 6.7, false],
-        ["cloud-4", 512, 1400, 280, 6.75, false],
-        ["cloud-1", 80, 1375, 260, 6.8, false],
-        ["cloud-1", 955, 1380, 260, 6.8, true],
-        ["cloud-6", 512, 1505, 600, 6.85, true],
-        ["cloud-8", 250, 1460, 320, 6.9, false],
-        ["cloud-3", 790, 1465, 300, 6.9, true],
-        ["cloud-5", 40, 1500, 280, 8, false],
-        ["cloud-7", 985, 1505, 270, 8, true],
-        ["cloud-2", 120, 1580, 360, 8.05, false],
-        ["cloud-6", 900, 1585, 380, 8.05, true],
       ].forEach(([piece, x, y, w, z, flip], i) => out.push(put(`cloud-${i + 1}`, piece, x, y, w, z, flip ? { flip } : {})));
 
-      // floating buds and diyas around the lotus (they rise and come round again while idle)
-      out.push(put("bud-a", "bud-1", 70, 1400, 50, 8.1), put("bud-b", "bud-3", 955, 1300, 50, 8.1));
-      out.push(put("fdiya-a", "float-diya-1", 140, 1300, 52, 8.1), put("fdiya-b", "float-diya-2", 880, 1420, 52, 8.1));
-      out.push(put("bud-c", "bud-2", 40, 1150, 40, 1.2), put("fdiya-c", "float-diya-3", 990, 1100, 44, 1.2));
+      // the lotus floats on a pond: lily pads, and buds and little diyas bobbing on the water
+      // (the far ones behind the lotus, the near ones in front of it)
+      out.push(put("pad-1", "leaf-1", 175, 1345, 130, 7.9), put("pad-2", "leaf-2", 852, 1352, 122, 7.9, { flip: true }));
+      out.push(put("pad-3", "leaf-2", 330, 1402, 92, 7.95), put("pad-4", "leaf-1", 694, 1408, 98, 7.95, { flip: true }));
+      out.push(put("pad-5", "leaf-1", 70, 1262, 80, 1.1, { flip: true }), put("pad-6", "leaf-2", 958, 1258, 80, 1.1));
+      out.push(put("bud-a", "bud-1", 120, 1330, 46, 8.1), put("bud-b", "bud-3", 905, 1322, 46, 8.1));
+      out.push(put("fdiya-a", "float-diya-1", 245, 1390, 48, 8.1), put("fdiya-b", "float-diya-2", 790, 1398, 48, 8.1));
+      out.push(put("bud-c", "bud-2", 95, 1252, 36, 1.2), put("fdiya-c", "float-diya-3", 930, 1248, 38, 1.2));
 
       // where the two lotuses are (built in 3D by the scene), in stage %; tilt = the camera's
       // angle onto each (a circle seen as the master's ovals)
@@ -223,6 +211,8 @@ const config = {
         stage: { x: X(510), y: Y(1035), r: Wd(425), tilt: 74 },
         crown: { x: X(512), y: Y(272), r: Wd(408), tilt: 87 },
         rangoli: { x: X(512), y: Y(1448), r: Wd(300), squash: 0.3 },
+        // the pond the lotus floats on (centre, radii; stage %)
+        pond: { x: X(512), y: Y(1292), rx: Wd(560), ry: Y(128) },
       });
       return out;
     },

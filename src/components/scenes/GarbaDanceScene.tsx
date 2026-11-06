@@ -13,7 +13,7 @@ import { ParticlePool, createIdle, createParticles, gateIdle, makeScene, playOnA
  * Garba / Dance Night — "Raas to Remix". One stage, two looks, one beat:
  *
  *  - GARBA: six dancers revolve (anticlockwise from above) round a glowing
- *    garbo, dipping on 1 and 3, clicking dandiyas in pairs on 2 and 4 (sparks),
+ *    garbo, each on their own: dipping on 1 and 3, tapping their own dandiyas on 2 and 4 (sparks),
  *    a skirt-flaring lift every other bar; the dhol player keeps the beat (gold ripples);
  *    bunting, a mirror toran and three lanterns sway overhead.
  *  - THE DROP: the tempo climbs, the ring speeds out, the garbo's flame flares
@@ -53,18 +53,12 @@ const FLOOR = META.floor;
 
 /* ── the garba ring ───────────────────────────────────────────────────── */
 const DANCERS = ["dancer-bride", "dancer-groom", "dancer-gujarati", "dancer-kerala", "dancer-mustard", "dancer-pink"];
-/** the pairs that click (trailing, leading) */
-const PAIRS: [number, number][] = [
-  [0, 1],
-  [2, 3],
-  [4, 5],
-];
 const sheetW = (n: string) => (P[n] as unknown as { sw: number }).sw;
 /** each dancer's size at the front (% of the stage width / height): one scale for all, as on their sheet */
 const DW = DANCERS.map((n) => (RING.w * sheetW(n)) / sheetW("dancer-bride"));
 const DH = DANCERS.map((n, i) => DW[i] / P[n].aspect / ASPECT);
-/** where each sits on the ring (°, 0 = nearest us): pairs a third of the ring apart, the front kept clear */
-const BASE = DANCERS.map((_, i) => 60 + 120 * Math.floor(i / 2) + (i % 2 ? S.pairGap / 2 : -S.pairGap / 2));
+/** where each sits on the ring (°, 0 = nearest us): evenly spaced, each on their own; the front kept clear */
+const BASE = DANCERS.map((_, i) => 30 + 60 * i);
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 /** a point on the ring (angle °, radius × the ring): stage %, depth (−1 far … 1 near), scale */
 function ringPose(deg: number, R: number) {
@@ -135,6 +129,9 @@ const STARS = Array.from({ length: 36 }, (_, i) => {
 /** the disco ball's centre and radius inside its piece (shares of its box) */
 const DB = P["disco-ball"].points as unknown as { ball: number[]; edge: number[] };
 const DB_R = DB.edge[0] - DB.ball[0];
+
+/** this scene's event on the vine (its icon follows the look: dandiya / music notes) */
+const eventOf = (el: HTMLElement, page: string) => el.closest(".timeline")?.querySelector(`.t-text[data-page="${page}"]`)?.closest<HTMLElement>(".t-event") ?? null;
 
 /** sizes of the flame on the garbo (share of the garbo's height) */
 const FLAME_H = 0.24;
@@ -236,7 +233,6 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
         spin: 0, // whole twirls (an in-place turn per unit)
         turn: 0, // the bar-end turn (0 → 1)
         dip: 0,
-        close: 0, // the pair closing in (°)
         tip: { x: 0, y: 0 },
         bx: { x: 0, y: 0, w: 0, h: 0 },
         lastZ: -1,
@@ -255,6 +251,7 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
 
       const setLook = (m: "garba" | "dance") => {
         root.setAttribute("data-mode", m);
+        eventOf(root, page)?.setAttribute("data-look", m);
         toggleBtn.setAttribute("aria-pressed", String(m === "dance"));
         toggleBtn.setAttribute("aria-label", m === "dance" ? "Switch to the garba" : "Switch to the dance floor");
       };
@@ -411,11 +408,11 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
       let sparkI = 0;
       let glintI = 0;
       /** a dandiya spark (scales in and fades) with a few tiny sparkles round it (px in the stage) */
-      const spark = (x: number, y: number, n = 4) => {
+      const spark = (x: number, y: number, n = 4, size = 1.15) => {
         const el = sparkEls[sparkI++ % sparkEls.length];
         gsap.set(el, { x, y, rotation: rnd(0, 360) });
-        gsap.fromTo(el, { scale: 0.25, opacity: 1 }, { scale: 1.15, opacity: 0, duration: 0.5, ease: "power2.out", overwrite: true });
-        for (let i = 0; i < n; i++) glint(x + rnd(-22, 22) * k(), y + rnd(-18, 18) * k(), 0.6);
+        gsap.fromTo(el, { scale: 0.25, opacity: 1 }, { scale: size, opacity: 0, duration: 0.5, ease: "power2.out", overwrite: true });
+        for (let i = 0; i < n; i++) glint(x + rnd(-22, 22) * k() * size, y + rnd(-18, 18) * k() * size, 0.6);
       };
       /** a tiny gold twinkle */
       const glint = (x: number, y: number, s = 1) => {
@@ -461,14 +458,11 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
       };
 
       /* ── the beat ─────────────────────────────────────────────────── */
-      const click = (p: [number, number]) => {
-        const tr = D[p[0]];
-        const ld = D[p[1]];
-        gsap.fromTo([tr, ld], { close: 0 }, { close: S.clickClose, duration: 0.15, ease: "power2.out", yoyo: true, repeat: 1, repeatDelay: 0.08, overwrite: "auto" });
-        gsap.delayedCall(0.15, () => {
-          if (tr.out > 0.2 || ld.out > 0.2) return;
-          spark((tr.tip.x + ld.tip.x) / 2, (tr.tip.y + ld.tip.y) / 2, Math.round(rnd(3, 5)));
-        });
+      /** a dancer taps their own two dandiyas together: a small spark at the stick tips (solo:
+       *  nobody touches anyone) */
+      const tapSticks = (d: (typeof D)[number]) => {
+        if (d.out > 0.2) return;
+        spark(d.tip.x, d.tip.y, 2, 0.55);
       };
       const garbaBeat = (n: number) => {
         const b = n % 4;
@@ -482,7 +476,8 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
         if (b === 0 || b === 2) D.forEach((d) => gsap.fromTo(d, { dip: 0 }, { dip: 1, duration: 0.12, ease: "sine.out", yoyo: true, repeat: 1, overwrite: "auto" }));
         // beat 4 of every second bar: a quick turn in place (the skirts flare)
         if (n % 8 === 7) D.forEach((d) => gsap.fromTo(d, { turn: 0 }, { turn: 1, duration: 0.5, ease: "sine.inOut", overwrite: "auto" }));
-        else if (b === 1 || b === 3) PAIRS.forEach(click);
+        // beats 2 and 4: half the ring taps its sticks, then the other half
+        else if (b === 1 || b === 3) D.forEach((d) => d.i % 2 === (b === 1 ? 0 : 1) && tapSticks(d));
         outfitGlints(Math.round(rnd(3, 5)));
       };
       const coneAt = ["coneL", "coneR"].map((nm) => point("dj-console", nm));
@@ -694,7 +689,7 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
         gsap.set(decorEls, { autoAlpha: 1, y: 0 });
         gsap.set(dhol, { autoAlpha: 1, x: 0, y: 0 });
         gsap.set(garboIn, { yPercent: 0 });
-        D.forEach((d) => Object.assign(d, { out: 0, turn: 0, dip: 0, close: 0 }));
+        D.forEach((d) => Object.assign(d, { out: 0, turn: 0, dip: 0 }));
       };
 
       /* ── the ticker: the beat, the ring, the lights ───────────────── */
@@ -751,7 +746,7 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
           }
           d.hidden = false;
           const R = st.ringR * (1 + d.out * 1.6);
-          const ang = BASE[d.i] + ring.phi + (d.i % 2 ? -d.close : d.close) + d.out * 110;
+          const ang = BASE[d.i] + ring.phi + d.out * 110;
           const qp = ringPose(ang, R);
           // flat 2D: always as drawn (never mirrored); the bar-end "turn" is a skirt flare with a lift,
           // a twirl (spin) a little hop with a sway
@@ -967,7 +962,7 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
         lastBlast = now;
         confetti(24);
         sparkBlast();
-        if (mode === "garba") PAIRS.forEach(click);
+        if (mode === "garba") D.forEach(tapSticks);
         else {
           gsap.fromTo(st, { center: 0 }, { center: 1, duration: 0.35, ease: "power2.out", yoyo: true, repeat: 1, repeatDelay: 0.7, overwrite: "auto" });
           st.pulseAt = T;
@@ -1043,6 +1038,11 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
     },
     { dependencies: [ready, reduce], scope: wrap },
   );
+
+  // reduced motion: the event's icon follows the look on show
+  useEffect(() => {
+    if (reduce && wrap.current) eventOf(wrap.current, page)?.setAttribute("data-look", still);
+  }, [reduce, still, page]);
 
   // reduced motion: taps fade a few petals / confetti in and out, in place
   useEffect(() => {

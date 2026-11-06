@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { gsap, useGSAP } from "@/src/lib/gsap";
 import { timing } from "@/src/config/timing";
-import { enableMotion, motionActive, onShake } from "@/src/lib/motion";
+import { onShake } from "@/src/lib/motion";
 import { onOrient } from "@/src/lib/tilt";
 import manifest from "@/public/scenes/hindu-wedding-lotus/manifest.json";
 import layout from "@/src/config/scenes/hindu-wedding-lotus.json";
@@ -30,7 +30,7 @@ import { LotusPetals, buildPetals, petalTransform, petalZ, pose, type Petal, typ
  * crown's petals spring outward one after another, petals drop), the arch (petals fall), a cloud (it
  * drifts away and back), the fire (it flares), a diya (it jumps), a strand
  * (it swings), or anywhere else (a burst of flowers). Shake the phone (after
- * the "Shake to shower blessings" pill): the crown's petals spring, the clouds puff
+ * no button needed): the crown's petals spring, the clouds puff
  * out, petals storm down from the canopy. Taps never block scrolling.
  *
  * No halo, glow or light rays behind anyone: the only warm light near the
@@ -79,6 +79,10 @@ const ARCH_PTS = Array.from({ length: 24 }, (_, i) => point("arch", `a${i}`));
 const STRANDS = SC.ITEMS.filter((i) => i.id.startsWith("strand-"));
 const CLOUDS = SC.ITEMS.filter((i) => i.id.startsWith("cloud-"));
 const FLOATERS = SC.ITEMS.filter((i) => /^(bud|fdiya)-/.test(i.id));
+/** lily pads on the pond */
+const PADS = SC.ITEMS.filter((i) => i.id.startsWith("pad-"));
+/** the pond the lotus floats on */
+const POND = (layout as unknown as { meta: { lotus: { pond: { x: number; y: number; rx: number; ry: number } } } }).meta.lotus.pond;
 /** how each lotus is seen: centre, radius, the camera's tilt; z: the people / the kalash sit at
  *  this depth — nearer petals in front of them, farther ones behind */
 const STAGE_VIEW: View = { x: ST.x, y: ST.y, R: ST.r, tilt: ST.tilt, z: 400, zSpread: 80 };
@@ -109,7 +113,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
   const wrap = useRef<HTMLDivElement>(null);
   const ready = useSceneAssets(wrap, scrollerRef, RUNTIME);
   const debug = useDebug();
-  const [pillLabel, setPillLabel] = useState("Shake to shower blessings");
   /** 0: full; 1: fewer petals, no breathing; 2: the painted lotus (a slow phone) */
   const [quality, setQuality] = useState(S.lotusMode === "painted" ? 2 : 0);
   const assembledOnce = useRef(false);
@@ -144,7 +147,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       const canopyGroup = q(".lt-canopy")[0] as HTMLElement;
       const fire = q(".hw-fire")[0] as HTMLElement;
       const glow = q(".hw-fire-glow")[0] as HTMLElement;
-      const pill = q(".hw-pill")[0] as HTMLElement;
       const couple = item("couple-final");
       const arch = item("arch");
       const archImg = arch.querySelector("img") as HTMLElement;
@@ -152,6 +154,8 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       const strands = STRANDS.map((s) => item(s.id));
       const clouds = CLOUDS.map((c) => item(c.id));
       const floaters = FLOATERS.map((f) => item(f.id));
+      const pads = PADS.map((pd) => item(pd.id));
+      const pond = q(".lt-pond")[0] as HTMLElement;
       const diyas = q(".lt-diya");
       const diyaFlames = q(".lt-diya .hw-diya-flame");
       const props = [item("pandit"), item("havan-kund"), item("kalash"), item("thali")];
@@ -328,7 +332,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       /* ── hidden until their moment ── */
       gsap.set([couple, ...props, ...strands, ...rim, fire, glow, ...diyas, ...floaters], { autoAlpha: 0 });
       gsap.set(diyaFlames, { scale: 0, autoAlpha: 0 });
-      gsap.set(pill, { autoAlpha: 0, y: 6 });
       gsap.set(strands, { scaleY: 0, transformOrigin: "50% 0%" });
       gsap.set(stageGroup, { transformOrigin: `${ST.x}% ${ST.y}%` });
 
@@ -336,6 +339,9 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       const tl = gsap.timeline({ paused: true, defaults: { ease: "power2.out" } });
       let t = 0;
 
+      // 0. the pond spreads out, its lily pads come up
+      tl.fromTo(pond, { autoAlpha: 0, scaleX: 0.6 }, { autoAlpha: 1, scaleX: 1, duration: 1.1, ease: "power2.out" }, t);
+      tl.fromTo(pads, { autoAlpha: 0, scale: 0.5 }, { autoAlpha: 1, scale: 1, duration: 0.6, ease: "back.out(1.8)", stagger: 0.08 }, t + 0.4);
       // 1. the clouds sail in from the left and the right; a whirl of flowers spins into the
       //    heart of the sky
       clouds.forEach((c, i) => {
@@ -368,7 +374,8 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       //    lower petals curl down first, then the outer, then the inner — turning 120° clockwise
       tl.fromTo(stageGroup, { scale: 0.35, y: () => H() * 0.08, autoAlpha: 0 }, { scale: 1, y: 0, autoAlpha: 1, duration: ACT.bloom, ease: "power2.out" }, t - 0.2);
       if (stageL) {
-        [0, 1, 2].forEach((ring, j) => openRing(stageL, ring, t + j * 0.35, ACT.bloom - 0.6));
+        // it rises already in its shape: a cup of petals, never opening (the opening looked odd)
+        stageL.open.forEach((o) => (o.v = 1));
         tl.fromTo(q(".lt-floor"), { opacity: 0 }, { opacity: 1, duration: 0.8 }, t + 0.4);
       }
       t += ACT.bloom;
@@ -503,10 +510,13 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         });
         // the strands sway from their loops
         strands.forEach((s) => idle.fromTo(s, { rotation: -2 }, { rotation: 2, duration: rnd(1.8, 2.6), ease: "sine.inOut", yoyo: true, repeat: -1 }, rnd(0, 2)));
-        // buds and floating diyas rise slowly round the stage and come round again
-        floaters.forEach((f, i) =>
-          idle.fromTo(f, { y: 0, autoAlpha: 0 }, { keyframes: [{ autoAlpha: 1, duration: 2 }, { y: () => -H() * rnd(0.12, 0.2), x: () => rnd(-10, 10) * k(), duration: 9 }, { autoAlpha: 0, duration: 2 }], ease: "sine.inOut", repeat: -1 }, i * 1.6),
-        );
+        // buds and little diyas bob on the water and drift a little; the lily pads rock
+        floaters.forEach((f, i) => {
+          idle.to(f, { autoAlpha: 1, duration: 1.2 }, i * 0.25);
+          idle.fromTo(f, { y: () => -2 * k() }, { y: () => 2 * k(), duration: rnd(2, 2.8), ease: "sine.inOut", yoyo: true, repeat: -1 }, i * 0.4);
+          idle.fromTo(f, { x: () => -6 * k(), rotation: -4 }, { x: () => 6 * k(), rotation: 4, duration: rnd(6, 9), ease: "sine.inOut", yoyo: true, repeat: -1 }, i * 0.7);
+        });
+        pads.forEach((pd, i) => idle.fromTo(pd, { rotation: -2.5, y: 0 }, { rotation: 2.5, y: () => 1.5 * k(), duration: rnd(3.5, 5), ease: "sine.inOut", yoyo: true, repeat: -1 }, i * 0.6));
         // the arch sheds a petal now and then
         every(6, 9, () => fall(ARCH_PTS, 1, KINDS.petals, 0.6), 3);
         // smoke, the pandit's offering, diyas flicker, the couple breathe
@@ -526,7 +536,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           if (count("ambient") >= S.maxAmbient) return;
           spawn(gsap.utils.random(KINDS.ambient), rnd(0.06, 0.94) * W(), -0.02 * H(), { tag: "ambient", vy: rnd(14, 22) * k(), vx: rnd(-4, 4), life: 14, s: rnd(0.42, 0.62) });
         });
-        gsap.to(pill, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" });
         gate.run();
       };
 
@@ -634,29 +643,8 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           0,
         );
       };
-      let mode: "ask" | "shake" | "button" = "ask";
-      const say = (label: string) => {
-        setPillLabel(label);
-        gsap.delayedCall(3, () => setPillLabel("Shake to shower blessings"));
-      };
-      const onPill = () => {
-        if (!assembled) return;
-        if (mode === "button") return shower();
-        if (mode === "shake") return say("Shake your phone ✨");
-        enableMotion().then((ok) => {
-          if (ok) shakeOn();
-          gsap.delayedCall(0.7, () => {
-            if (ok && motionActive()) {
-              mode = "shake";
-              say("Shake your phone ✨");
-            } else {
-              mode = "button";
-              shower();
-            }
-          });
-        });
-      };
-      pill.addEventListener("click", onPill);
+      // a shake showers blessings (no button: the phone's motion is asked for on the opening tap)
+      shakeOn();
 
       // everything runs only while the stage is on screen and the tab visible
       const gate = gateIdle(
@@ -667,7 +655,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           running = go;
           main.setTicking(go);
           tapPool.setTicking(go);
-          if (assembled) gsap.to(pill, { autoAlpha: on ? 1 : 0, duration: 0.3, overwrite: "auto" });
         },
         () => idleStarted,
       );
@@ -687,7 +674,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           idleStarted = false;
           assembled = false;
           for (const L of lotuses) L.on.v = 0;
-          gsap.to(pill, { autoAlpha: 0, duration: 0.2, overwrite: "auto" });
           gate.run();
         },
       });
@@ -709,18 +695,16 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         stage.removeEventListener("pointerdown", onDown);
         stage.removeEventListener("pointerup", onUp);
         stage.removeEventListener("pointercancel", onCancel);
-        pill.removeEventListener("click", onPill);
       };
     },
     { dependencies: [ready, reduce, quality], scope: wrap },
   );
 
-  // reduced motion: taps and the pill fade a few petals in and out, in place
+  // reduced motion: taps fade a few petals in and out, in place
   useEffect(() => {
     const root = wrap.current;
     if (!ready || !reduce || !root) return;
     const stage = root.querySelector<HTMLElement>(".ms-stage")!;
-    const pill = root.querySelector<HTMLElement>(".hw-pill")!;
     const still = (sx: number, sy: number, n: number, spread: number) => {
       for (let i = 0; i < n; i++) {
         const im = document.createElement("img");
@@ -743,14 +727,11 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
       const r = stage.getBoundingClientRect();
       still(((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100, 4, 10);
     };
-    const onPill = () => still(50, CR.y + 8, 8, 60);
     stage.addEventListener("pointerdown", onDown);
     stage.addEventListener("pointerup", onUp);
-    pill.addEventListener("click", onPill);
     return () => {
       stage.removeEventListener("pointerdown", onDown);
       stage.removeEventListener("pointerup", onUp);
-      pill.removeEventListener("click", onPill);
     };
   }, [ready, reduce]);
 
@@ -770,6 +751,18 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
         {debug && <DebugMaster scene={SC} />}
         {ready && (
           <>
+            {/* the pond the lotus floats on: its pink reflection, a shimmer, slow ripples */}
+            <div className="lt-pond" style={{ left: `${POND.x - POND.rx}%`, top: `${POND.y - POND.ry}%`, width: `${POND.rx * 2}%`, height: `${POND.ry * 2}%` }}>
+              <span className="lt-pond-glow" />
+              <span className="lt-pond-shine" />
+              <span className="lt-pond-shine lt-pond-shine-2" />
+              {[0, 1, 2].map((i) => (
+                <span key={i} className="lt-ripple" style={{ animationDelay: `${-i * 1.6}s` }} />
+              ))}
+            </div>
+            {PADS.filter((pd) => pd.z < 2).map((pd) => (
+              <Pc key={pd.id} id={pd.id} className="lt-pad" />
+            ))}
             {/* far sky: small clouds, a bud and a floating diya far off */}
             {CLOUDS.filter((c) => c.z < 2).map((c) => (
               <Pc key={c.id} id={c.id} className="lt-cloud" />
@@ -857,9 +850,9 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
               ))}
             </div>
 
-            {/* the cloud bank the lotus rests in (in front of its base), and the near clouds, on top */}
-            {CLOUDS.filter((c) => c.z >= 6).map((c) => (
-              <Pc key={c.id} id={c.id} className="lt-cloud lt-near" />
+            {/* lily pads in front of the lotus, on the water */}
+            {PADS.filter((pd) => pd.z >= 2).map((pd) => (
+              <Pc key={pd.id} id={pd.id} className="lt-pad" />
             ))}
             {FLOATERS.filter((f) => f.z >= 2).map((f) => (
               <Pc key={f.id} id={f.id} className="lt-floater">
@@ -892,11 +885,6 @@ export function HinduLotusScene({ scrollerRef, style, reduce, page }: { scroller
           </>
         )}
       </div>
-      {ready && (
-        <button type="button" className="hw-pill" aria-label={pillLabel}>
-          {pillLabel}
-        </button>
-      )}
     </div>
   );
 }
