@@ -8,7 +8,7 @@ import { assets } from "@/src/config/assets";
 import { AssetImage } from "./AssetImage";
 import { Divider, ScheduleThread, buildThread } from "./art/LineArt";
 import { FlowerOpenPlaceholder } from "./art/Placeholders";
-import { EVENT_ICONS, HENNA_CONE, LotusDivider, MEHNDI_MANDALA, SvgArt, type EventIconName } from "./art/svgArt";
+import { EVENT_ICONS, HALDI_RANGOLI, HENNA_CONE, LotusDivider, MEHNDI_MANDALA, SvgArt, type EventIconName } from "./art/svgArt";
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 import { SOFT_BLUR } from "@/src/lib/device";
 import { MehndiScene } from "./scenes/MehndiScene";
@@ -632,6 +632,8 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           if (i >= 0) {
             moveRose(i);
             fx[i].enter();
+            // seen once: its rangoli (Haldi) stays drawn from then on
+            events[i].classList.add("t-seen");
           }
         };
 
@@ -737,6 +739,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                 <div className="t-text" data-page={i === 0 ? "mehndi" : `event-${i}`}>
                   {mehndi && <SvgArt svg={MEHNDI_MANDALA} className="t-pattern" data-page-part="" />}
                   {"mood" in e && e.mood === "haldi" && <span className="t-halo" aria-hidden />}
+                  {"mood" in e && e.mood === "haldi" && <SvgArt svg={HALDI_RANGOLI} className="t-rangoli" />}
                   <EventDate day={e.day} weekday={e.weekday} month={e.month} />
                   <h3 className="t-title script">
                     <span className="wipe">{e.title}</span>

@@ -1052,6 +1052,72 @@ body {
 
 /* Haldi on the schedule: turmeric bloom of colour behind it, golden text */
 /* Haldi: soft turmeric light behind the event, drifting while focused (JS) */
+/* the Haldi rangoli: behind the Haldi icon, it draws itself from the centre out the first time
+   the event is in focus (each stroke has pathLength 1 and its own delay, --d), the powder colours
+   fill in, then it turns very slowly. */
+.t-rangoli {
+  position: absolute;
+  z-index: -1;
+  /* centred on the Haldi icon (242u from the text's left) and kept on screen */
+  left: calc(var(--u) * 196);
+  top: 50%;
+  width: calc(var(--u) * 92);
+  height: calc(var(--u) * 92);
+  margin-top: calc(var(--u) * -46);
+  opacity: 0.85;
+  pointer-events: none;
+}
+.t-rangoli svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: t-rangoli-spin 160s linear infinite;
+}
+.t-rangoli path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  fill-opacity: 0;
+  transition:
+    stroke-dashoffset 0.9s ease-out calc(var(--d) * 1.6),
+    fill-opacity 0.8s ease calc(var(--d) * 1.6 + 0.5s);
+}
+.t-rangoli circle {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  scale: 0;
+  transition:
+    opacity 0.3s ease calc(var(--d) * 1.6 + 0.3s),
+    scale 0.4s cubic-bezier(0.3, 1.8, 0.5, 1) calc(var(--d) * 1.6 + 0.3s);
+}
+.t-seen .t-rangoli path {
+  stroke-dashoffset: 0;
+  fill-opacity: 0.24;
+}
+.t-seen .t-rangoli circle {
+  opacity: 1;
+  scale: 1;
+}
+@keyframes t-rangoli-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .t-rangoli svg {
+    animation: none;
+  }
+  .t-rangoli path {
+    stroke-dashoffset: 0;
+    fill-opacity: 0.24;
+    transition: none;
+  }
+  .t-rangoli circle {
+    opacity: 1;
+    scale: 1;
+    transition: none;
+  }
+}
 .t-halo {
   position: absolute;
   z-index: -1;
