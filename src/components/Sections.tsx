@@ -323,7 +323,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           const N = D.henna;
           const strokes = [...pattern.querySelectorAll<SVGPathElement>(".draw")];
           const dots = [...pattern.querySelectorAll<SVGCircleElement>(".dot")];
-          // the icon's own cone (first 7 strokes + nozzle dots) dims while the pen is out
+          // the icon's own cone hides while the pen (the same cone) is out drawing
           const iconCone = [...iconSvg.querySelectorAll("path")].slice(0, 7).concat([...iconSvg.querySelectorAll("circle")].slice(0, 3) as never[]);
           const lens = strokes.map((p) => p.getTotalLength());
           const total = lens.reduce((a, b) => a + b, 0) || 1;
@@ -371,12 +371,16 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
               const pt = p.getPointAtLength(l);
               return { x: pr.left - er.left + pt.x * k, y: pr.top - er.top + pt.y * k };
             };
-            const dock = { x: ir.left - er.left + (39 * ir.width) / 80, y: ir.top - er.top + (41 * ir.width) / 80 };
-            const small = (26 * ir.width) / 80 / cone.offsetWidth; // the icon's cone size
+            // the cone's nozzle tip (39, 41 in drawing units) in the icon, and the pen's scale there
+            // to sit exactly on the icon's cone (the pen draws 36 units across its box)
+            const vb = iconSvg.viewBox.baseVal;
+            const unit = ir.width / (vb.width || 80);
+            const dock = { x: ir.left - er.left + (39 - vb.x) * unit, y: ir.top - er.top + (41 - vb.y) * unit };
+            const small = unit / (cone.offsetWidth / 36);
 
             tl = gsap.timeline();
             tl.set(cone, { x: dock.x, y: dock.y, rotation: 0, scale: small, autoAlpha: 1 }, 0)
-              .to(iconCone, { opacity: 0.12, duration: 0.3 }, 0)
+              .to(iconCone, { opacity: 0, duration: 0.2 }, 0.05)
               .to(pattern, { opacity: N.opacity, duration: 0.4 }, 0)
               .to(cone, { ...at(strokes[0], 0), scale: 1, duration: N.fly, ease: "power2.inOut" }, 0)
               .add(() => {

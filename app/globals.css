@@ -1208,15 +1208,6 @@ body {
   pointer-events: none;
   will-change: transform;
 }
-/* Mehndi: the gold cone icon sits in the middle of its turning mandala; the cone "pen" that
-   draws the mandala stays hidden (it still places the drawing, so it keeps its layout), and so
-   the icon's own cone never dims while the pen is out */
-.henna-cone {
-  opacity: 0 !important;
-}
-.t-event:has(.t-pattern) .event-icon :is(path, circle) {
-  opacity: 1 !important;
-}
 /* the "pen": its nozzle tip sits on the element's top-left corner, so
    GSAP's x/y place the tip exactly on the line being drawn */
 .henna-cone {
@@ -1237,7 +1228,11 @@ body {
   top: calc(var(--u) * -42.2);
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 calc(var(--u) * 3) calc(var(--u) * 3) rgb(90 40 20 / 0.25));
+  /* the same gold line cone as the icon: it lifts out of it and draws the mandala */
+  color: var(--gold);
+}
+.henna-cone-art path {
+  stroke-width: 1.5;
 }
 .henna-cone-art svg {
   display: block;
