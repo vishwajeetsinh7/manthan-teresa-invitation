@@ -70,7 +70,7 @@ export const invitation = {
       weekday: "Sunday",
       title: "Mehndi",
       time: "9:00 AM – 11:00 AM",
-      place: "Garden Lawns", // PLACEHOLDER
+      place: "Element Events",
       note: "Festive colours", // PLACEHOLDER
       icons: ["mehndi"],
       pattern: "mehndi", // the henna mandala beside the details (it draws itself, then turns slowly)
@@ -122,7 +122,7 @@ export const invitation = {
       title: "Church Wedding & Reception", // PLACEHOLDER
       scene: "church-wedding", // "The Aisle"
       time: "4:00 PM onwards", // PLACEHOLDER
-      place: "St. Mary's Church", // PLACEHOLDER
+      place: "Element Events",
       note: "Formal / Gowns & Suits", // PLACEHOLDER
       icons: ["church"],
       flower: { kind: 2 }, // ivory — white wedding
