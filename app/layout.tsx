@@ -51,8 +51,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${script.variable} ${serif.variable} antialiased`}>
-      <body>{children}</body>
+    // suppressHydrationWarning: browsers and their extensions (translate bars and the like) add
+    // attributes to <html> / <body> before React loads (e.g. style="margin-top: 0px"); that is
+    // not a bug in the page. It only covers these two elements' own attributes, not their content.
+    <html lang="en" className={`${script.variable} ${serif.variable} antialiased`} suppressHydrationWarning>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

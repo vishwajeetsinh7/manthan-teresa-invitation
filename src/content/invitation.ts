@@ -73,6 +73,7 @@ export const invitation = {
       place: "Garden Lawns", // PLACEHOLDER
       note: "Festive colours", // PLACEHOLDER
       icons: ["mehndi"],
+      pattern: "mehndi", // the henna mandala beside the details (it draws itself, then turns slowly)
       scene: "mehndi", // the assembled Mehndi scene
       flower: { kind: 3 }, // raspberry — henna red
     },
