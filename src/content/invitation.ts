@@ -41,12 +41,12 @@ export const invitation = {
       { day: "25", weekday: "Tue" },
     ],
   },
-  venueLine: "The Grand Palace, Ahmedabad", // PLACEHOLDER
+  venueLine: "Element Events, Warner QLD",
 
   scrollHint: "Scroll",
 
   /** Countdown target (local time of the venue). */
-  countdownTo: "2027-05-23T17:00:00+05:30",
+  countdownTo: "2027-05-23T17:00:00+10:00", // Queensland time (AEST, no daylight saving)
 
   /** "Map" beside each event's place (opens the event's mapsUrl, or the venue's) */
   eventMapLabel: "Map",
@@ -84,7 +84,7 @@ export const invitation = {
       title: "Haldi",
       scene: "haldi", // "The Golden Swing"
       time: "10:00 AM onwards", // PLACEHOLDER
-      place: "The Grand Palace", // PLACEHOLDER
+      place: "Element Events",
       note: "",
       mood: "haldi",
       icons: ["haldi"],
@@ -97,7 +97,7 @@ export const invitation = {
       title: "Garba & Dance", // PLACEHOLDER
       scene: "garba-dance", // "Raas to Remix"
       time: "8:00 PM onwards", // PLACEHOLDER
-      place: "The Grand Palace", // PLACEHOLDER
+      place: "Element Events",
       note: "Dandiya & dancing shoes", // PLACEHOLDER
       icons: ["dandiya", "music"], // the dandiya in the garba, music notes on the dance floor
       flower: { kind: 1 }, // blush
@@ -110,7 +110,7 @@ export const invitation = {
       // "Swarg Kamal", the heavenly lotus (the first version, the mandap: "hindu-wedding" — git tag hindu-wedding-mandap)
       scene: "hindu-lotus",
       time: "6:00 PM onwards", // PLACEHOLDER
-      place: "The Grand Palace", // PLACEHOLDER
+      place: "Element Events",
       note: "Traditional Indian", // PLACEHOLDER
       icons: ["mandap"],
       flower: { kind: 0 }, // deep red bridal rose
@@ -131,8 +131,8 @@ export const invitation = {
 
   venue: {
     heading: "The Venue",
-    name: "The Grand Palace", // PLACEHOLDER
-    address: "SG Highway, Ahmedabad, Gujarat", // PLACEHOLDER
+    name: "Element Events",
+    address: "7 Coorparoo Rd, Warner QLD 4500, Australia",
     mapsUrl: "https://maps.app.goo.gl/BbYLqSbYiXJDMwMD8",
     mapsLabel: "Open in Google Maps",
   },
