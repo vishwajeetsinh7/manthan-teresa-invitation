@@ -260,7 +260,10 @@ export function Invitation() {
 
         {/* background song — started by the opening tap, loops; the button
             appears once the file is confirmed to exist */}
-        <audio ref={audioRef} src={assets.music} loop preload="auto" onError={() => setMusicAvailable(false)} />
+        <audio ref={audioRef} loop preload="auto">
+          <source src={assets.musicAac} type="audio/mp4" />
+          <source src={assets.music} type="audio/mpeg" onError={() => setMusicAvailable(false)} />
+        </audio>
       </div>
 
       <DesktopNote />

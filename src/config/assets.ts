@@ -23,7 +23,9 @@ export const assets = {
   rosebud: `${A}/flowers/rosebud.webp`,
   leaves: [1, 2, 3, 4, 5].map((n) => `${A}/leaves/leaf-${n}.webp`),
   petals: [1, 2, 3].map((n) => `${A}/petals/petal-${n}.webp`),
+  /** the background song ("Main Edit", ~50 s, loops): AAC first (best on iPhone), MP3 for the rest */
   music: `${A}/audio/music.mp3`,
+  musicAac: `${A}/audio/music.m4a`,
   og: `${A}/og.jpg`,
 } as const;
 
