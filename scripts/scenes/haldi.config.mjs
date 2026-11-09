@@ -121,9 +121,9 @@ const config = {
       { piece: "basket", box: [92, 1215, 388, 1388], z: 10 },
       { piece: "urli", box: [335, 1262, 727, 1476], z: 10 },
       { piece: "haldi-bowl", box: [688, 1300, 1000, 1442], z: 10 },
-      // a little boy (smaller than before), standing clear of the right-hand curtain — he runs out
+      // the little boy (twice the size he was: he was lost next to everything else), clear of the right-hand curtain — he runs out
       // from behind it (the curtain is in front of him)
-      { piece: "boy", fixed: { x: 74, y: 84, w: 19.7 }, z: 12 },
+      { piece: "boy", fixed: { x: 74, y: 84, w: 39.4 }, z: 12 },
     ],
     /** pieces that are not matched to the master (or are placed from others) */
     extra: (items, P) => {
