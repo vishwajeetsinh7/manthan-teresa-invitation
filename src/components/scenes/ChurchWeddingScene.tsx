@@ -28,8 +28,8 @@ import {
  * The church wedding scene, "The Aisle": the church appears (altar, windows,
  * the flower arch, the bells), the pews fill with guests row by row and the
  * candles are lit, the runner unrolls and the priest rises in behind the
- * altar while the groom comes to wait there. The bride walks up the
- * aisle to him, petals drifting from the arch; as she reaches him a beam of
+ * altar. The groom walks the bride up the aisle, side by side, petals
+ * drifting from the arch; as they reach the altar a beam of
  * light falls from the cross and they turn to each other: he ties the minnu
  * (a golden glint at her neck), then slips the ring on her finger (a bright
  * glint, petals from the arch). The bells ring and they walk back down the
@@ -100,6 +100,7 @@ export function ChurchWeddingScene({ scrollerRef, style, reduce, page }: { scrol
 
       const groomWait = item("groom-wait");
       const brideBack = item("bride-back");
+      const groomBack = item("groom-back");
       const altarA = item("couple-altar-a");
       const altarB = item("couple-altar-b");
       const walk = item("couple-walk");
@@ -108,7 +109,7 @@ export function ChurchWeddingScene({ scrollerRef, style, reduce, page }: { scrol
       const glow = q(".cw-glow")[0];
       const holy = q(".cw-holy")[0];
       // hidden until their moment (the timeline below brings each in)
-      gsap.set([item("girl-back"), groomWait, brideBack, altarA, altarB, walk, ...kids], { autoAlpha: 0 });
+      gsap.set([item("girl-back"), groomWait, groomBack, brideBack, altarA, altarB, walk, ...kids], { autoAlpha: 0 });
       gsap.set(q(".cw-flame"), { scale: 0, autoAlpha: 0 });
       gsap.set([holy, q(".cw-glint")], { autoAlpha: 0 });
 
@@ -224,20 +225,22 @@ export function ChurchWeddingScene({ scrollerRef, style, reduce, page }: { scrol
       tl.fromTo(item("runner"), { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.8, ease: "power2.inOut" }, t);
       tl.fromTo(items("scatter-"), { opacity: 0 }, { opacity: 1, duration: 0.4, stagger: 0.03 }, t + 0.6);
       tl.fromTo(item("priest"), { opacity: 0, y: () => H() * 0.03 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, t + 0.25);
-      // the groom comes to the altar and waits, facing the aisle
-      tl.fromTo(groomWait, { x: () => -W() * 0.06, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.7, ease: "power2.out" }, t + 0.4);
       t += ACT.runner;
 
-      // 4. the bride walks up the aisle to him (no flower girl beside her), smaller and smaller with
-      //    the perspective, to her place at his side; petals drift down from the flower arch
+      // 4. the groom walks the bride up the aisle: side by side, in step, her on his left (his arm
+      //    offered to her), smaller and smaller with the perspective — their gap shrinks with it,
+      //    so they arrive exactly where they stand at the altar; petals drift down from the arch
       const BB = byId["bride-back"];
+      const GB = byId["groom-back"];
       const bride = walker(brideBack, BB, ALTAR_SCALE);
+      const groom = walker(groomBack, GB, ALTAR_SCALE);
       const walkT = ACT.girl + ACT.bride - 0.2;
       const startY = YF + 3;
-      const brideFrom = { x: BB.x + 3, y: startY };
-      const brideTo = { x: BB.x, y: YA };
-      tl.fromTo(brideBack, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, t);
-      bride.go(brideFrom, brideTo, t, walkT, 9, "power1.out");
+      const mid = (BB.x + GB.x) / 2;
+      const half = (GB.x - BB.x) / 2 / ALTAR_SCALE; // half their gap at the front of the aisle
+      tl.fromTo([groomBack, brideBack], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, t);
+      bride.go({ x: mid - half, y: startY }, { x: BB.x, y: YA }, t, walkT, 9, "power1.out");
+      groom.go({ x: mid + half, y: startY }, { x: GB.x, y: YA }, t, walkT, 9, "power1.out");
       for (let i = 0; i < 5; i++) tl.call(() => archPetals(2), undefined, t + 0.3 + i * 0.6);
       t += ACT.girl + ACT.bride;
 
@@ -246,7 +249,7 @@ export function ChurchWeddingScene({ scrollerRef, style, reduce, page }: { scrol
       tl.fromTo(holy, { autoAlpha: 0, scaleY: 0.4 }, { keyframes: [{ autoAlpha: 1, scaleY: 1, duration: 0.45, ease: "power2.out" }, { autoAlpha: 0.35, duration: 0.7, ease: "sine.inOut" }] }, t);
       tl.fromTo(glow, { opacity: 0, scale: 0.6 }, { opacity: 0.8, scale: 1, duration: 0.6, ease: "sine.out" }, t + 0.1);
       // (they turn to each other: the minnu pose stands exactly where they are — a short cross-fade in the light)
-      tl.to([groomWait, brideBack], { autoAlpha: 0, duration: 0.4, ease: "sine.inOut" }, t + 0.3);
+      tl.to([groomBack, brideBack], { autoAlpha: 0, duration: 0.4, ease: "sine.inOut" }, t + 0.3);
       tl.fromTo(altarA, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, ease: "sine.inOut" }, t + 0.3);
       t += ACT.couple;
 

@@ -52,6 +52,8 @@ const config = {
     walk: "couple-walk-v3.png",
     vows: "couple-altar-v3.png",
     arrive: "bride-groom-arrive.png",
+    // the groom from behind, walking (he walks the bride up the aisle, offering her his arm)
+    groomback: "groom-back.png",
     guests: "guests.png",
     people: "people.png",
     pews: "pews.png",
@@ -80,6 +82,7 @@ const config = {
     // the bride walking away from us up the aisle; the groom waiting at the altar, facing us
     { name: "bride-back", sheet: "arrive", at: [420, 600] },
     { name: "groom-wait", sheet: "arrive", at: [1090, 700] },
+    { name: "groom-back", sheet: "groomback", at: [760, 600], pivotAt: [765, 993] },
     ...GUESTS.map((at, i) => ({ name: `pew-guests-${i + 1}`, sheet: "guests", at, gather: 20 })),
 
     // (cut at the waist: the altar table hides the rest)
@@ -214,6 +217,9 @@ const config = {
         const xAt = (sheetX) => +(ca.x - ca.w / 2 + ((sheetX - pa.x0) / pa.w) * ca.w).toFixed(2);
         out.push({ id: "groom-wait", piece: "groom-wait", x: xAt(478), y: ca.y, w: +(P["groom-wait"].w * sc * (945 / 955)).toFixed(2), z: 3.7 });
         out.push({ id: "bride-back", piece: "bride-back", x: xAt(290), y: ca.y, w: +(P["bride-back"].w * sc * (890 / 900)).toFixed(2), z: 3.72 });
+        // the groom from behind, ending his walk where he stands in the minnu pose, at its height
+        // (968 px on his sheet); his feet (the walking pose) sit a little left of his body's centre
+        out.push({ id: "groom-back", piece: "groom-back", x: xAt(478), y: ca.y, w: +(P["groom-back"].w * sc * (945 / 968)).toFixed(2), z: 3.71 });
       }
       // the little flower girl starts at the front of the aisle (the timeline walks her up)
       const gf = byId["girl-front"];

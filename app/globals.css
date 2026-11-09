@@ -2327,7 +2327,7 @@ body {
   mask-image: radial-gradient(ellipse 62% 58% at 50% 46%, #000 58%, transparent 100%);
 }
 /* reduced motion: the final scene (the couple walking out, the children at the front) */
-.cw-scene[data-reduce] :is([data-id="girl-back"], [data-id="groom-wait"], [data-id="bride-back"], [data-id="couple-altar-a"], [data-id="couple-altar-b"]) {
+.cw-scene[data-reduce] :is([data-id="girl-back"], [data-id="groom-wait"], [data-id="groom-back"], [data-id="bride-back"], [data-id="couple-altar-a"], [data-id="couple-altar-b"]) {
   display: none;
 }
 /* the beam of light from the cross onto the altar steps */

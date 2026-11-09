@@ -223,6 +223,14 @@
       "z": 3.7
     },
     {
+      "id": "groom-back",
+      "piece": "groom-back",
+      "x": 52.95,
+      "y": 47.68,
+      "w": 11.45,
+      "z": 3.71
+    },
+    {
       "id": "bride-back",
       "piece": "bride-back",
       "x": 47.72,

@@ -192,6 +192,16 @@
         0.9959
       ]
     },
+    "groom-back": {
+      "src": "groom-back.webp",
+      "w": 148,
+      "h": 342,
+      "aspect": 0.4324,
+      "pivot": [
+        0.6019,
+        0.9949
+      ]
+    },
     "pew-guests-1": {
       "src": "pew-guests-1.webp",
       "w": 479,
