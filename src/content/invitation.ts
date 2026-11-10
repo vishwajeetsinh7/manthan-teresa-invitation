@@ -132,7 +132,7 @@ export const invitation = {
   venue: {
     heading: "The Venue",
     name: "Element Events",
-    address: "7 Coorparoo Rd, Warner QLD 4500, Australia",
+    address: "7 Coorparoo Rd, Brisbane QLD 4500, Australia",
     mapsUrl: "https://maps.app.goo.gl/BbYLqSbYiXJDMwMD8",
     mapsLabel: "Open in Google Maps",
   },
