@@ -41,7 +41,7 @@ export const invitation = {
       { day: "25", weekday: "Tue" },
     ],
   },
-  venueLine: "Element Events, Warner QLD",
+  venueLine: "Element Events, Brisbane QLD",
 
   scrollHint: "Scroll",
 
