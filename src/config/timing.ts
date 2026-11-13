@@ -59,6 +59,24 @@ export const timing = {
   },
 
   // Ambient loop (after reveal)
+  /** the culture side wings on the opening card (Kerala left, Gujarat right) */
+  culture: {
+    /** off: the card keeps its velvet corners, vines and corner roses instead */
+    enabled: true as boolean,
+    /** the wings start sweeping in this long after the card's reveal starts (s): as the white of
+     *  the envelope video clears (where the velvet corners used to slide in) */
+    enterAt: 0.6,
+    /** at most this many drifting petals at once (jasmine and frangipani from the top left,
+     *  marigold and rose petals from the top right) */
+    maxParticles: 10,
+    /** each side may shrink to this (×) to keep clear of the card text; then pieces move outward */
+    minScale: 0.85,
+    /** under this many frames a second for 2 s: the flag stops waving, half the petals, no shimmer */
+    minFps: 40,
+    /** Kathakali's eye glance and the garba click (s between) — once their edits exist */
+    eyesEvery: [5, 8] as [number, number],
+    clickEvery: [4, 6] as [number, number],
+  },
   ambient: {
     petals: 8, // 6–10 looks right
     petalFall: [11, 17] as [number, number], // seconds to fall, min/max

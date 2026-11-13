@@ -13,7 +13,8 @@
     "scene:hindu-wedding": "node scripts/build-scene-assets.mjs scripts/scenes/hindu-wedding.config.mjs",
     "scene:church-wedding": "node scripts/build-scene-assets.mjs scripts/scenes/church-wedding.config.mjs",
     "scene:hindu-wedding-lotus": "node scripts/build-scene-assets.mjs scripts/scenes/hindu-wedding-lotus.config.mjs",
-    "scene:garba-dance": "node scripts/build-scene-assets.mjs scripts/scenes/garba-dance.config.mjs"
+    "scene:garba-dance": "node scripts/build-scene-assets.mjs scripts/scenes/garba-dance.config.mjs",
+    "scene:culture": "node scripts/build-scene-assets.mjs scripts/scenes/culture.config.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

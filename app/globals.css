@@ -3093,3 +3093,281 @@ body {
 .lt-scene[data-reduce] .lt-pond-shine {
   opacity: 0.6;
 }
+
+/* ── The opening card's culture side wings (src/components/CultureWings.tsx) ── */
+/* Kerala down the left edge, Gujarat down the right, water along the bottom: inside the card,
+   behind its text (the text never overlaps them: they are fitted round it). Each piece: placed
+   (px) › .cu-e (the entrance, GSAP) › .cu-i (the idle loop, CSS) › its picture. */
+/* with the wings, the scroll hint sits on the water: a soft parchment backing keeps it readable */
+.card:has(.cu-wings) .scroll-hint {
+  padding: calc(var(--u) * 2) calc(var(--u) * 12);
+  border-radius: 999px;
+  background: radial-gradient(closest-side, rgb(251 246 236 / 0.92), rgb(251 246 236 / 0.75) 70%, rgb(251 246 236 / 0));
+}
+.cu-wings {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.cu-debug {
+  position: absolute;
+  left: 0;
+  z-index: 1000;
+  opacity: 0.4;
+}
+.cu-p {
+  position: absolute;
+}
+.cu-e,
+.cu-i {
+  position: absolute;
+  inset: 0;
+}
+.cu-e {
+  will-change: transform, opacity;
+}
+.cu-i > img,
+.cu-i > canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+/* the idle loops (only once the entrance is done; paused off screen / in a hidden tab) */
+.cu-wings:not([data-live]) .cu-i {
+  animation: none !important;
+}
+.cu-wings[data-paused] .cu-i,
+.cu-wings[data-paused] .cu-flame img,
+.cu-wings[data-paused] .cu-glow,
+.cu-wings[data-paused] .cu-band {
+  animation-play-state: paused !important;
+}
+.cu-sway {
+  animation: cu-sway var(--d) ease-in-out infinite alternate;
+}
+@keyframes cu-sway {
+  from {
+    rotate: calc(var(--a) * -1deg);
+  }
+  to {
+    rotate: calc(var(--a) * 1deg);
+  }
+}
+.cu-drift {
+  animation: cu-drift var(--d) ease-in-out infinite alternate;
+}
+@keyframes cu-drift {
+  0% {
+    translate: calc(var(--cu-u) * -12) 0;
+    rotate: -0.8deg;
+  }
+  50% {
+    rotate: 0.8deg;
+  }
+  100% {
+    translate: calc(var(--cu-u) * 12) 0;
+    rotate: -0.6deg;
+  }
+}
+.cu-kite {
+  animation: cu-kite var(--d) ease-in-out infinite;
+}
+@keyframes cu-kite {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: -6deg;
+  }
+  50% {
+    translate: calc(var(--cu-u) * 3) calc(var(--cu-u) * -10);
+    rotate: 6deg;
+  }
+}
+.cu-breathe {
+  animation: cu-breathe var(--d) ease-in-out infinite alternate;
+}
+@keyframes cu-breathe {
+  from {
+    scale: 1 1;
+  }
+  to {
+    scale: 1.004 1.012;
+  }
+}
+.cu-bob {
+  animation: cu-bob var(--d) ease-in-out infinite alternate;
+}
+@keyframes cu-bob {
+  from {
+    translate: 0 calc(var(--cu-u) * var(--a) * -0.5);
+  }
+  to {
+    translate: 0 calc(var(--cu-u) * var(--a) * 0.5);
+  }
+}
+/* flames: the Hindu wedding's diya flames, flickering (each its own pace) */
+.cu-flame {
+  position: absolute;
+  aspect-ratio: 0.39;
+  translate: -50% -96%;
+  transform-origin: 50% 100%;
+}
+.cu-flame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 100%;
+  animation: cu-flicker var(--fd, 1.1s) ease-in-out infinite;
+  animation-delay: inherit;
+}
+.cu-flame-glow {
+  position: absolute;
+  left: -160%;
+  right: -160%;
+  top: -40%;
+  bottom: -60%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 214 120 / 0.55), rgb(255 170 70 / 0.15) 60%, transparent);
+}
+@keyframes cu-flicker {
+  0%,
+  100% {
+    scale: 1 1;
+    opacity: 1;
+  }
+  20% {
+    scale: 0.94 1.08;
+    opacity: 0.92;
+  }
+  45% {
+    scale: 1.04 0.95;
+    opacity: 1;
+  }
+  70% {
+    scale: 0.97 1.05;
+    opacity: 0.88;
+  }
+}
+/* the lantern's glow and the garbo's glowing holes pulse */
+.cu-glow {
+  position: absolute;
+  pointer-events: none;
+}
+.cu-glow-lantern {
+  width: 90%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 226 150 / 0.6), rgb(255 180 80 / 0.2) 55%, transparent);
+  mix-blend-mode: screen;
+  animation: cu-pulse-o 3.3s ease-in-out infinite alternate;
+}
+img.cu-holes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: screen;
+  animation: cu-pulse-o 2.7s ease-in-out infinite alternate;
+}
+@keyframes cu-pulse-o {
+  from {
+    opacity: 0.65;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* water shimmer: a soft band of light moving across the water (clipped to the painted water) */
+.cu-shimmer {
+  position: absolute;
+  overflow: hidden;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.cu-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgb(255 246 214 / 0.55) 45%, rgb(255 255 255 / 0.7) 50%, rgb(255 246 214 / 0.55) 55%, transparent);
+  mix-blend-mode: soft-light;
+  translate: -110% 0;
+  animation: cu-shimmer 8s ease-in-out infinite;
+}
+@keyframes cu-shimmer {
+  0% {
+    translate: -110% 0;
+  }
+  60%,
+  100% {
+    translate: 240% 0;
+  }
+}
+.cu-wings:not([data-live]) .cu-band,
+.cu-wings[data-lite] .cu-shimmer {
+  display: none;
+}
+/* kite strings */
+.cu-string {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.cu-string path {
+  fill: none;
+  stroke: rgb(120 92 60 / 0.55);
+  stroke-width: 0.8;
+  stroke-linecap: round;
+}
+/* sprite moments: the aligned edit, shown for a moment over its base */
+img.cu-swap {
+  position: absolute;
+  visibility: hidden;
+}
+/* sparkles, drifting petals */
+.cu-spark,
+.cu-particle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.cu-spark {
+  width: calc(var(--cu-u) * 9);
+  margin: calc(var(--cu-u) * -4.5) 0 0 calc(var(--cu-u) * -4.5);
+  z-index: 200;
+}
+.cu-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 190;
+}
+.cu-particle {
+  width: calc(var(--cu-u) * 13);
+}
+/* reduced motion: the finished wings, still, the flames lit */
+.cu-wings[data-still] .cu-i,
+.cu-wings[data-still] .cu-flame img,
+.cu-wings[data-still] .cu-glow,
+.cu-wings[data-still] .cu-band {
+  animation: none !important;
+}
+.cu-wings[data-still] .cu-glow {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cu-wings .cu-i,
+  .cu-wings .cu-flame img,
+  .cu-wings .cu-glow,
+  .cu-wings .cu-band {
+    animation: none !important;
+  }
+}

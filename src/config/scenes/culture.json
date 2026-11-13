@@ -1,0 +1,279 @@
+{
+  "//": "Stage layout in % of the stage (x, y = the piece's pivot; w = width). Back to front by z. Made by --fit, tweak freely.",
+  "aspect": 1.5,
+  "items": [
+    {
+      "id": "backwaters-view",
+      "piece": "backwaters-view",
+      "x": -0.813,
+      "y": 64.996,
+      "w": 41.016,
+      "z": 1
+    },
+    {
+      "id": "temple-stepwell",
+      "piece": "temple-stepwell",
+      "x": 100.373,
+      "y": 62.88,
+      "w": 36.719,
+      "z": 1
+    },
+    {
+      "id": "palm-2",
+      "piece": "palm-2",
+      "x": -0.575,
+      "y": 50.064,
+      "w": 15.325,
+      "z": 2
+    },
+    {
+      "id": "kite-1",
+      "piece": "kite-1",
+      "x": 76.953,
+      "y": 22.731,
+      "w": 7.813,
+      "z": 2
+    },
+    {
+      "id": "kite-2",
+      "piece": "kite-2",
+      "x": 84.961,
+      "y": 23.908,
+      "w": 6.25,
+      "z": 2
+    },
+    {
+      "id": "kite-3",
+      "piece": "kite-3",
+      "x": 90.918,
+      "y": 26.153,
+      "w": 5.273,
+      "z": 2
+    },
+    {
+      "id": "palm-1",
+      "piece": "palm-1",
+      "x": 2.207,
+      "y": 49.262,
+      "w": 25.019,
+      "z": 2.1
+    },
+    {
+      "id": "houseboat",
+      "piece": "houseboat",
+      "x": 12.012,
+      "y": 56.472,
+      "w": 20.117,
+      "z": 3
+    },
+    {
+      "id": "flag",
+      "piece": "flag",
+      "x": 90.355,
+      "y": 33.945,
+      "w": 19.981,
+      "z": 3
+    },
+    {
+      "id": "jasmine-strand",
+      "piece": "jasmine-strand",
+      "x": 3.894,
+      "y": -7.038,
+      "w": 5.859,
+      "z": 4
+    },
+    {
+      "id": "latkan-short",
+      "piece": "latkan-short",
+      "x": 91.053,
+      "y": -2.505,
+      "w": 7.422,
+      "z": 4
+    },
+    {
+      "id": "brass-lamp",
+      "piece": "brass-lamp",
+      "x": 16.003,
+      "y": -2.803,
+      "w": 8.398,
+      "z": 4.1
+    },
+    {
+      "id": "latkan-long",
+      "piece": "latkan-long",
+      "x": 96.644,
+      "y": -1.468,
+      "w": 6.25,
+      "z": 4.1
+    },
+    {
+      "id": "lantern",
+      "piece": "lantern",
+      "x": 83.732,
+      "y": 7.605,
+      "w": 7.617,
+      "z": 4.2
+    },
+    {
+      "id": "kathakali",
+      "piece": "kathakali",
+      "x": 10.66,
+      "y": 92.957,
+      "w": 25.616,
+      "z": 5
+    },
+    {
+      "id": "garba-couple",
+      "piece": "garba-couple",
+      "x": 82.617,
+      "y": 89.607,
+      "w": 35.938,
+      "z": 5
+    },
+    {
+      "id": "water-strip",
+      "piece": "water-strip",
+      "x": 50,
+      "y": 100.074,
+      "w": 103.906,
+      "z": 5.5,
+      "h": 12.63
+    },
+    {
+      "id": "leaf-a",
+      "piece": "lotus-leaf-2",
+      "x": 29.98,
+      "y": 95.566,
+      "w": 8.789,
+      "z": 5.6
+    },
+    {
+      "id": "leaf-b",
+      "piece": "lotus-leaf-3",
+      "x": 71.289,
+      "y": 96.716,
+      "w": 7.813,
+      "z": 5.6
+    },
+    {
+      "id": "leaf-c",
+      "piece": "lotus-leaf-1",
+      "x": 54.98,
+      "y": 99.224,
+      "w": 10.742,
+      "z": 5.6
+    },
+    {
+      "id": "lotus-a",
+      "piece": "lotus-1",
+      "x": 38.184,
+      "y": 90.554,
+      "w": 7.617,
+      "z": 5.7
+    },
+    {
+      "id": "lotus-b",
+      "piece": "lotus-3",
+      "x": 39.16,
+      "y": 95.084,
+      "w": 5.664,
+      "z": 5.7
+    },
+    {
+      "id": "lotus-c",
+      "piece": "lotus-2",
+      "x": 55.762,
+      "y": 95.099,
+      "w": 6.055,
+      "z": 5.7
+    },
+    {
+      "id": "lotus-d",
+      "piece": "lotus-1",
+      "x": 61.621,
+      "y": 90.297,
+      "w": 7.227,
+      "z": 5.7
+    },
+    {
+      "id": "bud-a",
+      "piece": "lotus-bud-1",
+      "x": 47.07,
+      "y": 94.063,
+      "w": 2.344,
+      "z": 5.7
+    },
+    {
+      "id": "bud-b",
+      "piece": "lotus-bud-2",
+      "x": 67.48,
+      "y": 97.827,
+      "w": 2.148,
+      "z": 5.7
+    },
+    {
+      "id": "fdiya-a",
+      "piece": "diya-1",
+      "x": 44.336,
+      "y": 92.13,
+      "w": 4.688,
+      "z": 5.75
+    },
+    {
+      "id": "fdiya-b",
+      "piece": "diya-2",
+      "x": 63.867,
+      "y": 93.953,
+      "w": 4.688,
+      "z": 5.75
+    },
+    {
+      "id": "pookalam",
+      "piece": "pookalam",
+      "x": 25.879,
+      "y": 93.157,
+      "w": 18.945,
+      "z": 5.8
+    },
+    {
+      "id": "nilavilakku",
+      "piece": "nilavilakku",
+      "x": 21.372,
+      "y": 88.701,
+      "w": 9.541,
+      "z": 6
+    },
+    {
+      "id": "garbo",
+      "piece": "garbo",
+      "x": 71.094,
+      "y": 90.565,
+      "w": 8.984,
+      "z": 6
+    },
+    {
+      "id": "uruli",
+      "piece": "uruli",
+      "x": 28.613,
+      "y": 89.003,
+      "w": 11.133,
+      "z": 6.1
+    },
+    {
+      "id": "flowers-left",
+      "piece": "flowers-left",
+      "x": -0.402,
+      "y": 100.106,
+      "w": 28.32,
+      "z": 7
+    },
+    {
+      "id": "flowers-right",
+      "piece": "flowers-right",
+      "x": 100.355,
+      "y": 100.107,
+      "w": 28.516,
+      "z": 7
+    }
+  ]
+}

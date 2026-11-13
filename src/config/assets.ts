@@ -4,6 +4,8 @@
  * assets-src/ — they are served as-is (no on-demand resizing), so they load
  * fast even on a cold CDN. Missing files still fall back to placeholders.
  */
+import { cultureImages } from "./culture";
+
 const A = "/assets";
 
 export const assets = {
@@ -38,4 +40,6 @@ export const revealImages: string[] = [
   assets.rosebud,
   ...assets.leaves,
   ...assets.petals,
+  // the culture side wings round the card
+  ...cultureImages,
 ];

@@ -29,7 +29,7 @@ import sharp from "sharp";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { chromaKey } from "./lib/chroma-key.mjs";
+import { chromaKey, glowKey } from "./lib/chroma-key.mjs";
 
 const cfgPath = process.argv.find((a) => a.endsWith(".config.mjs")) ?? "scripts/scenes/mehndi.config.mjs";
 const FIT = process.argv.includes("--fit");
@@ -43,12 +43,20 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
 /* ── 1–2. key every sheet and find its blobs ────────────────────────── */
 const sheets = {};
+/** sheets whose file is missing: skipped (with their pieces), listed at the end; never fatal */
+const missing = [];
 for (const [id, file] of Object.entries(cfg.sheets)) {
+  if (!existsSync(path.join(cfg.srcDir, file))) {
+    missing.push(`sheet ${id} (${file})`);
+    continue;
+  }
   const { data, info } = await sharp(path.join(cfg.srcDir, file)).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const W = info.width;
   const H = info.height;
   const N = W * H;
-  const { rgba, alpha } = chromaKey(data, N, cfg.key);
+  // a sheet painted on black with a glow (no blue screen) is keyed by its own method
+  const sk = cfg.sheetKeys?.[id];
+  const { rgba, alpha } = sk?.kind === "glow" ? await glowKey(data, W, H, sk) : chromaKey(data, N, cfg.key);
 
   const label = new Int32Array(N).fill(-1);
   const blobs = [];
@@ -108,6 +116,10 @@ const pieces = {};
 const used = new Set();
 const picks = [];
 for (const spec of cfg.pieces) {
+  if (!sheets[spec.sheet] && missing.some((m) => m.startsWith(`sheet ${spec.sheet} `))) {
+    missing.push(`piece ${spec.name}`);
+    continue;
+  }
   const sh = sheets[spec.sheet] ?? fail(`unknown sheet ${spec.sheet}`);
   const [px, py] = spec.at;
   // the piece whose own pixels are under the point; else the biggest box around it
@@ -176,7 +188,7 @@ for (const { spec, sh, hit } of picks) {
    overlay in the piece's own frame; too few holes → a soft inner glow of the given body box ── */
 for (const spec of cfg.pieces) {
   const G = spec.glowMask;
-  if (!G) continue;
+  if (!G || !pieces[spec.name]) continue;
   const p = pieces[spec.name];
   const [bx0, by0, bx1, by1] = G.box.map((v, i) => v - (i % 2 ? p.y0 : p.x0));
   const dark = new Uint8Array(p.w * p.h);
@@ -352,6 +364,10 @@ if (cfg.lampFlames) {
    yellow being added), grouped by the config's region hints and exported
    as overlays in the base's frame, with a soft feathered mask. */
 for (const V of cfg.variants ?? []) {
+  if (!pieces[V.base] || !pieces[V.variant]) {
+    missing.push(`variant ${V.out}`);
+    continue;
+  }
   const P = pieces[V.base] ?? fail(`variant: no piece ${V.base}`);
   const Hn = pieces[V.variant] ?? fail(`variant: no piece ${V.variant}`);
   const lumA = (pc, x, y) => {
@@ -516,6 +532,10 @@ for (const V of cfg.variants ?? []) {
    B is aligned to A on the rows given (torso + legs: arms, garlands and
    thalis left out); the offset is saved so they can cross-fade in place. */
 for (const pr of cfg.pairs ?? []) {
+  if (!pieces[pr.a] || !pieces[pr.b]) {
+    missing.push(`pair ${pr.a} ↔ ${pr.b}`);
+    continue;
+  }
   const A = pieces[pr.a] ?? fail(`pair: no piece ${pr.a}`);
   const B = pieces[pr.b] ?? fail(`pair: no piece ${pr.b}`);
   const at = (pc, x, y) => {
@@ -584,6 +604,26 @@ for (const p of Object.values(pieces)) {
   }
 }
 
+// its painted outline: for 16 horizontal bands, the leftmost and rightmost solid pixel (shares
+// of the piece; null where the band is empty) — so a page can keep a piece clear of its text
+if (cfg.profiles)
+  for (const p of Object.values(pieces)) {
+    const B = 16;
+    const prof = [];
+    for (let b = 0; b < B; b++) {
+      let mn = p.w;
+      let mx = -1;
+      for (let y = Math.floor((b * p.h) / B); y < Math.floor(((b + 1) * p.h) / B); y++)
+        for (let x = 0; x < p.w; x++)
+          if (p.px[(y * p.w + x) * 4 + 3] > 110) {
+            if (x < mn) mn = x;
+            if (x > mx) mx = x;
+          }
+      prof.push(mx < 0 ? null : [+(mn / p.w).toFixed(3), +((mx + 1) / p.w).toFixed(3)]);
+    }
+    p.extra.prof = prof;
+  }
+
 // named action points (a pour spout, fingertips, a nozzle), as a share of the piece
 for (const p of Object.values(pieces)) {
   if (!p.spec.points) continue;
@@ -605,7 +645,7 @@ const manifest = { name: cfg.name, pieces: {} };
 for (const [name, p] of Object.entries(pieces)) {
   const ref = p.sameAs ?? name;
   const screen = p.spec.screen ?? (widestOnStage[ref] ? (widestOnStage[ref] / 100) * cfg.stageMaxWidth : null);
-  const target = screen ? Math.min(p.w, Math.ceil(screen * cfg.density)) : p.w;
+  const target = screen ? Math.min(p.w, Math.ceil(screen * (p.spec.density ?? cfg.density))) : p.w;
   const scale = target / p.w;
   const w = Math.max(1, Math.round(p.w * scale));
   const h = Math.max(1, Math.round(p.h * scale));
@@ -654,6 +694,7 @@ figcaption{margin-top:6px;display:flex;justify-content:space-between}small{opaci
 <p>${Object.keys(manifest.pieces).length} pieces · <label><input type="checkbox" onchange="document.body.classList.toggle('dark',this.checked)"> dark background (shows any fringe)</label></p>
 <main>${cards}</main></body></html>\n`,
 );
+if (missing.length) console.log(`! skipped (missing files): ${missing.join(", ")}`);
 console.log(`✔ ${Object.keys(manifest.pieces).length} pieces → ${cfg.outDir}`);
 
 /* ────────────────────────────────────────────────────────────────────── */
@@ -667,6 +708,10 @@ async function fitLayout() {
   const items = [];
   for (const g of F.items) {
     const p = pieces[g.piece];
+    if (!p) {
+      missing.push(`fit ${g.id ?? g.piece}`);
+      continue;
+    }
     if (g.fixed) {
       // placed by hand (measured from the master) — the matcher can't follow a different pose
       items.push({ id: g.id ?? g.piece, piece: g.piece, ...g.fixed, z: g.z, ...(g.flip ? { flip: true } : {}), ...(g.group ? { group: g.group } : {}) });
@@ -725,7 +770,8 @@ async function fitLayout() {
       ...(g.flip ? { flip: true } : {}),
       ...(g.group ? { group: g.group } : {}),
     });
-    console.log(`fit ${g.id ?? g.piece}: ${(best.s).toFixed(0)} avg diff`);
+    // a high average difference means the piece is drawn differently in the master: flagged
+    console.log(`fit ${g.id ?? g.piece}: ${best.s.toFixed(0)} avg diff${best.s > (F.flagAbove ?? 60) ? "  ← LOW CONFIDENCE (check it; give it a fixed place)" : ""}`);
   }
   const extras = typeof F.extra === "function" ? F.extra(items, pieces) : F.extra;
   const doc = {

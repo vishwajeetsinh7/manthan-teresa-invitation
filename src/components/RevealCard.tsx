@@ -20,6 +20,7 @@ import { SOFT_BLUR, isTouchDevice } from "@/src/lib/device";
 import { PetalBlast, type BlastSource } from "@/src/lib/petalBlast";
 import { imagesReady } from "@/src/lib/preload";
 import { FlyingDoves } from "./FlyingDoves";
+import { CultureWings } from "./CultureWings";
 
 const u = (n: number) => `calc(var(--u) * ${n})`;
 const V = timing.velvet;
@@ -100,6 +101,9 @@ type Props = {
   onScrollHint: () => void;
 };
 
+/** the culture side wings replace the velvet corners, their vines and the corner roses */
+const CULTURE = timing.culture.enabled;
+
 export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
   const card = useRef<HTMLElement>(null);
   const [fontsReady, setFontsReady] = useState(false);
@@ -158,6 +162,8 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         gsap.set(q(".wipe"), { "--wipe": "0%" });
         gsap.set(q(".scroll-hint"), { opacity: 1 });
         gsap.fromTo(root, { opacity: 0 }, { opacity: 1, duration: R.reducedFade });
+        root.dataset.reveal = "1";
+        window.dispatchEvent(new Event("invite:card-reveal"));
         if (veil) gsap.to(veil, { opacity: 0, duration: R.reducedFade, ease: "power1.out" });
         root.dataset.armed = "1";
         return;
@@ -678,6 +684,9 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       tl.call(() => startScrollBurst(), undefined, 0.05);
 
       tl.play(0);
+      // the culture side wings sweep in alongside the reveal
+      root.dataset.reveal = "1";
+      window.dispatchEvent(new Event("invite:card-reveal"));
       // dev only: scrub from the console, e.g. __revealTl.pause().seek(4)
       if (process.env.NODE_ENV !== "production") (window as unknown as { __revealTl: gsap.core.Timeline }).__revealTl = tl;
 
@@ -704,8 +713,14 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         <div className="paper-inner" />
       </div>
 
+      {/* The culture side wings: Kerala down the left edge, Gujarat down the right (in place of
+          the velvet corners, their vines and the corner roses; timing.culture.enabled) */}
+      {CULTURE && <CultureWings cardRef={card} reduced={reduced} />}
+
       {/* Velvet corners — fixed in place (no parallax); only the fabric
           pattern flows inside them */}
+      {!CULTURE && (
+      <>
       <div className="layer drape drape-tl" aria-hidden>
         <div className="drape-in">
           <VelvetDrape variant="tl" tile={assets.velvetTile} tileU={V.tileU} flowSeconds={V.flowSeconds} sheenSeconds={V.sheenSeconds} />
@@ -724,6 +739,8 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       <div className="layer vine vine-br" aria-hidden>
         <TailVine />
       </div>
+      </>
+      )}
 
       {ambient && !reduced && <GoldDust count={isTouchDevice() ? 24 : timing.ambient.dustParticles} />}
 
@@ -731,6 +748,8 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       <FlyingDoves cardRef={card} />
 
       {/* Corner flowers */}
+      {!CULTURE && (
+      <>
       <div className="corner-cluster corner-bl layer" aria-hidden>
         {CORNER_BUDS.map((b, i) => (
           <Bud key={`b${i}`} spec={b} />
@@ -747,6 +766,8 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
           <Flower key={i} spec={f} />
         ))}
       </div>
+      </>
+      )}
 
       {/* Wording */}
       <div className="content" data-depth="0.15">
