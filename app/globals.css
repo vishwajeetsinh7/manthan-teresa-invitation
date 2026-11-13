@@ -1499,6 +1499,10 @@ body {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
+/* no place name before it: the pin starts the line. */
+.t-map-solo {
+  margin-left: 0;
+}
 .t-map svg {
   width: calc(var(--u) * 11);
   height: calc(var(--u) * 11);
@@ -1626,15 +1630,34 @@ body {
 .doves {
   position: absolute;
   inset: 0;
-  z-index: 7;
+  /* above the card content: they land on the wax seal */
+  z-index: 9;
   pointer-events: none;
   visibility: hidden;
 }
 .doves[data-on] {
   visibility: visible;
 }
-.doves[data-fit="none"] {
+.doves[data-fit="none"] .dove {
   display: none;
+}
+/* a dove sitting on the seal (the perched sprite: landing, landed, sitting, cooing). */
+.dove-sit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--sit-w, 60px);
+  height: var(--sit-h, 70px);
+  visibility: hidden;
+  will-change: transform;
+}
+.dove-sit-strip {
+  display: block;
+  height: 100%;
+  width: calc(100% * 4);
+  max-width: none;
+  will-change: transform;
+  user-select: none;
 }
 .dove {
   position: absolute;
@@ -3326,6 +3349,62 @@ img.cu-holes {
   opacity: 0.85;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 38%);
   mask-image: linear-gradient(to bottom, transparent 0%, #000 38%);
+}
+/* ripple rings on the water, the sweep of light across it, small rising sparks */
+.cu-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 58;
+  border-radius: 50%;
+  border: max(1px, calc(var(--cu-u) * 1.2)) solid rgb(255 244 210 / 0.9);
+  box-shadow: 0 0 calc(var(--cu-u) * 4) rgb(255 220 150 / 0.6);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.cu-sweep {
+  position: absolute;
+  z-index: 56;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.cu-sweep > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgb(255 248 220 / 0.75) 50%, transparent);
+  mix-blend-mode: soft-light;
+}
+.cu-fx-pool {
+  z-index: 195;
+}
+.cu-fx {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--cu-u) * 10);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.cu-p[data-id^="fdiya-"] .cu-i {
+  animation-name: cu-float;
+}
+@keyframes cu-float {
+  0% {
+    translate: calc(var(--cu-u) * -5) calc(var(--cu-u) * var(--a) * -0.5);
+  }
+  50% {
+    translate: calc(var(--cu-u) * 2) calc(var(--cu-u) * var(--a) * 0.5);
+  }
+  100% {
+    translate: calc(var(--cu-u) * 6) calc(var(--cu-u) * var(--a) * -0.3);
+  }
+}
+.cu-wings[data-lite] .cu-sweep,
+.cu-wings[data-lite] .cu-fx-pool {
+  display: none;
 }
 /* kite strings */
 .cu-string {

@@ -186,6 +186,18 @@ export const timing = {
     clearance: 8,
     /** how far (px) a dove may rise above the "with" line to find room beside the names */
     lift: 48,
+    /** then they fly to the wax seal and sit on it: hover this long after flying in (s; when
+     *  they come back to the page: perchAgain), the flight there (s), the landing pose and the
+     *  settling (s), a coo or a wing-lift every … s (held cooHold s) */
+    perchAfter: 2.4,
+    perchAgain: 0.5,
+    toSeal: 1.8,
+    landHold: [0.26, 0.34] as [number, number],
+    cooEvery: [3.5, 7] as [number, number],
+    cooHold: 0.6,
+    /** on the seal: each bird's length (× the seal's width), how far each side of its middle
+     *  its feet stand, the seal's radius and how far the feet sink into its rim (× its width) */
+    perch: { size: 0.56, spread: 0.3, radius: 0.47, sink: 0.02 },
   },
 
   // Scene 4

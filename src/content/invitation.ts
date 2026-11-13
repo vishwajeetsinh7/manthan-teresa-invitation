@@ -41,7 +41,7 @@ export const invitation = {
       { day: "25", weekday: "Tue" },
     ],
   },
-  venueLine: "Element Events, Brisbane QLD",
+  venueLine: "Aaya khali Brisbane QLD",
 
   scrollHint: "Scroll",
 
@@ -70,7 +70,7 @@ export const invitation = {
       weekday: "Sunday",
       title: "Mehndi",
       time: "9:00 AM – 11:00 AM",
-      place: "Element Events",
+      place: "",
       note: "Festive colours", // PLACEHOLDER
       icons: ["mehndi"],
       pattern: "mehndi", // the henna mandala beside the details (it draws itself, then turns slowly)
@@ -84,7 +84,7 @@ export const invitation = {
       title: "Haldi",
       scene: "haldi", // "The Golden Swing"
       time: "10:00 AM onwards", // PLACEHOLDER
-      place: "Element Events",
+      place: "",
       note: "",
       mood: "haldi",
       icons: ["haldi"],
@@ -97,7 +97,7 @@ export const invitation = {
       title: "Garba & Dance", // PLACEHOLDER
       scene: "garba-dance", // "Raas to Remix"
       time: "8:00 PM onwards", // PLACEHOLDER
-      place: "Element Events",
+      place: "",
       note: "Dandiya & dancing shoes", // PLACEHOLDER
       icons: ["dandiya", "music"], // the dandiya in the garba, music notes on the dance floor
       flower: { kind: 1 }, // blush
@@ -110,7 +110,7 @@ export const invitation = {
       // "Swarg Kamal", the heavenly lotus (the first version, the mandap: "hindu-wedding" — git tag hindu-wedding-mandap)
       scene: "hindu-lotus",
       time: "6:00 PM onwards", // PLACEHOLDER
-      place: "Element Events",
+      place: "",
       note: "Traditional Indian", // PLACEHOLDER
       icons: ["mandap"],
       flower: { kind: 0 }, // deep red bridal rose
@@ -122,7 +122,7 @@ export const invitation = {
       title: "Church Wedding & Reception", // PLACEHOLDER
       scene: "church-wedding", // "The Aisle"
       time: "4:00 PM onwards", // PLACEHOLDER
-      place: "Element Events",
+      place: "",
       note: "Formal / Gowns & Suits", // PLACEHOLDER
       icons: ["church"],
       flower: { kind: 2 }, // ivory — white wedding
@@ -131,7 +131,7 @@ export const invitation = {
 
   venue: {
     heading: "The Venue",
-    name: "Element Events",
+    name: "",
     address: "7 Coorparoo Rd, Brisbane QLD 4500, Australia",
     mapsUrl: "https://maps.app.goo.gl/BbYLqSbYiXJDMwMD8",
     mapsLabel: "Open in Google Maps",

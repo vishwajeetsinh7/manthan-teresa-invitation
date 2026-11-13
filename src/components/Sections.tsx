@@ -748,11 +748,11 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                   <p className="t-line t-place">
                     {e.place}
                     <a
-                      className="t-map"
+                      className={e.place ? "t-map" : "t-map t-map-solo"}
                       href={"mapsUrl" in e ? (e as { mapsUrl: string }).mapsUrl : C.venue.mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label={`${e.title}: open ${e.place} in Google Maps`}
+                      aria-label={`${e.title}: open the venue in Google Maps`}
                     >
                       <svg viewBox="0 0 16 16" aria-hidden>
                         <path d="M8 15 C8 15 3 9.6 3 6.2 A5 5 0 0 1 13 6.2 C13 9.6 8 15 8 15 Z" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
@@ -796,7 +796,7 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           {C.venue.heading}
         </h2>
         <Divider />
-        <p style={{ fontWeight: 600, fontSize: "calc(var(--u) * 19)", color: "var(--burgundy)" }}>{C.venue.name}</p>
+        {C.venue.name && <p style={{ fontWeight: 600, fontSize: "calc(var(--u) * 19)", color: "var(--burgundy)" }}>{C.venue.name}</p>}
         <p style={{ fontStyle: "italic" }}>{C.venue.address}</p>
         <a className="btn-gold" href={C.venue.mapsUrl} target="_blank" rel="noopener noreferrer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>

@@ -406,6 +406,38 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
     /* drifting petals: jasmine buds and frangipani from the top left, marigold and rose from the top right */
     const pool = q(".cu-particle") as HTMLImageElement[];
     const parts = createParticles(pool, H, cultureUrl);
+    const fx = createParticles(q(".cu-fx") as HTMLImageElement[], H, cultureUrl);
+    const rings = q(".cu-ring") as HTMLElement[];
+    let ringI = 0;
+    /** a ripple ring spreading on the water at (x, y), w wide */
+    const ripple = (x: number, y: number, w: number, delay = 0) => {
+      const g = rings[ringI++ % rings.length];
+      gsap.set(g, { x, y, width: w, height: w * 0.3, xPercent: -50, yPercent: -50 });
+      gsap.fromTo(g, { scale: 0.25, opacity: 0.9 }, { scale: 1.5, opacity: 0, duration: 1.8, ease: "sine.out", delay, overwrite: true });
+    };
+    /** where a water piece meets the water (its base) */
+    const baseOf = (id: string) => {
+      const pp = placed[id];
+      return pp ? { x: pp.left + pp.w / 2, y: pp.top + pp.h * 0.9, w: pp.w } : null;
+    };
+    /** a small rising spark (an ember, a mote of light) */
+    const ember = (x: number, y: number, slow = false) =>
+      fx.spawn(gsap.utils.random(CULTURE_KINDS.sparkles), x, y, {
+        vx: rnd(-6, 6) * u(),
+        vy: -rnd(slow ? 9 : 18, slow ? 16 : 32) * u(),
+        g: 0,
+        r: 0,
+        vr: rnd(-80, 80),
+        sw: rnd(2, 6),
+        f: rnd(0.4, 0.8),
+        s: rnd(slow ? 0.18 : 0.25, slow ? 0.32 : 0.45),
+        life: rnd(slow ? 2.4 : 1.1, slow ? 3.4 : 1.7),
+      });
+    /** petals thrown out from a point (the corner flowers opening, into the uruli) */
+    const toss = (x: number, y: number, n: number, kinds: string[], dir: number, spread = 1) => {
+      for (let i = 0; i < n; i++)
+        parts.spawn(gsap.utils.random(kinds), x, y, { vx: dir * rnd(25, 70) * u() * spread, vy: -rnd(40, 80) * u() * spread, g: 140 * u(), life: rnd(1.4, 2.2), s: rnd(0.45, 0.7), sw: rnd(3, 7) });
+    };
     let maxParts: number = S.maxParticles;
 
     /* run only while the card is on screen and the tab visible; shed work on a slow phone */
@@ -441,6 +473,7 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
       if (!go && ticking) gsap.ticker.remove(tick);
       ticking = go;
       parts.setTicking(go);
+      fx.setTicking(go);
     };
     const io = new IntersectionObserver(([e]) => {
       visible = e.isIntersecting;
@@ -454,6 +487,7 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
       document.removeEventListener("visibilitychange", onVis);
       gsap.ticker.remove(tick);
       parts.setTicking(false);
+      fx.setTicking(false);
     });
 
     /** a small scheduler that waits while paused */
@@ -525,6 +559,50 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
         const p = at(id, rnd(0.3, 0.7), rnd(0.1, 0.85));
         burst(p.x, p.y, 1, 2);
       }, 1.5);
+      // the water: ripples spread round the lotuses; motes of light rise from it now and then
+      const waterIds = CITEMS.filter((i) => /^(lotus-|bud-|fdiya-)/.test(i.id)).map((i) => i.id);
+      every(1.6, 3.2, () => {
+        const b = baseOf(gsap.utils.random(waterIds));
+        if (b) ripple(b.x, b.y, b.w * 1.8);
+      }, 0.8);
+      every(0.7, 1.3, () => {
+        const wtr = placed["water-strip"];
+        if (wtr && fx.count("") < 14) ember(rnd(0.08, 0.92) * W(), wtr.top + wtr.h * rnd(0.45, 0.85), true);
+      }, 0.4);
+      // the garbo breathes embers out of its mouth
+      every(0.5, 1.1, () => {
+        const g = placed.garbo;
+        const pt = CP.garbo?.points?.flame;
+        if (g && pt) ember(g.left + pt[0] * g.w + rnd(-3, 3) * u(), g.top + pt[1] * g.h);
+      }, 0.3);
+      // the garba couple: a dandiya beat now and then — two little hops, sparks at their sticks
+      every(4, 6, () => {
+        const e = enter("garba-couple");
+        if (!e) return;
+        gsap.to(e, { keyframes: [{ y: -5 * u(), duration: 0.13, ease: "power2.out" }, { y: 0, duration: 0.15, ease: "power2.in" }, { y: -4 * u(), duration: 0.12, ease: "power2.out" }, { y: 0, duration: 0.16, ease: "power2.in" }], overwrite: "auto" });
+        for (const [fx0, fy0, dl] of [[0.32, 0.03, 0.08], [0.6, 0.06, 0.36]] as const) {
+          const pt = at("garba-couple", fx0, fy0);
+          gsap.delayedCall(dl, () => burst(pt.x, pt.y, 3, 6));
+        }
+      }, 2.5);
+      // Kathakali bows a little, a glint at his folded hands
+      every(6, 9, () => {
+        const e = enter("kathakali");
+        if (!e) return;
+        gsap.to(e, { keyframes: [{ rotation: 2.4, duration: 0.8, ease: "sine.inOut" }, { rotation: 0, duration: 0.9, ease: "sine.inOut" }], overwrite: "auto" });
+        const h = at("kathakali", 0.55, 0.32);
+        gsap.delayedCall(0.55, () => burst(h.x, h.y, 2, 5));
+      }, 4);
+      // the pookalam twinkles; the corner flowers let a petal go now and then
+      every(2.5, 4.5, () => {
+        const p = at("pookalam", rnd(0.2, 0.8), rnd(0.3, 0.7));
+        burst(p.x, p.y, 1, 3);
+      }, 2);
+      every(4, 7, () => {
+        const left = Math.random() < 0.5;
+        const f = at(left ? "flowers-left" : "flowers-right", left ? rnd(0.35, 0.7) : rnd(0.3, 0.65), rnd(0.15, 0.35));
+        toss(f.x, f.y, 1, left ? CULTURE_KINDS.left : CULTURE_KINDS.right, left ? 1 : -1, 0.5);
+      }, 3);
       if (SWAPS.some((s) => s.id.startsWith("eyes"))) every(S.eyesEvery[0], S.eyesEvery[1], glance);
       if (SWAPS.some((s) => s.id === "click")) every(S.clickEvery[0], S.clickEvery[1], click);
     };
@@ -574,16 +652,86 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
     };
     unfurl("flowers-left", "0% 100%", -18, B + 1.4);
     unfurl("flowers-right", "100% 100%", 18, B + 1.52);
-    // 2.5  (as the rosebuds sprang) the lotuses, buds and leaves spring up on the water
-    tl.fromTo(enters(CITEMS.filter((i) => /^(leaf-|lotus-|bud-|fdiya-)/.test(i.id)).map((i) => i.id)), { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 1.0, ease: "elastic.out(1, 0.55)", stagger: 0.08 }, B + 1.9);
-    // 2.3  Kathakali and the garba couple rise into place; the lamp, the uruli, the pookalam and the
-    //      garbo set down beside them
-    tl.fromTo(enters(["kathakali"]), { y: () => 30 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1.0, ease: "power3.out" }, B + 1.7);
-    tl.fromTo(enters(["garba-couple"]), { y: () => 30 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1.0, ease: "power3.out" }, B + 1.85);
-    tl.fromTo(enters(["pookalam", "nilavilakku", "uruli", "garbo"]), { scale: 0.7, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.7, ease: "back.out(1.8)", stagger: 0.1 }, B + 2.1);
-    // 3.1  the lamps light, one after another; the lantern and the garbo glow
-    tl.to(flamesOf(["brass-lamp", "temple-stepwell", "nilavilakku", "garbo", "fdiya-a", "fdiya-b"]), { scale: 1, autoAlpha: 1, duration: 0.35, ease: "back.out(2)", stagger: 0.04 }, B + 2.5);
+    // the water: a sweep of golden light runs across it as it settles
+    const sweep = q(".cu-sweep")[0] as HTMLElement | undefined;
+    const wtr = placed["water-strip"];
+    if (sweep && wtr) {
+      gsap.set(sweep, { left: wtr.left, top: wtr.top + wtr.h * 0.3, width: wtr.w, height: wtr.h * 0.7 });
+      tl.fromTo(sweep.firstElementChild, { xPercent: -120 }, { xPercent: 260, duration: 1.6, ease: "sine.inOut" }, B + 0.9);
+      tl.fromTo(sweep, { opacity: 0 }, { keyframes: [{ opacity: 1, duration: 0.3 }, { opacity: 1, duration: 1.0 }, { opacity: 0, duration: 0.3 }] }, B + 0.9);
+    }
+    // 2.5  (as the rosebuds sprang) the lotuses rise out of the water and open, each sending a
+    //      ripple; the leaves spread; the floating diyas bob up
+    const lotusIds = CITEMS.filter((i) => /^(lotus-|bud-)/.test(i.id)).map((i) => i.id);
+    lotusIds.forEach((id, i) => {
+      const e = enter(id);
+      if (!e) return;
+      const at0 = B + 1.85 + i * 0.12;
+      tl.fromTo(e, { y: () => 12 * u(), scaleX: 0.5, scaleY: 0.15, autoAlpha: 0 }, { y: 0, scaleX: 1, scaleY: 1, autoAlpha: 1, duration: 1.0, ease: "elastic.out(1, 0.6)" }, at0);
+      tl.call(() => {
+        const b = baseOf(id);
+        if (b) ripple(b.x, b.y, b.w * 2);
+      }, undefined, at0 + 0.05);
+    });
+    tl.fromTo(enters(CITEMS.filter((i) => /^leaf-/.test(i.id)).map((i) => i.id)), { scale: 0.2, rotation: -25, autoAlpha: 0 }, { scale: 1, rotation: 0, autoAlpha: 1, duration: 0.9, ease: "back.out(1.6)", stagger: 0.1 }, B + 1.75);
+    tl.fromTo(enters(["fdiya-a", "fdiya-b"]), { y: () => 14 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.9, ease: "back.out(2)", stagger: 0.15 }, B + 2.2);
+    // the corner flowers throw a few petals as they open
+    tl.call(() => {
+      const l = at("flowers-left", 0.55, 0.2);
+      const rr = at("flowers-right", 0.45, 0.2);
+      toss(l.x, l.y, 5, CULTURE_KINDS.left, 1);
+      toss(rr.x, rr.y, 5, CULTURE_KINDS.right, -1);
+    }, undefined, B + 1.9);
+    // 2.3  Kathakali rises into place and bows; the garba couple rise and step to the beat
+    tl.fromTo(enters(["kathakali"]), { y: () => 34 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1.0, ease: "power3.out" }, B + 1.7);
+    tl.to(enters(["kathakali"]), { keyframes: [{ rotation: 3, duration: 0.5, ease: "sine.inOut" }, { rotation: 0, duration: 0.6, ease: "sine.inOut" }] }, B + 2.75);
+    tl.call(() => {
+      const h = at("kathakali", 0.55, 0.32);
+      burst(h.x, h.y, 3, 6);
+    }, undefined, B + 3.0);
+    tl.fromTo(enters(["garba-couple"]), { y: () => 34 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.9, ease: "power3.out" }, B + 1.85);
+    tl.to(enters(["garba-couple"]), { keyframes: [{ y: () => -6 * u(), duration: 0.14, ease: "power2.out" }, { y: 0, duration: 0.16, ease: "power2.in" }, { y: () => -5 * u(), duration: 0.13, ease: "power2.out" }, { y: 0, duration: 0.17, ease: "power2.in" }] }, B + 2.8);
+    tl.call(() => {
+      for (const [fx0, fy0] of [[0.32, 0.03], [0.6, 0.06]] as const) {
+        const pt = at("garba-couple", fx0, fy0);
+        burst(pt.x, pt.y, 4, 8);
+      }
+    }, undefined, B + 2.9);
+    // the props: the pookalam spreads from its centre like rangoli being laid; the uruli sets
+    // down and petals drop into it; the nilavilakku rises; the garbo bounces down
+    const pk = enter("pookalam");
+    if (pk) {
+      tl.fromTo(pk, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2 }, B + 2.0);
+      tl.fromTo(pk, { clipPath: "ellipse(0% 0% at 50% 55%)", scale: 0.85 }, { clipPath: "ellipse(75% 80% at 50% 55%)", scale: 1, duration: 1.1, ease: "power2.out" }, B + 2.0);
+      tl.set(pk, { clipPath: "none" }, B + 3.15);
+    }
+    tl.fromTo(enters(["uruli"]), { scale: 0.6, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.6, ease: "back.out(2)" }, B + 2.15);
+    tl.call(() => {
+      const ur = placed.uruli;
+      if (!ur) return;
+      for (let i = 0; i < 5; i++)
+        parts.spawn(gsap.utils.random([...CULTURE_KINDS.left, ...CULTURE_KINDS.right]), ur.left + ur.w * rnd(0.25, 0.75), ur.top - 30 * u(), { vx: rnd(-6, 6) * u(), vy: rnd(10, 25) * u(), g: 160 * u(), life: 0.55, s: rnd(0.35, 0.55), sw: 2 });
+    }, undefined, B + 2.5);
+    tl.fromTo(enters(["nilavilakku"]), { y: () => 20 * u(), scaleY: 0.8, autoAlpha: 0 }, { y: 0, scaleY: 1, autoAlpha: 1, duration: 0.8, ease: "back.out(1.6)" }, B + 2.05);
+    tl.fromTo(enters(["garbo"]), { y: () => -36 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.9, ease: "bounce.out" }, B + 2.1);
+    // 3.1  the lamps light, one wick after another, each with a spark; the lantern and the garbo
+    //      glow, and the garbo breathes its first embers
+    tl.to(flamesOf(["brass-lamp", "temple-stepwell"]), { scale: 1, autoAlpha: 1, duration: 0.35, ease: "back.out(2)", stagger: 0.04 }, B + 2.5);
+    flamesOf(["nilavilakku", "garbo", "fdiya-a", "fdiya-b"]).forEach((f, i) => {
+      const at0 = B + 2.75 + i * 0.12;
+      tl.to(f, { scale: 1, autoAlpha: 1, duration: 0.35, ease: "back.out(2.4)" }, at0);
+      tl.call(() => {
+        const r0 = f.getBoundingClientRect();
+        const cr = card.getBoundingClientRect();
+        burst(r0.left - cr.left + r0.width / 2, r0.top - cr.top, 2, 4);
+      }, undefined, at0 + 0.05);
+    });
     tl.to(q('[data-id="lantern"] .cu-glow, [data-id="garbo"] .cu-glow'), { opacity: 1, duration: 0.8 }, B + 2.6);
+    tl.call(() => {
+      const g = placed.garbo;
+      const pt = CP.garbo?.points?.flame;
+      if (g && pt) for (let i = 0; i < 5; i++) gsap.delayedCall(i * 0.12, () => ember(g.left + pt[0] * g.w, g.top + pt[1] * g.h));
+    }, undefined, B + 3.0);
     // the first sprite moment (once the edits exist), then the loops
     tl.call(() => {
       if (SWAPS.some((s) => s.id.startsWith("eyes"))) {
@@ -592,7 +740,7 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
       }
       click();
     }, undefined, B + 3.2);
-    tl.call(startLoops, undefined, B + 3.0);
+    tl.call(startLoops, undefined, B + 3.3);
     // the flag waves (and petals fly) from the start
     tl.call(() => {
       live = true;
@@ -631,6 +779,17 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
       {CULTURE_KINDS.sparkles.concat(CULTURE_KINDS.sparkles).map((n, i) => (
         <img key={`s${i}`} className="cu-spark" src={cultureUrl(n)} alt="" />
       ))}
+      {Array.from({ length: 8 }, (_, i) => (
+        <span key={`r${i}`} className="cu-ring" />
+      ))}
+      <div className="cu-sweep">
+        <span />
+      </div>
+      <div className="cu-particles cu-fx-pool">
+        {Array.from({ length: 18 }, (_, i) => (
+          <img key={i} className="cu-fx" alt="" />
+        ))}
+      </div>
       <div className="cu-particles">
         {Array.from({ length: S.maxParticles }, (_, i) => (
           <img key={i} className="cu-particle" alt="" />

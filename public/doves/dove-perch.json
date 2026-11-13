@@ -1,0 +1,22 @@
+{
+  "frameWidth": 421,
+  "frameHeight": 497,
+  "frameCount": 4,
+  "frames": [
+    "landing",
+    "landed",
+    "sitting",
+    "cooing"
+  ],
+  "feet": {
+    "x": 255,
+    "y": 405
+  },
+  "bodyWidth": 329,
+  "sitBox": [
+    66,
+    183,
+    395,
+    409
+  ]
+}

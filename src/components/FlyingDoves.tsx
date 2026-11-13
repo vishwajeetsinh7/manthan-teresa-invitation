@@ -1,16 +1,23 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties, type RefObject } from "react";
+import { Fragment, useEffect, useRef, type CSSProperties, type RefObject } from "react";
 import { timing } from "@/src/config/timing";
 import sprite from "@/public/doves/dove-sprite.json";
+import perch from "@/public/doves/dove-perch.json";
 
 /**
  * Two white doves in the side margins of the card, beside the names, both
  * facing the couple. They fly in once the names are written ("invite:names-done"),
- * then hover: flapping (each at its own rate), bobbing on the downstroke,
- * drifting slowly, and now and then gliding on level wings. Leaving the first
- * page ("invite:page") they fly up and away; coming back, they fly in again
- * from the sides.
+ * hover a moment (flapping, bobbing on the downstroke, drifting), then fly up to
+ * the wax seal and land on it, one each side of its top, facing each other: the
+ * landing pose, settling, then sitting — now and then one coos (dips its head) or
+ * lifts its wings. They stay on the seal as it moves (its parallax). Leaving the
+ * first page ("invite:page") they take off and fly up and away; coming back, they
+ * fly in again from the sides and settle on the seal again.
+ *
+ * - Perched: public/doves/dove-perch.webp (scripts/build-dove-perch.mjs): 4 frames
+ *   (landing, landed, sitting, cooing) with the feet on the same pixel. The flying
+ *   bird hands over to the landing pose beak on beak, at the same size.
  *
  * - Sprite: public/doves/dove-sprite.webp (built by scripts/build-dove-sprite.mjs),
  *   frames in one row; a frame is shown by sliding the strip inside a clip box,
@@ -22,6 +29,11 @@ import sprite from "@/public/doves/dove-sprite.json";
  */
 const D = timing.doves;
 const SRC = "/doves/dove-sprite.webp";
+const PSRC = "/doves/dove-perch.webp";
+const PN = perch.frameCount;
+/** the landing pose's beak tip in a perched frame (where the flying bird's beak hands over) */
+const LANDING_BEAK = { x: 384, y: 258 };
+const PERCH = { LANDING: 0, LANDED: 1, SITTING: 2, COOING: 3 };
 const N = sprite.frameCount;
 const C = sprite.content; // the bird's tight box inside a frame (sprite px)
 
@@ -161,17 +173,75 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
       box.style.setProperty("--dove-h", `${sprite.frameHeight * layout.scale}px`);
       box.dataset.fit = layout.visible ? "" : "none";
     };
+    const sits = [...box.querySelectorAll<HTMLElement>(".dove-sit")];
+    const sitStrips = [...box.querySelectorAll<HTMLElement>(".dove-sit-strip")];
     const showFrame = (k: number, i: number) => {
       strips[i].style.transform = `translate3d(${(-k * 100) / N}%,0,0)`;
     };
+    const showPerch = (k: number, i: number) => {
+      sitStrips[i].style.transform = `translate3d(${(-k * 100) / PN}%,0,0)`;
+    };
     const pos = [
-      { x: 0, y: 0 },
-      { x: 0, y: 0 },
+      { x: 0, y: 0, k: 1 },
+      { x: 0, y: 0, k: 1 },
     ];
-    const setPos = (i: number, x: number, y: number) => {
+    /** the flying bird: its box's top-left (x, y) at its own extra scale k (about its centre) */
+    const setPos = (i: number, x: number, y: number, k = 1) => {
       pos[i].x = x;
       pos[i].y = y;
-      els[i].style.transform = `translate3d(${x}px,${y}px,0)${i ? " scaleX(-1)" : ""}`;
+      pos[i].k = k;
+      els[i].style.transform = `translate3d(${x}px,${y}px,0) scale(${i ? -k : k},${k})`;
+    };
+    /** the flying bird's beak (the sprite's anchor) in card px, for a top-left and a scale */
+    const beakOf = (i: number, x: number, y: number, k: number) => {
+      const s = layout!.scale;
+      const w = sprite.frameWidth * s;
+      const h = sprite.frameHeight * s;
+      const ax = i ? w - sprite.anchor.x * s : sprite.anchor.x * s;
+      return { x: x + w / 2 + (ax - w / 2) * k, y: y + h / 2 + (sprite.anchor.y * s - h / 2) * k };
+    };
+    /** …and the top-left that puts its beak at (bx, by) at scale k */
+    const topLeftFor = (i: number, bx: number, by: number, k: number) => {
+      const s = layout!.scale;
+      const w = sprite.frameWidth * s;
+      const h = sprite.frameHeight * s;
+      const ax = i ? w - sprite.anchor.x * s : sprite.anchor.x * s;
+      return { x: bx - w / 2 - (ax - w / 2) * k, y: by - h / 2 - (sprite.anchor.y * s - h / 2) * k };
+    };
+    /** where each dove sits on the seal now (it follows the seal), its scale, and its beak when landing */
+    const sealSpot = (i: number) => {
+      const seal = card.querySelector(".seal-wrap");
+      const cr = card.getBoundingClientRect();
+      const r = seal?.getBoundingClientRect();
+      const Dm = r?.width || 100;
+      const cx = r ? r.left + r.width / 2 - cr.left : card.clientWidth / 2;
+      const cy = r ? r.top + r.height / 2 - cr.top : 80;
+      const P = D.perch;
+      const sp = (Dm * P.size) / perch.bodyWidth;
+      const dx = Dm * P.spread;
+      const fx = cx + (i ? dx : -dx);
+      const fy = cy - Math.sqrt(Math.max(0, (Dm * P.radius) ** 2 - dx * dx)) + Dm * P.sink;
+      const fw = perch.frameWidth * sp;
+      const left = fx - (i ? perch.frameWidth - perch.feet.x : perch.feet.x) * sp;
+      const top = fy - perch.feet.y * sp;
+      const beak = { x: left + (i ? perch.frameWidth - LANDING_BEAK.x : LANDING_BEAK.x) * sp, y: top + LANDING_BEAK.y * sp };
+      return { left, top, sp, fw, beak };
+    };
+    let sitScale = 0;
+    /** the perched bird on the seal (a little breathing while it sits) */
+    const placeSit = (i: number, lift = 0) => {
+      const s = sealSpot(i);
+      if (Math.abs(s.sp - sitScale) > 1e-4) {
+        sitScale = s.sp;
+        box.style.setProperty("--sit-w", `${perch.frameWidth * s.sp}px`);
+        box.style.setProperty("--sit-h", `${perch.frameHeight * s.sp}px`);
+      }
+      sits[i].style.transform = `translate3d(${s.left}px,${s.top - lift}px,0)${i ? " scaleX(-1)" : ""}`;
+    };
+    /** fly bird or sitting bird */
+    const show = (i: number, sitting: boolean) => {
+      els[i].style.visibility = sitting ? "hidden" : "";
+      sits[i].style.visibility = sitting ? "visible" : "hidden";
     };
 
     /* per-dove state */
@@ -189,8 +259,17 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
       /** where the fly-in starts (null = beyond the card edge, a little high) */
       from: null as null | { x: number; y: number },
       exitAt: -1, // flying away since (s, loop clock)
-      exitFrom: { x: 0, y: 0 },
+      exitFrom: { x: 0, y: 0, k: 1 },
       gone: false,
+      /** on the way to the seal / on it: "seal" (flying there), "land", "sit"; since (s) */
+      mode: "" as "" | "seal" | "land" | "sit",
+      modeAt: 0,
+      sealFrom: { x: 0, y: 0 },
+      perchFrame: -1,
+      nextCoo: 0,
+      cooUntil: 0,
+      /** how long it hovers after flying in before it goes to the seal */
+      hover: D.perchAfter as number,
     }));
     let page = 0; // which page the guest is on (from the pager)
 
@@ -210,6 +289,38 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
         for (const d of doves) {
           if (d.gone || d.start < 0 || clock < d.start) continue;
           const t = clock - d.start;
+          if (d.exitAt < 0 && d.mode === "land") {
+            // the landing pose, then settling, then sitting
+            const lt = clock - d.modeAt;
+            const f = lt < D.landHold[0] ? PERCH.LANDING : lt < D.landHold[0] + D.landHold[1] ? PERCH.LANDED : PERCH.SITTING;
+            if (f !== d.perchFrame) {
+              showPerch(f, d.i);
+              d.perchFrame = f;
+            }
+            placeSit(d.i, f === PERCH.LANDING ? 3 * (1 - lt / D.landHold[0]) : 0);
+            if (f === PERCH.SITTING) {
+              d.mode = "sit";
+              d.modeAt = clock;
+              d.nextCoo = clock + rnd(D.cooEvery[0], D.cooEvery[1]) * (d.i ? 1.3 : 0.7);
+            }
+            continue;
+          }
+          if (d.exitAt < 0 && d.mode === "sit") {
+            // sitting: breathing; now and then it coos (dips its head) or lifts its wings
+            let f = PERCH.SITTING;
+            if (clock < d.cooUntil) f = d.perchFrame;
+            else if (clock >= d.nextCoo) {
+              f = Math.random() < 0.8 ? PERCH.COOING : PERCH.LANDED;
+              d.cooUntil = clock + (f === PERCH.COOING ? D.cooHold : 0.35);
+              d.nextCoo = clock + rnd(D.cooEvery[0], D.cooEvery[1]);
+            }
+            if (f !== d.perchFrame) {
+              showPerch(f, d.i);
+              d.perchFrame = f;
+            }
+            placeSit(d.i, 0.6 * Math.sin((2 * Math.PI * (clock - d.modeAt)) / (3.1 + d.i * 0.4)));
+            continue;
+          }
           const tx = L.x[d.i];
           const ty = L.y;
           // wingbeat: frame from phase; held on the level frame while gliding
@@ -243,7 +354,7 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
             const e = p * p;
             const away = d.i === 0 ? -1 : 1;
             const topY = -sprite.frameHeight * L.scale - 40;
-            setPos(d.i, d.exitFrom.x + away * 70 * e, d.exitFrom.y + (topY - d.exitFrom.y) * e);
+            setPos(d.i, d.exitFrom.x + away * 70 * e, d.exitFrom.y + (topY - d.exitFrom.y) * e, d.exitFrom.k);
             if (p >= 1) {
               d.gone = true;
               setPos(d.i, d.i ? card.clientWidth + 400 : -400, topY);
@@ -260,6 +371,40 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
             const y = fy + (ty - fy) * e - 16 * Math.sin(Math.PI * e);
             setPos(d.i, x, y);
             if (p > 0.98) d.nextGlide = clock + rnd(D.glideEvery[0], D.glideEvery[1]);
+            continue;
+          }
+          if (d.mode === "seal") {
+            const p = Math.min(1, (clock - d.modeAt) / D.toSeal);
+            const e = p < 0.5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2;
+            const spot = sealSpot(d.i);
+            const kEnd = spot.sp / L.scale;
+            const a = d.sealFrom;
+            const b = spot.beak;
+            const u = card.clientWidth / 390;
+            const c1 = { x: a.x, y: a.y - (a.y - b.y) * 0.55 };
+            const c2 = { x: b.x + (a.x - b.x) * 0.45, y: b.y - 36 * u };
+            const m = 1 - e;
+            const bx = m * m * m * a.x + 3 * m * m * e * c1.x + 3 * m * e * e * c2.x + e * e * e * b.x;
+            const by = m * m * m * a.y + 3 * m * m * e * c1.y + 3 * m * e * e * c2.y + e * e * e * b.y;
+            const k = 1 + (kEnd - 1) * e;
+            const tl = topLeftFor(d.i, bx, by, k);
+            setPos(d.i, tl.x, tl.y, k);
+            if (p >= 1) {
+              // touch down: the landing pose takes over, beak on beak
+              d.mode = "land";
+              d.modeAt = clock;
+              d.perchFrame = -1;
+              showPerch(PERCH.LANDING, d.i);
+              placeSit(d.i, 3);
+              show(d.i, true);
+            }
+            continue;
+          }
+          // after a moment of hovering, off to the seal
+          if (t >= D.enter + d.hover && d.mode === "" && !gliding) {
+            d.mode = "seal";
+            d.modeAt = clock;
+            d.sealFrom = beakOf(d.i, pos[d.i].x, pos[d.i].y, pos[d.i].k);
             continue;
           }
           // hover: bob on the downstroke, slow drift, sink a little while gliding
@@ -297,7 +442,9 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
     // the sprite is decoded before anything moves
     const img = new Image();
     img.src = SRC;
-    const ready = img.decode().catch(() => undefined);
+    const pimg = new Image();
+    pimg.src = PSRC;
+    const ready = Promise.all([img.decode(), pimg.decode()]).catch(() => undefined);
 
     const begin = () => {
       if (begun || disposed) return;
@@ -306,9 +453,10 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
         place();
         box.dataset.on = "";
         if (reduce) {
-          els.forEach((_, i) => {
-            showFrame(sprite.glideFrame, i);
-            setPos(i, layout!.x[i], layout!.y);
+          [0, 1].forEach((i) => {
+            showPerch(PERCH.SITTING, i);
+            placeSit(i);
+            show(i, true);
           });
           return;
         }
@@ -331,6 +479,14 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
       if (from === 0 && to !== 0) {
         doves.forEach((d) => {
           if (d.gone || d.exitAt >= 0) return;
+          if (d.mode === "land" || d.mode === "sit") {
+            const spot = sealSpot(d.i);
+            const k = spot.sp / layout!.scale;
+            const tl = topLeftFor(d.i, spot.beak.x, spot.beak.y, k);
+            setPos(d.i, tl.x, tl.y, k);
+            show(d.i, false);
+          }
+          d.mode = "";
           d.exitAt = clock + d.i * 0.12;
           d.exitFrom = { ...pos[d.i] };
           d.wantGlide = false;
@@ -346,6 +502,9 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
           d.wantGlide = false;
           d.glideFrom = -1;
           d.nextGlide = 0;
+          d.mode = "";
+          d.hover = D.perchAgain;
+          show(d.i, false);
         });
         run();
       }
@@ -356,7 +515,7 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
     const ro = new ResizeObserver(() => {
       if (!box.hasAttribute("data-on")) return;
       place();
-      if (reduce && layout) els.forEach((_, i) => setPos(i, layout!.x[i], layout!.y));
+      if (reduce && layout) [0, 1].forEach((i) => placeSit(i));
     });
     ro.observe(card);
     const io = new IntersectionObserver(([e]) => {
@@ -381,12 +540,20 @@ export function FlyingDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
   return (
     <div ref={root} className="doves" style={{ "--dove-n": N } as CSSProperties} aria-hidden>
       {[0, 1].map((i) => (
-        <div key={i} className={`dove ${i ? "dove-r" : "dove-l"}`}>
-          <div className="dove-clip">
-            {/* eslint-disable-next-line @next/next/no-img-element -- a sprite strip, positioned by transform */}
-            <img className="dove-strip" src={SRC} alt="" draggable={false} decoding="async" />
+        <Fragment key={i}>
+          <div className={`dove ${i ? "dove-r" : "dove-l"}`}>
+            <div className="dove-clip">
+              {/* eslint-disable-next-line @next/next/no-img-element -- a sprite strip, positioned by transform */}
+              <img className="dove-strip" src={SRC} alt="" draggable={false} decoding="async" />
+            </div>
           </div>
-        </div>
+          <div className="dove-sit">
+            <div className="dove-clip">
+              {/* eslint-disable-next-line @next/next/no-img-element -- a sprite strip, positioned by transform */}
+              <img className="dove-sit-strip" src={PSRC} alt="" draggable={false} decoding="async" />
+            </div>
+          </div>
+        </Fragment>
       ))}
     </div>
   );
