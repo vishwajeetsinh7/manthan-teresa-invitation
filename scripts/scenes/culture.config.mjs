@@ -163,9 +163,10 @@ const config = {
       box("flowers-left", "flowers-left", [-6, 1330, 284, 1540], 7);
       // ── Gujarat, down the right edge ──
       box("temple-stepwell", "temple-stepwell", [654, 540, 1030, 968], 1, { right: true });
-      box("kite-1", "kite-1", [748, 296, 828, 396], 2);
-      box("kite-2", "kite-2", [838, 322, 902, 404], 2);
-      box("kite-3", "kite-3", [904, 362, 958, 432], 2);
+      // the kites fly lower, beside the names (placed by height on the card)
+      box("kite-1", "kite-1", [846, 470, 934, 580], 2);
+      box("kite-2", "kite-2", [934, 534, 1012, 634], 2);
+      box("kite-3", "kite-3", [866, 616, 938, 706], 2);
       box("latkan-short", "latkan-short", [894, -40, 970, 300], 4, { at: "top" });
       box("latkan-long", "latkan-long", [958, -24, 1022, 380], 4.1, { at: "top" });
       box("lantern", "lantern", [818, 116, 896, 290], 4.2, { at: "top" });

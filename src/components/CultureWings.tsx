@@ -28,8 +28,8 @@ const S = timing.culture;
 const rnd = gsap.utils.random;
 
 /* ── where each piece belongs ─────────────────────────────────────────── */
-const TOP = new Set(["jasmine-strand", "brass-lamp", "latkan-short", "latkan-long", "lantern", "kite-1", "kite-2", "kite-3"]);
-const MID = new Set(["backwaters-view", "temple-stepwell", "palm-1", "palm-2", "houseboat", "flag"]);
+const TOP = new Set(["jasmine-strand", "brass-lamp", "latkan-short", "latkan-long", "lantern"]);
+const MID = new Set(["backwaters-view", "temple-stepwell", "palm-1", "palm-2", "houseboat", "flag", "kite-1", "kite-2", "kite-3"]);
 const isWater = (id: string) => /^(water-strip|leaf-|lotus-|bud-|fdiya-)/.test(id);
 type Side = "left" | "right" | "water";
 const sideOf = (it: CultureItem): Side => (isWater(it.id) ? "water" : it.x < 50 ? "left" : "right");
@@ -87,14 +87,18 @@ const SWAPS = [
 /* ── geometry ─────────────────────────────────────────────────────────── */
 type Rect = { left: number; right: number; top: number; bottom: number };
 type Placed = { it: CultureItem; side: Side; left: number; top: number; w: number; h: number; ox: number; oy: number };
-type Fit = { scale: Record<Side, number>; nudge: Record<string, number>; dy: Record<string, number> };
-/** pieces that move together (the houseboat sits on the backwaters' water) */
-const LINKED: Record<string, string> = { houseboat: "backwaters-view" };
+type Fit = { scale: Record<Side, number>; nudge: Record<string, number>; dy: Record<string, number>; gs: Record<string, number> };
+/** scenes: an anchor and what rides with it (the houseboat on the backwaters' water); a scene
+ *  shrinks about its anchor's pivot, slides and moves as one (the flag goes with its temple) */
+const GROUPS: Record<string, string[]> = { "backwaters-view": ["backwaters-view", "houseboat"], "temple-stepwell": ["temple-stepwell"] };
+const groupOf = (id: string) => (id === "flag" ? "temple-stepwell" : (Object.keys(GROUPS).find((g) => GROUPS[g].includes(id)) ?? id));
+/** hanging pieces: they may hang lower, on a longer cord, to clear the buttons and the seal's roses */
+const HANG = new Set(["jasmine-strand", "brass-lamp", "latkan-short", "latkan-long", "lantern"]);
 
-/** every piece in card px, for a card W × H, a scale per side and per-piece outward nudges */
+/** every piece in card px, for a card W × H and a fit (side scales, scene scales, slides, nudges) */
 function placeAll(W: number, H: number, fit: Fit) {
   const k = W / 1024;
-  const out: Record<string, Placed> = {};
+  const raw: Record<string, { it: CultureItem; side: Side; px: number; py: number; w: number; h: number; ox: number; oy: number }> = {};
   for (const it of CITEMS) {
     const pc = CP[it.piece];
     if (!pc || it.id === "flag") continue;
@@ -104,14 +108,36 @@ function placeAll(W: number, H: number, fit: Fit) {
     const mh = it.h ? (it.h / 100) * 1536 : mw / pc.aspect;
     const mx = (it.x / 100) * 1024;
     const my = (it.y / 100) * 1536;
-    const w = mw * k * s;
-    const h = mh * k * s;
-    const px = side === "left" ? mx * k * s : side === "right" ? W - (1024 - mx) * k * s : mx * k;
-    const py = TOP.has(it.id) ? my * k * s : MID.has(it.id) ? (my / 1536) * H : H - (1536 - my) * k * s;
-    const ox = it.flip ? 1 - pc.pivot[0] : pc.pivot[0];
-    const oy = pc.pivot[1];
-    const dy = fit.dy?.[LINKED[it.id] ?? it.id] ?? 0;
-    out[it.id] = { it, side, left: px - ox * w + (fit.nudge[it.id] ?? 0), top: py - oy * h + dy, w, h, ox, oy };
+    raw[it.id] = {
+      it,
+      side,
+      px: side === "left" ? mx * k * s : side === "right" ? W - (1024 - mx) * k * s : mx * k,
+      py: TOP.has(it.id) ? my * k * s : MID.has(it.id) ? (my / 1536) * H : H - (1536 - my) * k * s,
+      w: mw * k * s,
+      h: mh * k * s,
+      ox: it.flip ? 1 - pc.pivot[0] : pc.pivot[0],
+      oy: pc.pivot[1],
+    };
+  }
+  // a scene shrinks about its anchor's pivot
+  for (const [g, ids] of Object.entries(GROUPS)) {
+    const gs = fit.gs[g] ?? 1;
+    const A = raw[g];
+    if (!A || gs === 1) continue;
+    const [ax, ay] = [A.px, A.py];
+    for (const id of ids) {
+      const r = raw[id];
+      if (!r) continue;
+      r.px = ax + (r.px - ax) * gs;
+      r.py = ay + (r.py - ay) * gs;
+      r.w *= gs;
+      r.h *= gs;
+    }
+  }
+  const out: Record<string, Placed> = {};
+  for (const [id, r] of Object.entries(raw)) {
+    const key = groupOf(id);
+    out[id] = { it: r.it, side: r.side, left: r.px - r.ox * r.w + (fit.nudge[key] ?? 0), top: r.py - r.oy * r.h + (fit.dy[key] ?? 0), w: r.w, h: r.h, ox: r.ox, oy: r.oy };
   }
   // the flag stands on the temple's shikhara
   const t = out["temple-stepwell"];
@@ -119,7 +145,7 @@ function placeAll(W: number, H: number, fit: Fit) {
   const ft = CP["temple-stepwell"]?.points?.flagTop;
   if (t && fl && ft && CP.flag) {
     const pc = CP.flag;
-    const w = (fl.w / 100) * W * fit.scale.right;
+    const w = (fl.w / 100) * W * fit.scale.right * (fit.gs["temple-stepwell"] ?? 1);
     const h = w / pc.aspect;
     const tx = t.left + ft[0] * t.w;
     const ty = t.top + ft[1] * t.h;
@@ -160,56 +186,108 @@ function overlapOf(p: Placed, obs: Rect[], W: number) {
   return need * dir;
 }
 
-/** the side scales and nudges that keep every piece off the text */
+/** how much of a box stays on the card, side to side (0 … 1) */
+const onCard = (left: number, w: number, W: number) => Math.max(0, Math.min(W, left + w) - Math.max(0, left)) / w;
+
+/** the scales, slides and nudges that keep every piece off the text — and the scenes whole */
 function fitAround(W: number, H: number, obs: Rect[]): Fit {
-  const fit: Fit = { scale: { left: 1, right: 1, water: 1 }, nudge: {}, dy: {} };
+  const fit: Fit = { scale: { left: 1, right: 1, water: 1 }, nudge: {}, dy: {}, gs: {} };
+  const u = W / 390;
+  const scenic = (id: string) => groupOf(id) in GROUPS || id.startsWith("palm-");
+  // 1. each side shrinks (to minScale) for its figures, props, kites and hanging pieces
   for (const side of ["left", "right"] as const) {
     for (let s = 1; s >= S.minScale - 1e-6; s -= 0.05) {
       fit.scale[side] = +s.toFixed(2);
       const pl = placeAll(W, H, fit);
-      if (!Object.values(pl).some((p) => p.side === side && overlapOf(p, obs, W) !== 0)) break;
+      if (!Object.values(pl).some((p) => p.side === side && !scenic(p.it.id) && !HANG.has(p.it.id) && overlapOf(p, obs, W) !== 0)) break;
     }
   }
-  // the scenery and palms (placed by height) may also slide up or down a little, to where the
-  // text is narrowest, before they move outward (the houseboat goes with its backwaters)
-  const u = W / 390;
-  for (const id of ["backwaters-view", "temple-stepwell", "palm-1", "palm-2"]) {
-    let best = { need: Infinity, dy: 0 };
+  // 2. hanging pieces may hang lower (never higher) to clear the buttons, the roses and the text
+  for (const id of HANG) {
+    let best = { need: Infinity, d: 0 };
+    for (let d = 0; d <= 110; d += 4) {
+      fit.dy[id] = d * u;
+      const p = placeAll(W, H, fit)[id];
+      if (!p) break;
+      const need = Math.abs(overlapOf(p, obs, W));
+      if (need < best.need - 0.5) best = { need, d };
+      if (need === 0) break;
+    }
+    fit.dy[id] = best.d * u;
+  }
+  // 3. each scene shrinks and slides to where the text leaves the most room, kept whole on the
+  //    card, clear of the figure below it and of the top
+  for (const g of Object.keys(GROUPS)) {
+    let best = { score: -Infinity, gs: 1, d: 0 };
+    for (let gs = 1; gs >= 0.5 - 1e-6; gs -= 0.05) {
+      for (let d = -150; d <= 150; d += 6) {
+        fit.gs[g] = gs;
+        fit.dy[g] = d * u;
+        const pl = placeAll(W, H, fit);
+        const A = pl[g];
+        if (!A) continue;
+        const fig = pl[A.side === "left" ? "kathakali" : "garba-couple"];
+        if (fig && A.top + A.h > fig.top + fig.h * 0.3) continue;
+        if (A.top < H * 0.16) continue;
+        const ids = [...GROUPS[g], ...(g === "temple-stepwell" ? ["flag"] : [])].filter((id) => pl[id]);
+        const need = Math.max(...ids.map((id) => Math.abs(overlapOf(pl[id], obs, W))));
+        const shift = A.side === "left" ? -need : need;
+        const vis = Math.min(...GROUPS[g].filter((id) => pl[id]).map((id) => onCard(pl[id].left + shift, pl[id].w, W)));
+        const score = gs * gs * vis ** 3 - (Math.abs(d) / 390) * 0.15;
+        if (score > best.score) best = { score, gs, d };
+      }
+    }
+    fit.gs[g] = +best.gs.toFixed(2);
+    fit.dy[g] = best.d * u;
+  }
+  // 4. the palms (placed by height) may slide up or down a little
+  for (const id of ["palm-1", "palm-2"]) {
+    let best = { need: Infinity, d: 0 };
     for (let d = -70; d <= 70; d += 5) {
       fit.dy[id] = d * u;
-      const pl = placeAll(W, H, fit);
-      const ids = [id, ...Object.keys(LINKED).filter((k) => LINKED[k] === id)];
-      const need = Math.max(...ids.filter((k) => pl[k]).map((k) => Math.abs(overlapOf(pl[k], obs, W))));
-      if (need < best.need - 0.5 || (Math.abs(need - best.need) <= 0.5 && Math.abs(d) < Math.abs(best.dy))) best = { need, dy: d };
+      const p = placeAll(W, H, fit)[id];
+      if (!p) break;
+      const need = Math.abs(overlapOf(p, obs, W));
+      if (need < best.need - 0.5 || (Math.abs(need - best.need) <= 0.5 && Math.abs(d) < Math.abs(best.d))) best = { need, d };
     }
-    fit.dy[id] = best.dy * u;
+    fit.dy[id] = best.d * u;
   }
+  // 5. anything still in the way moves outward (a scene as one, as far as its member that needs most)
   const pl = placeAll(W, H, fit);
   for (const p of Object.values(pl)) {
     const n = overlapOf(p, obs, W);
-    if (n) fit.nudge[p.it.id] = n;
+    const key = groupOf(p.it.id);
+    if (n && Math.abs(n) > Math.abs(fit.nudge[key] ?? 0)) fit.nudge[key] = n;
   }
-  // linked pieces keep together: both move as far as the one that needs most
-  for (const [a, b] of Object.entries(LINKED)) {
-    const n = [fit.nudge[a] ?? 0, fit.nudge[b] ?? 0].sort((x, y) => Math.abs(y) - Math.abs(x))[0];
-    if (n) fit.nudge[a] = fit.nudge[b] = n;
-  }
-  // the flag goes where its temple goes
-  if (fit.nudge["temple-stepwell"]) fit.nudge.flag = fit.nudge["temple-stepwell"];
   return fit;
 }
 
-/** the card text (and the seal's roses, the scroll hint): line by line, in card px */
+/** the card text, the seal and its roses, the scroll hint and the top buttons: line by line, in
+ *  card px, as they finally sit (the reveal's own offsets taken out) */
 function measureText(card: HTMLElement): Rect[] {
   const cr = card.getBoundingClientRect();
   const out: Rect[] = [];
-  const add = (r: DOMRect) => r.width > 1 && r.height > 1 && out.push({ left: r.left - cr.left, right: r.right - cr.left, top: r.top - cr.top, bottom: r.bottom - cr.top });
-  card.querySelectorAll(".content .together, .content .name, .content .relation, .content .parents, .content .joiner-word, .content .invite, .content .tagline, .content .venue").forEach((el) => {
+  const own = (el: Element) => ({ x: Number(gsap.getProperty(el, "x")) || 0, y: Number(gsap.getProperty(el, "y")) || 0 });
+  const add = (r: DOMRect, o = { x: 0, y: 0 }) =>
+    r.width > 1 && r.height > 1 && out.push({ left: r.left - cr.left - o.x, right: r.right - cr.left - o.x, top: r.top - cr.top - o.y, bottom: r.bottom - cr.top - o.y });
+  card.querySelectorAll(".content .name, .content .relation, .content .parents, .content .joiner-word, .content .invite, .content .tagline, .content .venue").forEach((el) => {
     const rg = document.createRange();
     rg.selectNodeContents(el);
-    for (const r of rg.getClientRects()) add(r);
+    const o = own(el);
+    for (const r of rg.getClientRects()) add(r, o);
   });
-  card.querySelectorAll(".content .date-block, .content .divider, .content .scroll-hint, .content .seal-wrap, .content .joiner .flourish, .content .name-flourish, .seal-cluster .flower-bloom, .seal-cluster .rosebud").forEach((el) => add(el.getBoundingClientRect()));
+  // "TOGETHER WITH OUR FAMILIES" is split into letters that start spread apart
+  card.querySelectorAll(".content .together").forEach((el) => {
+    const chars = el.querySelectorAll(".char");
+    if (!chars.length) {
+      const rg = document.createRange();
+      rg.selectNodeContents(el);
+      for (const r of rg.getClientRects()) add(r);
+    } else chars.forEach((c) => add(c.getBoundingClientRect(), own(c)));
+  });
+  card.querySelectorAll(".content .date-block, .content .divider, .content .scroll-hint, .content .seal-wrap, .content .joiner .flourish, .content .name-flourish, .seal-cluster .flower").forEach((el) => add(el.getBoundingClientRect()));
+  // the replay and music buttons (only while the card is at the top of the page)
+  if (Math.abs(cr.top) < 4) document.querySelectorAll(".controls .ctrl").forEach((el) => add(el.getBoundingClientRect()));
   return out;
 }
 
@@ -249,10 +327,20 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
         setSize({ W, H, fit: fitAround(W, H, measureText(card)) });
       });
     };
-    document.fonts?.ready.then(measure).catch(measure);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(card);
+    // first once the fonts are in (the text's final size), then only when the card changes size
+    let lastW = 0;
+    let lastH = 0;
+    const onResize = () => {
+      if (card.clientWidth === lastW && card.clientHeight === lastH) return;
+      lastW = card.clientWidth;
+      lastH = card.clientHeight;
+      measure();
+    };
+    const ro = new ResizeObserver(onResize);
+    (document.fonts?.ready ?? Promise.resolve()).then(() => {
+      onResize();
+      ro.observe(card);
+    });
     return () => {
       ro.disconnect();
       cancelAnimationFrame(raf);
@@ -446,60 +534,68 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
       return () => cleanups.forEach((f) => f());
     }
 
-    /* ── the entrance (seconds from the card's appearance) ── */
+    /* ── the entrance: on the card's own reveal beats (where the velvet corners, the vines,
+          the corner roses and the rosebuds used to come in), at the card's speed ── */
+    const B = S.enterAt; // where the velvet corners came in
     const tl = gsap.timeline({ paused: true, defaults: { ease: "power2.out" } });
+    tl.timeScale(timing.speed);
     const flamesOf = (ids: string[]) => ids.flatMap((id) => [...(item(id)?.querySelectorAll<HTMLElement>(".cu-flame") ?? [])]);
     gsap.set(q(".cu-e"), { autoAlpha: 0 });
     gsap.set(q(".cu-flame"), { scale: 0, autoAlpha: 0 });
     gsap.set(q(".cu-glow"), { opacity: 0 });
-    // 0.0 — 0.8  the scenery slides in from both edges
-    tl.fromTo(enters(["backwaters-view"]), { x: () => -40 * u(), autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.8 }, 0);
-    tl.fromTo(enters(["temple-stepwell"]), { x: () => 40 * u(), autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.8 }, 0);
-    // 0.2 — 0.9  the water rises along the bottom; lotuses and leaves pop up
-    tl.fromTo(enters(["water-strip"]), { y: () => 30 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6 }, 0.2);
-    tl.fromTo(enters(CITEMS.filter((i) => /^(leaf-|lotus-|bud-|fdiya-)/.test(i.id)).map((i) => i.id)), { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.45, ease: "back.out(2.2)", stagger: 0.04 }, 0.35);
-    // 0.4 — 1.2  palms grow, kites float up (strings draw), the flag unfurls
-    tl.fromTo(enters(["palm-1", "palm-2"]), { scaleY: 0, autoAlpha: 0 }, { scaleY: 1, autoAlpha: 1, duration: 0.8, ease: "back.out(1.5)", stagger: 0.12 }, 0.4);
+    // 0.6  the scenery glides in from both edges (as the velvet did); the water rises; the
+    //      houseboat drifts in on it; the flag unfurls on the temple
+    tl.fromTo(enters(["backwaters-view"]), { x: () => -70 * u(), autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 1.4, ease: "power3.out" }, B);
+    tl.fromTo(enters(["temple-stepwell"]), { x: () => 70 * u(), autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 1.4, ease: "power3.out" }, B);
+    tl.fromTo(enters(["water-strip"]), { y: () => 26 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1.3, ease: "power3.out" }, B + 0.1);
+    tl.fromTo(enters(["houseboat"]), { x: () => -50 * u(), autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 1.6, ease: "power2.out" }, B + 0.35);
+    tl.fromTo(enters(["flag"]), { scaleX: 0, autoAlpha: 1 }, { scaleX: 1, duration: 0.8, ease: "power2.out" }, B + 1.1);
+    // 1.2  (as the vines drew) the palms grow from their bases; the strands and lamps drop in and
+    //      settle with a swing; the kites rise on the breeze and their strings draw out
+    tl.fromTo(enters(["palm-2", "palm-1"]), { scaleY: 0.2, autoAlpha: 0 }, { scaleY: 1, autoAlpha: 1, duration: 1.1, ease: "power3.out", stagger: 0.15 }, B + 0.6);
+    tl.fromTo(enters(["jasmine-strand", "latkan-short", "latkan-long"]), { scaleY: 0, autoAlpha: 0 }, { scaleY: 1, autoAlpha: 1, duration: 0.9, ease: "power2.out", stagger: 0.12 }, B + 0.7);
+    tl.fromTo(enters(["brass-lamp", "lantern"]), { y: () => -30 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out", stagger: 0.12 }, B + 0.85);
+    tl.fromTo(enters(["jasmine-strand", "latkan-short", "latkan-long", "brass-lamp", "lantern"]), { rotation: 0 }, { keyframes: [{ rotation: 4, duration: 0.35 }, { rotation: -2.5, duration: 0.4 }, { rotation: 0, duration: 0.4 }], ease: "sine.inOut", stagger: 0.08 }, B + 1.45);
     ["kite-1", "kite-2", "kite-3"].forEach((id, i) => {
       const e = enter(id);
-      if (!e) return;
-      tl.fromTo(e, { y: () => H() * 0.35, x: () => (i - 1) * 20 * u(), autoAlpha: 0, rotation: -15 }, { y: 0, x: 0, autoAlpha: 1, rotation: 0, duration: 0.8, ease: "sine.out" }, 0.4 + i * 0.1);
+      if (e) tl.fromTo(e, { y: () => 50 * u(), autoAlpha: 0, rotation: -10 }, { y: 0, autoAlpha: 1, rotation: 0, duration: 1.3, ease: "sine.out" }, B + 0.9 + i * 0.18);
     });
-    tl.fromTo(q(".cu-string path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "none", stagger: 0.1 }, 0.6);
-    tl.fromTo(enters(["flag"]), { scaleX: 0, autoAlpha: 1 }, { scaleX: 1, duration: 0.7, ease: "power2.out" }, 0.5);
-    // 0.6 — 1.4  the houseboat drifts in; strands, lamp and lantern drop and swing; flames light
-    tl.fromTo(enters(["houseboat"]), { x: () => -60 * u(), autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out" }, 0.6);
-    tl.fromTo(enters(["jasmine-strand", "latkan-short", "latkan-long"]), { scaleY: 0, autoAlpha: 0 }, { scaleY: 1, autoAlpha: 1, duration: 0.5, ease: "power2.out", stagger: 0.08 }, 0.6);
-    tl.fromTo(enters(["jasmine-strand", "latkan-short", "latkan-long"]), { rotation: 0 }, { keyframes: [{ rotation: 5, duration: 0.25 }, { rotation: -3, duration: 0.3 }, { rotation: 0, duration: 0.3 }], ease: "sine.inOut", stagger: 0.08 }, 1.0);
-    tl.fromTo(enters(["brass-lamp", "lantern"]), { y: () => -40 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5, ease: "power2.out", stagger: 0.1 }, 0.7);
-    tl.fromTo(enters(["brass-lamp", "lantern"]), { rotation: 0 }, { keyframes: [{ rotation: -6, duration: 0.25 }, { rotation: 4, duration: 0.3 }, { rotation: 0, duration: 0.3 }], ease: "sine.inOut", stagger: 0.1 }, 1.0);
-    tl.to(flamesOf(["brass-lamp"]), { scale: 1, autoAlpha: 1, duration: 0.3, ease: "back.out(2)", stagger: 0.06 }, 1.25);
-    tl.to(q('[data-id="lantern"] .cu-glow'), { opacity: 1, duration: 0.6 }, 1.25);
-    // 1.0 — 1.8  Kathakali rises; the garba couple twirl in; the props pop and light
-    tl.fromTo(enters(["kathakali"]), { y: () => 40 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.7 }, 1.0);
-    tl.fromTo(enters(["garba-couple"]), { y: () => 40 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.7 }, 1.0);
-    tl.fromTo(enters(["garba-couple"]), { scaleX: 1 }, { keyframes: [{ scaleX: -1, duration: 0.3 }, { scaleX: 1, duration: 0.3 }], ease: "sine.inOut" }, 1.05);
-    tl.fromTo(enters(["nilavilakku", "uruli", "pookalam", "garbo"]), { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out(2)", stagger: 0.08 }, 1.2);
-    tl.to(flamesOf(["nilavilakku", "garbo", "fdiya-a", "fdiya-b"]), { scale: 1, autoAlpha: 1, duration: 0.3, ease: "back.out(2)", stagger: 0.05 }, 1.55);
-    tl.to(flamesOf(["temple-stepwell"]), { scale: 1, autoAlpha: 1, duration: 0.3, ease: "back.out(2)", stagger: 0.04 }, 1.3);
-    tl.to(q('[data-id="garbo"] .cu-glow'), { opacity: 1, duration: 0.6 }, 1.65);
-    // 1.6 — 2.2  the corner flowers bloom from their corners
-    tl.fromTo(enters(["flowers-left"]), { scale: 0.6, rotation: -8, autoAlpha: 0 }, { scale: 1, rotation: 0, autoAlpha: 1, duration: 0.6, ease: "back.out(1.6)" }, 1.6);
-    tl.fromTo(enters(["flowers-right"]), { scale: 0.6, rotation: 8, autoAlpha: 0 }, { scale: 1, rotation: 0, autoAlpha: 1, duration: 0.6, ease: "back.out(1.6)" }, 1.65);
-    // 2.2 — 2.8  the first sprite moment (once the edits exist)
+    tl.fromTo(q(".cu-string path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "none", stagger: 0.18 }, B + 1.2);
+    // 2.0  (as the corner roses unfurled) the corner flowers open out from their corners, turning
+    const unfurl = (id: string, corner: string, turn: number, at: number) => {
+      const e = enter(id);
+      if (!e) return;
+      tl.fromTo(e, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: "none" }, at);
+      tl.fromTo(e, { rotation: turn, scale: 0.4 }, { rotation: 0, scale: 1, duration: 1.15, ease: "back.out(1.4)" }, at);
+      tl.fromTo(e, { clipPath: `circle(12% at ${corner})` }, { clipPath: `circle(150% at ${corner})`, duration: 1.0, ease: "power2.out" }, at + 0.05);
+      tl.set(e, { clipPath: "none" }, at + 1.1);
+    };
+    unfurl("flowers-left", "0% 100%", -18, B + 1.4);
+    unfurl("flowers-right", "100% 100%", 18, B + 1.52);
+    // 2.5  (as the rosebuds sprang) the lotuses, buds and leaves spring up on the water
+    tl.fromTo(enters(CITEMS.filter((i) => /^(leaf-|lotus-|bud-|fdiya-)/.test(i.id)).map((i) => i.id)), { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 1.0, ease: "elastic.out(1, 0.55)", stagger: 0.08 }, B + 1.9);
+    // 2.3  Kathakali and the garba couple rise into place; the lamp, the uruli, the pookalam and the
+    //      garbo set down beside them
+    tl.fromTo(enters(["kathakali"]), { y: () => 30 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1.0, ease: "power3.out" }, B + 1.7);
+    tl.fromTo(enters(["garba-couple"]), { y: () => 30 * u(), autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1.0, ease: "power3.out" }, B + 1.85);
+    tl.fromTo(enters(["pookalam", "nilavilakku", "uruli", "garbo"]), { scale: 0.7, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.7, ease: "back.out(1.8)", stagger: 0.1 }, B + 2.1);
+    // 3.1  the lamps light, one after another; the lantern and the garbo glow
+    tl.to(flamesOf(["brass-lamp", "temple-stepwell", "nilavilakku", "garbo", "fdiya-a", "fdiya-b"]), { scale: 1, autoAlpha: 1, duration: 0.35, ease: "back.out(2)", stagger: 0.04 }, B + 2.5);
+    tl.to(q('[data-id="lantern"] .cu-glow, [data-id="garbo"] .cu-glow'), { opacity: 1, duration: 0.8 }, B + 2.6);
+    // the first sprite moment (once the edits exist), then the loops
     tl.call(() => {
       if (SWAPS.some((s) => s.id.startsWith("eyes"))) {
         swap("eyes-left", 400);
         swap("eyes-right", 400, 0.4);
       }
       click();
-    }, undefined, 2.2);
-    tl.call(startLoops, undefined, 2.3);
-    // the flag waves (and particles fly) from the start
+    }, undefined, B + 3.2);
+    tl.call(startLoops, undefined, B + 3.0);
+    // the flag waves (and petals fly) from the start
     tl.call(() => {
       live = true;
       run();
-    }, undefined, 0.5);
+    }, undefined, B);
 
     const play = () => {
       if (started.current) {
@@ -507,7 +603,7 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
         return;
       }
       started.current = true;
-      gsap.delayedCall(S.enterAt / timing.speed, () => tl.play(0));
+      tl.play(0);
     };
     // the card dispatches this as its reveal starts (and marks itself, in case it came first)
     if (card.dataset.reveal) play();
@@ -563,6 +659,7 @@ function PieceView({ p }: { p: Placed }) {
   return (
     <div className="cu-p" data-id={it.id} data-side={p.side} style={placeStyle}>
       <div className="cu-e" style={{ transformOrigin: it.id === "flag" ? `${pct(CP.flag?.points?.cloth?.[0] ?? 0)} 50%` : origin }}>
+        {HANG.has(it.id) && p.top + p.oy * p.h > 2 && <span className="cu-cord" style={{ left: pct(p.ox), top: -p.top, height: p.top + p.oy * p.h }} />}
         <div className={`cu-i${idle ? ` cu-${idle.k}` : ""}`} style={idleStyle}>
           {it.id === "flag" ? <canvas className="cu-flag-cv" /> : <img src={cultureUrl(it.piece)} alt="" draggable={false} style={flip} />}
           {it.id === "lantern" && pc.points?.glow && <span className="cu-glow cu-glow-lantern" style={{ left: pct(pc.points.glow[0]), top: pct(pc.points.glow[1]) }} />}

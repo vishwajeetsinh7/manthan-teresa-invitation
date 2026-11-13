@@ -3314,6 +3314,19 @@ img.cu-holes {
 .cu-wings[data-lite] .cu-shimmer {
   display: none;
 }
+/* a cord above a hanging piece that hangs lower than its loop. */
+.cu-cord {
+  position: absolute;
+  width: max(1px, calc(var(--cu-u) * 1.2));
+  translate: -50% 0;
+  background: linear-gradient(#b8893e, #d9b066);
+}
+/* the water along the bottom: softer, melting into the parchment at its top */
+.cu-p[data-id="water-strip"] .cu-i {
+  opacity: 0.85;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 38%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 38%);
+}
 /* kite strings */
 .cu-string {
   position: absolute;
