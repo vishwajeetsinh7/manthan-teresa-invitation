@@ -96,7 +96,9 @@ const groupOf = (id: string) => (id === "flag" ? "temple-stepwell" : (Object.key
 const HANG = new Set(["jasmine-strand", "brass-lamp", "latkan-short", "latkan-long", "lantern"]);
 
 /** every piece in card px, for a card W × H and a fit (side scales, scene scales, slides, nudges) */
-function placeAll(W: number, H: number, fit: Fit) {
+function placeAll(W: number, H: number, f: Fit) {
+  // (a fit saved before a field existed — e.g. across a hot reload — still works)
+  const fit: Fit = { scale: f.scale ?? { left: 1, right: 1, water: 1 }, nudge: f.nudge ?? {}, dy: f.dy ?? {}, gs: f.gs ?? {} };
   const k = W / 1024;
   const raw: Record<string, { it: CultureItem; side: Side; px: number; py: number; w: number; h: number; ox: number; oy: number }> = {};
   for (const it of CITEMS) {
