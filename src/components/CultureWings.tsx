@@ -19,7 +19,7 @@
  * only once those edits exist (see scripts/scenes/culture.config.mjs).
  */
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
-import { gsap } from "@/src/lib/gsap";
+import { gsap, ScrollTrigger } from "@/src/lib/gsap";
 import { timing } from "@/src/config/timing";
 import { CITEMS, CP, CULTURE_KINDS, CULTURE_MASTER, cultureImages, cultureUrl, type CultureItem } from "@/src/config/culture";
 import { createParticles } from "./scenes/engine";
@@ -755,6 +755,42 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
       started.current = true;
       tl.play(0);
     };
+    /* scrolling down off the card: the bottom pieces slide away sideways (Kerala to the left,
+       Gujarat to the right, the lotuses and diyas to their nearer edge, the water sinks away),
+       and come back as the guest scrolls up again (scrubbed with the scroll) */
+    const scroller = card.closest(".scroller") as HTMLElement | null;
+    if (scroller) {
+      const away = gsap.timeline({ paused: true, defaults: { ease: "sine.in" } });
+      const bottomIds = CITEMS.filter((i) => !TOP.has(i.id) && !MID.has(i.id)).map((i) => i.id);
+      for (const id of bottomIds) {
+        const p = placed[id];
+        const e = item(id);
+        if (!p || !e) continue;
+        // lower pieces leave first, a little ahead of the higher ones
+        const at0 = Math.max(0, (1 - (p.top + p.h) / H()) * 0.6);
+        if (id === "water-strip") {
+          away.to(e, { y: () => p.h * 0.9, autoAlpha: 0, duration: 1 }, 0.15);
+          continue;
+        }
+        const left = p.side === "left" || (p.side === "water" && p.left + p.w / 2 < W() / 2);
+        away.to(e, { x: () => (left ? -(p.left + p.w + 24 * u()) : W() - p.left + 24 * u()), rotation: left ? -6 : 6, duration: 1 }, at0);
+      }
+      // the light effects on the water go with it
+      away.to(q(".cu-ring, .cu-fx-pool, .cu-sweep"), { autoAlpha: 0, duration: 0.4 }, 0);
+      const st = ScrollTrigger.create({
+        trigger: card,
+        scroller,
+        start: "top top",
+        end: () => `+=${card.clientHeight * S.awayDistance}`,
+        scrub: S.awayScrub,
+        animation: away,
+      });
+      cleanups.push(() => {
+        st.kill();
+        away.kill();
+      });
+    }
+
     // the card dispatches this as its reveal starts (and marks itself, in case it came first)
     if (card.dataset.reveal) play();
     window.addEventListener("invite:card-reveal", play);

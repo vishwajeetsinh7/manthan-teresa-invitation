@@ -73,6 +73,10 @@ export const timing = {
     minScale: 0.85,
     /** under this many frames a second for 2 s: the flag stops waving, half the petals, no shimmer */
     minFps: 40,
+    /** scrolling down off the card, the bottom pieces slide away sideways over this much of
+     *  the card's height (and come back scrolling up); scrub smoothing (s) */
+    awayDistance: 0.55,
+    awayScrub: 0.6,
     /** Kathakali's eye glance and the garba click (s between) — once their edits exist */
     eyesEvery: [5, 8] as [number, number],
     clickEvery: [4, 6] as [number, number],
