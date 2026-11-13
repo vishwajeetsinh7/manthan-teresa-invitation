@@ -58,8 +58,8 @@ const config = {
     // Kerala
     { name: "backwaters-view", sheet: "kscene", at: [700, 800], pivotAt: [33, 1000], density: 3, points: { water0: [150, 652], water1: [1500, 1000] } },
     { name: "houseboat", sheet: "kboat", at: [770, 560] },
-    { name: "palm-1", sheet: "ktall", at: [390, 21], pivotAt: [150, 990] },
-    { name: "palm-2", sheet: "ktall", at: [756, 221], pivotAt: [520, 985] },
+    { name: "palm-1", sheet: "ktall", at: [390, 21], pivotAt: [150, 990], despeckle: 400 },
+    { name: "palm-2", sheet: "ktall", at: [756, 221], pivotAt: [520, 985], despeckle: 400 },
     { name: "jasmine-strand", sheet: "ktall", at: [1043, 22], pivot: "top" },
     { name: "brass-lamp", sheet: "ktall", at: [1306, 22], pivot: "top", points: { w1: [1202, 710], w2: [1252, 710], w3: [1380, 710], w4: [1425, 710] } },
     { name: "kathakali", sheet: "kfront", at: [229, 16] },
@@ -151,8 +151,9 @@ const config = {
       };
       // ── Kerala, down the left edge ──
       box("backwaters-view", "backwaters-view", [-10, 700, 410, 1005], 1);
-      box("palm-2", "palm-2", [-36, 512, 124, 775], 2, { by: "h" });
-      box("palm-1", "palm-1", [-30, 250, 230, 765], 2.1, { by: "h" });
+      // the palms grow out of the backwaters' bank: just behind it, their feet hidden in its bushes
+      box("palm-2", "palm-2", [-125, 192, 293, 893], 0.8, { by: "h" });
+      box("palm-1", "palm-1", [-21, 275, 290, 900], 0.9, { by: "h" });
       // the houseboat sails on the water along the bottom of the card, out from behind the left
       // corner flowers, just below the pookalam
       box("houseboat", "houseboat", [150, 0, 342, 1514], 5.62);

@@ -558,11 +558,12 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
           0.5,
         );
         T2.to(st, { flameOn: 0, flame: 0.4, duration: 0.3 }, 0.6);
-        // 4. the sky turns plum, the stars come out; the garba decor lifts away; the truss drops in
+        // 4. the sky turns plum, the stars come out; the garba decor lifts a little and fades right
+        //    out — and only once it has gone does the truss drop in (never both at once, and neither
+        //    flies up over the heading)
         T2.to(st, { sky: 1, duration: 1.4, ease: "sine.inOut" }, 0.6);
-        T2.to(decorEls, { y: () => -H * 0.45, duration: 0.8, ease: "power2.in", stagger: 0.05 }, 0.7);
-        T2.set(decorEls, { autoAlpha: 0 }, 1.6);
-        T2.fromTo(truss, { y: () => -H * 0.3, autoAlpha: 1 }, { y: 0, duration: 0.9, ease: "back.out(1.7)" }, 1.0);
+        T2.to(decorEls, { y: () => -H * 0.07, autoAlpha: 0, duration: 0.42, ease: "power2.in", stagger: 0.035 }, 0.6);
+        T2.fromTo(truss, { y: () => -H * 0.08, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.55, ease: "back.out(1.6)" }, 1.35);
         // 5. the light becomes the disco ball; the spotlights snap on, left to right, on the beat
         T2.fromTo(disco, { autoAlpha: 0, scale: 0.8, x: 0, y: 0 }, { autoAlpha: 1, scale: 1, duration: 0.5, ease: "back.out(2.4)" }, 1.8);
         T2.to(lightBall, { autoAlpha: 0, scale: 1.25, duration: 0.45 }, 1.85);
@@ -634,8 +635,7 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
         });
         T2.set(beams, { autoAlpha: 0 }, 1.0);
         T2.to(st, { reflect: 0, duration: 0.3 }, 0);
-        T2.to(truss, { y: () => -H * 0.3, duration: 0.6, ease: "power2.in" }, 0.5);
-        T2.set(truss, { autoAlpha: 0 }, 1.1);
+        T2.to(truss, { y: () => -H * 0.08, autoAlpha: 0, duration: 0.42, ease: "power2.in" }, 0.75);
         T2.to(st, { floorOn: 0, duration: 0.6, ease: "sine.inOut" }, 0.1);
         T2.to(st, { sky: 0, duration: 1.0, ease: "sine.inOut" }, 0.2);
         T2.to(dholGlow, { opacity: 0.35, duration: 0.4 }, 1.4);
@@ -643,8 +643,9 @@ export function GarbaDanceScene({ scrollerRef, style, reduce, page }: { scroller
         crew.forEach((c, i) => T2.to(c.el, { x: () => W * ENTRY[c.id], autoAlpha: 0, duration: 0.6, ease: "power2.in" }, 0.3 + i * 0.08));
         T2.to([djCon, djBoy], { y: djDrop, duration: 0.6, ease: "power2.in" }, 0.3);
         T2.set([djCon, djBoy], { autoAlpha: 0 }, 0.95);
-        // 4. the decor drops back in; the dhol player walks in from the left
-        T2.fromTo(decorEls, { y: () => -H * 0.45, autoAlpha: 1 }, { y: 0, duration: 0.8, ease: "back.out(1.3)", stagger: 0.06 }, 1.1);
+        // 4. once the truss has gone, the decor drops back in (a short drop, fading in); the dhol
+        //    player walks in from the left
+        T2.fromTo(decorEls, { y: () => -H * 0.07, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, ease: "back.out(1.4)", stagger: 0.05 }, 1.25);
         T2.fromTo(dhol, { x: () => -W * 0.5, autoAlpha: 1 }, { x: 0, duration: 1.2, ease: "power1.out" }, 1.2);
         T2.fromTo(dhol, { y: 0 }, { y: () => -4 * k(), duration: 0.15, yoyo: true, repeat: 7, ease: "sine.inOut" }, 1.2);
         // 5. the dancers spiral back into the ring, slowing to the garba

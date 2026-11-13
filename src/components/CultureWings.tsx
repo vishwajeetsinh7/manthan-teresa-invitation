@@ -90,8 +90,11 @@ type Placed = { it: CultureItem; side: Side; left: number; top: number; w: numbe
 type Fit = { scale: Record<Side, number>; nudge: Record<string, number>; dy: Record<string, number>; gs: Record<string, number> };
 /** scenes: an anchor and what rides with it (the houseboat on the backwaters' water); a scene
  *  shrinks about its anchor's pivot, slides and moves as one (the flag goes with its temple) */
-const GROUPS: Record<string, string[]> = { "backwaters-view": ["backwaters-view"], "temple-stepwell": ["temple-stepwell"] };
+const GROUPS: Record<string, string[]> = { "backwaters-view": ["backwaters-view", "palm-1", "palm-2"], "temple-stepwell": ["temple-stepwell"] };
 const groupOf = (id: string) => (id === "flag" ? "temple-stepwell" : (Object.keys(GROUPS).find((g) => GROUPS[g].includes(id)) ?? id));
+/** the palms stand in their scene's bank (up and down with it) but each may lean out on its own */
+const isPalm = (id: string) => id.startsWith("palm-");
+const nudgeOf = (id: string) => (isPalm(id) ? id : groupOf(id));
 /** hanging pieces: they may hang lower, on a longer cord, to clear the buttons and the seal's roses */
 const HANG = new Set(["jasmine-strand", "brass-lamp", "latkan-short", "latkan-long", "lantern"]);
 
@@ -100,7 +103,7 @@ function placeAll(W: number, H: number, f: Fit) {
   // (a fit saved before a field existed — e.g. across a hot reload — still works)
   const fit: Fit = { scale: f.scale ?? { left: 1, right: 1, water: 1 }, nudge: f.nudge ?? {}, dy: f.dy ?? {}, gs: f.gs ?? {} };
   const k = W / 1024;
-  const raw: Record<string, { it: CultureItem; side: Side; px: number; py: number; w: number; h: number; ox: number; oy: number }> = {};
+  const raw: Record<string, { it: CultureItem; side: Side; px: number; py: number; my: number; s: number; w: number; h: number; ox: number; oy: number }> = {};
   for (const it of CITEMS) {
     const pc = CP[it.piece];
     if (!pc || it.id === "flag") continue;
@@ -115,11 +118,19 @@ function placeAll(W: number, H: number, f: Fit) {
       side,
       px: side === "left" ? mx * k * s : side === "right" ? W - (1024 - mx) * k * s : mx * k,
       py: TOP.has(it.id) ? my * k * s : MID.has(it.id) ? (my / 1536) * H : H - (1536 - my) * k * s,
+      my,
+      s,
       w: mw * k * s,
       h: mh * k * s,
       ox: it.flip ? 1 - pc.pivot[0] : pc.pivot[0],
       oy: pc.pivot[1],
     };
+  }
+  // what rides with a scene keeps its place in it (at any card height)
+  for (const [g, ids] of Object.entries(GROUPS)) {
+    const A = raw[g];
+    if (!A) continue;
+    for (const id of ids) if (id !== g && raw[id]) raw[id].py = A.py + (raw[id].my - A.my) * k * raw[id].s;
   }
   // a scene shrinks about its anchor's pivot
   for (const [g, ids] of Object.entries(GROUPS)) {
@@ -132,14 +143,15 @@ function placeAll(W: number, H: number, f: Fit) {
       if (!r) continue;
       r.px = ax + (r.px - ax) * gs;
       r.py = ay + (r.py - ay) * gs;
+      // (a palm keeps its size: only its foot follows the shrinking bank)
+      if (isPalm(id)) continue;
       r.w *= gs;
       r.h *= gs;
     }
   }
   const out: Record<string, Placed> = {};
   for (const [id, r] of Object.entries(raw)) {
-    const key = groupOf(id);
-    out[id] = { it: r.it, side: r.side, left: r.px - r.ox * r.w + (fit.nudge[key] ?? 0), top: r.py - r.oy * r.h + (fit.dy[key] ?? 0), w: r.w, h: r.h, ox: r.ox, oy: r.oy };
+    out[id] = { it: r.it, side: r.side, left: r.px - r.ox * r.w + (fit.nudge[nudgeOf(id)] ?? 0), top: r.py - r.oy * r.h + (fit.dy[groupOf(id)] ?? 0), w: r.w, h: r.h, ox: r.ox, oy: r.oy };
   }
   // the flag stands on the temple's shikhara
   const t = out["temple-stepwell"];
@@ -195,7 +207,7 @@ const onCard = (left: number, w: number, W: number) => Math.max(0, Math.min(W, l
 function fitAround(W: number, H: number, obs: Rect[]): Fit {
   const fit: Fit = { scale: { left: 1, right: 1, water: 1 }, nudge: {}, dy: {}, gs: {} };
   const u = W / 390;
-  const scenic = (id: string) => groupOf(id) in GROUPS || id.startsWith("palm-");
+  const scenic = (id: string) => groupOf(id) in GROUPS;
   // 1. each side shrinks (to minScale) for its figures, props, kites and hanging pieces
   for (const side of ["left", "right"] as const) {
     for (let s = 1; s >= S.minScale - 1e-6; s -= 0.05) {
@@ -231,34 +243,29 @@ function fitAround(W: number, H: number, obs: Rect[]): Fit {
         const fig = pl[A.side === "left" ? "kathakali" : "garba-couple"];
         if (fig && A.top + A.h > fig.top + fig.h * 0.3) continue;
         if (A.top < H * 0.16) continue;
-        const ids = [...GROUPS[g], ...(g === "temple-stepwell" ? ["flag"] : [])].filter((id) => pl[id]);
+        // (and below its side's kites: they fly in the sky above it)
+        const kites = Object.values(pl).filter((p) => p.it.id.startsWith("kite-") && p.side === A.side);
+        if (kites.length && A.top < Math.max(...kites.map((p) => p.top + p.h)) + 6 * u) continue;
+        // (the palms lean out on their own, after)
+        const ids = [...GROUPS[g].filter((id) => !isPalm(id)), ...(g === "temple-stepwell" ? ["flag"] : [])].filter((id) => pl[id]);
         const need = Math.max(...ids.map((id) => Math.abs(overlapOf(pl[id], obs, W))));
         const shift = A.side === "left" ? -need : need;
-        const vis = Math.min(...GROUPS[g].filter((id) => pl[id]).map((id) => onCard(pl[id].left + shift, pl[id].w, W)));
-        const score = gs * gs * vis ** 3 - (Math.abs(d) / 390) * 0.15;
+        const vis = Math.min(...GROUPS[g].filter((id) => pl[id] && !isPalm(id)).map((id) => onCard(pl[id].left + shift, pl[id].w, W)));
+        // …and its palms show as much as they can, leaning clear of the text from where they stand
+        const palms = GROUPS[g].filter((id) => isPalm(id) && pl[id]);
+        const pv = palms.length ? palms.reduce((a, id) => a + onCard(pl[id].left + overlapOf(pl[id], obs, W), pl[id].w, W), 0) / palms.length : 1;
+        const score = gs * gs * vis ** 3 * pv ** 2 - (Math.abs(d) / 390) * 0.15;
         if (score > best.score) best = { score, gs, d };
       }
     }
     fit.gs[g] = +best.gs.toFixed(2);
     fit.dy[g] = best.d * u;
   }
-  // 4. the palms (placed by height) may slide up or down a little
-  for (const id of ["palm-1", "palm-2"]) {
-    let best = { need: Infinity, d: 0 };
-    for (let d = -70; d <= 70; d += 5) {
-      fit.dy[id] = d * u;
-      const p = placeAll(W, H, fit)[id];
-      if (!p) break;
-      const need = Math.abs(overlapOf(p, obs, W));
-      if (need < best.need - 0.5 || (Math.abs(need - best.need) <= 0.5 && Math.abs(d) < Math.abs(best.d))) best = { need, d };
-    }
-    fit.dy[id] = best.d * u;
-  }
-  // 5. anything still in the way moves outward (a scene as one, as far as its member that needs most)
+  // 4. anything still in the way moves outward (a scene as one, as far as its member that needs most)
   const pl = placeAll(W, H, fit);
   for (const p of Object.values(pl)) {
     const n = overlapOf(p, obs, W);
-    const key = groupOf(p.it.id);
+    const key = nudgeOf(p.it.id);
     if (n && Math.abs(n) > Math.abs(fit.nudge[key] ?? 0)) fit.nudge[key] = n;
   }
   return fit;
@@ -272,11 +279,16 @@ function measureText(card: HTMLElement): Rect[] {
   const own = (el: Element) => ({ x: Number(gsap.getProperty(el, "x")) || 0, y: Number(gsap.getProperty(el, "y")) || 0 });
   const add = (r: DOMRect, o = { x: 0, y: 0 }) =>
     r.width > 1 && r.height > 1 && out.push({ left: r.left - cr.left - o.x, right: r.right - cr.left - o.x, top: r.top - cr.top - o.y, bottom: r.bottom - cr.top - o.y });
+  // (the glyphs themselves: each text node's lines, not the padded wipe/shimmer spans round them)
   card.querySelectorAll(".content .name, .content .relation, .content .parents, .content .joiner-word, .content .invite, .content .tagline").forEach((el) => {
-    const rg = document.createRange();
-    rg.selectNodeContents(el);
     const o = own(el);
-    for (const r of rg.getClientRects()) add(r, o);
+    const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+      if (!n.textContent?.trim()) continue;
+      const rg = document.createRange();
+      rg.selectNodeContents(n);
+      for (const r of rg.getClientRects()) add(r, o);
+    }
   });
   // "TOGETHER WITH OUR FAMILIES" is split into letters that start spread apart
   card.querySelectorAll(".content .together").forEach((el) => {

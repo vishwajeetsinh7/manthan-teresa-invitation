@@ -181,7 +181,33 @@ for (const { spec, sh, hit } of picks) {
     for (let y = 0; y < h; y++)
       for (let x = 0; x < w; x++) if (y0 + y < C.y && x0 + x >= C.x0 && x0 + x < C.x1) px4[(y * w + x) * 4 + 3] = 0;
   }
-  pieces[spec.name] = inside || spec.clearAbove ? trim({ spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} }) : { spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} };
+  // `despeckle` N: drop loose islands of fewer than N px (stray specks of the sheet's background
+  // that would otherwise widen the piece's box and its painted outline)
+  if (spec.despeckle) {
+    const seen = new Uint8Array(w * h);
+    for (let s = 0; s < w * h; s++) {
+      if (seen[s] || px4[s * 4 + 3] === 0) continue;
+      const list = [s];
+      seen[s] = 1;
+      for (let k = 0; k < list.length; k++) {
+        const q = list[k];
+        const qx = q % w;
+        const qy = (q - qx) / w;
+        for (let dy = -1; dy <= 1; dy++)
+          for (let dx = -1; dx <= 1; dx++) {
+            const nx = qx + dx;
+            const ny = qy + dy;
+            if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+            const u = ny * w + nx;
+            if (seen[u] || px4[u * 4 + 3] === 0) continue;
+            seen[u] = 1;
+            list.push(u);
+          }
+      }
+      if (list.length < spec.despeckle) for (const q of list) px4[q * 4 + 3] = 0;
+    }
+  }
+  pieces[spec.name] = inside || spec.clearAbove || spec.despeckle ? trim({ spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} }) : { spec, sheet: spec.sheet, x0, y0, w, h, px: px4, extra: {} };
 }
 
 /* ── 3b. glow masks: the small dark holes of a piece (the garbo's pierced pot), as a warm glow
