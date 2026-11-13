@@ -947,6 +947,15 @@ body {
   font-weight: 500;
   font-size: calc(var(--u) * 15);
   color: var(--ink);
+  /* highlighted: a soft parchment pill with a thin gold edge, so it reads over the water. */
+  padding: calc(var(--u) * 5) calc(var(--u) * 16) calc(var(--u) * 5) calc(var(--u) * 12);
+  border: 1px solid rgb(176 138 74 / 0.6);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgb(255 251 240 / 0.96), rgb(248 236 210 / 0.94));
+  box-shadow:
+    0 calc(var(--u) * 2) calc(var(--u) * 10) rgb(107 15 26 / 0.12),
+    inset 0 0 0 calc(var(--u) * 2) rgb(255 255 255 / 0.5);
+  color: var(--color-burgundy, var(--ink));
 }
 .venue-pin {
   width: calc(var(--u) * 13);

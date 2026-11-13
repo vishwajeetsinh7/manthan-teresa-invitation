@@ -272,7 +272,7 @@ function measureText(card: HTMLElement): Rect[] {
   const own = (el: Element) => ({ x: Number(gsap.getProperty(el, "x")) || 0, y: Number(gsap.getProperty(el, "y")) || 0 });
   const add = (r: DOMRect, o = { x: 0, y: 0 }) =>
     r.width > 1 && r.height > 1 && out.push({ left: r.left - cr.left - o.x, right: r.right - cr.left - o.x, top: r.top - cr.top - o.y, bottom: r.bottom - cr.top - o.y });
-  card.querySelectorAll(".content .name, .content .relation, .content .parents, .content .joiner-word, .content .invite, .content .tagline, .content .venue").forEach((el) => {
+  card.querySelectorAll(".content .name, .content .relation, .content .parents, .content .joiner-word, .content .invite, .content .tagline").forEach((el) => {
     const rg = document.createRange();
     rg.selectNodeContents(el);
     const o = own(el);
@@ -287,7 +287,8 @@ function measureText(card: HTMLElement): Rect[] {
       for (const r of rg.getClientRects()) add(r);
     } else chars.forEach((c) => add(c.getBoundingClientRect(), own(c)));
   });
-  card.querySelectorAll(".content .date-block, .content .divider, .content .scroll-hint, .content .seal-wrap, .content .joiner .flourish, .content .name-flourish, .seal-cluster .flower").forEach((el) => add(el.getBoundingClientRect()));
+  // (the venue line is a pill: its whole box counts)
+  card.querySelectorAll(".content .venue, .content .date-block, .content .divider, .content .scroll-hint, .content .seal-wrap, .content .joiner .flourish, .content .name-flourish, .seal-cluster .flower").forEach((el) => add(el.getBoundingClientRect()));
   // the replay and music buttons (only while the card is at the top of the page)
   if (Math.abs(cr.top) < 4) document.querySelectorAll(".controls .ctrl").forEach((el) => add(el.getBoundingClientRect()));
   return out;
