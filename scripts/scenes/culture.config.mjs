@@ -153,7 +153,9 @@ const config = {
       box("backwaters-view", "backwaters-view", [-10, 700, 410, 1005], 1);
       box("palm-2", "palm-2", [-36, 512, 124, 775], 2, { by: "h" });
       box("palm-1", "palm-1", [-30, 250, 230, 765], 2.1, { by: "h" });
-      box("houseboat", "houseboat", [20, 790, 226, 868], 3);
+      // the houseboat sails on the water along the bottom of the card, out from behind the left
+      // corner flowers, just below the pookalam
+      box("houseboat", "houseboat", [150, 0, 342, 1514], 5.62);
       box("jasmine-strand", "jasmine-strand", [8, -110, 68, 380], 4, { at: "top" });
       box("brass-lamp", "brass-lamp", [122, -60, 208, 232], 4.1);
       box("kathakali", "kathakali", [-22, 900, 240, 1430], 5, { by: "h" });

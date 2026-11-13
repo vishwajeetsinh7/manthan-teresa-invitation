@@ -29,8 +29,8 @@ const rnd = gsap.utils.random;
 
 /* ── where each piece belongs ─────────────────────────────────────────── */
 const TOP = new Set(["jasmine-strand", "brass-lamp", "latkan-short", "latkan-long", "lantern"]);
-const MID = new Set(["backwaters-view", "temple-stepwell", "palm-1", "palm-2", "houseboat", "flag", "kite-1", "kite-2", "kite-3"]);
-const isWater = (id: string) => /^(water-strip|leaf-|lotus-|bud-|fdiya-)/.test(id);
+const MID = new Set(["backwaters-view", "temple-stepwell", "palm-1", "palm-2", "flag", "kite-1", "kite-2", "kite-3"]);
+const isWater = (id: string) => /^(water-strip|houseboat|leaf-|lotus-|bud-|fdiya-)/.test(id);
 type Side = "left" | "right" | "water";
 const sideOf = (it: CultureItem): Side => (isWater(it.id) ? "water" : it.x < 50 ? "left" : "right");
 /** scenery that would melt into the parchment on its inner side (share of its width) */
@@ -90,7 +90,7 @@ type Placed = { it: CultureItem; side: Side; left: number; top: number; w: numbe
 type Fit = { scale: Record<Side, number>; nudge: Record<string, number>; dy: Record<string, number>; gs: Record<string, number> };
 /** scenes: an anchor and what rides with it (the houseboat on the backwaters' water); a scene
  *  shrinks about its anchor's pivot, slides and moves as one (the flag goes with its temple) */
-const GROUPS: Record<string, string[]> = { "backwaters-view": ["backwaters-view", "houseboat"], "temple-stepwell": ["temple-stepwell"] };
+const GROUPS: Record<string, string[]> = { "backwaters-view": ["backwaters-view"], "temple-stepwell": ["temple-stepwell"] };
 const groupOf = (id: string) => (id === "flag" ? "temple-stepwell" : (Object.keys(GROUPS).find((g) => GROUPS[g].includes(id)) ?? id));
 /** hanging pieces: they may hang lower, on a longer cord, to clear the buttons and the seal's roses */
 const HANG = new Set(["jasmine-strand", "brass-lamp", "latkan-short", "latkan-long", "lantern"]);

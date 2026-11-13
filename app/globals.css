@@ -947,7 +947,7 @@ body {
   font-weight: 500;
   font-size: calc(var(--u) * 15);
   color: var(--ink);
-  /* highlighted: a soft parchment pill with a thin gold edge, so it reads over the water. */
+  /* highlighted: a soft parchment pill with a thin gold edge, so it reads over the water */
   padding: calc(var(--u) * 5) calc(var(--u) * 16) calc(var(--u) * 5) calc(var(--u) * 12);
   border: 1px solid rgb(176 138 74 / 0.6);
   border-radius: 999px;

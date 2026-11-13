@@ -89,8 +89,8 @@
     },
     "houseboat": {
       "src": "houseboat.webp",
-      "w": 174,
-      "h": 55,
+      "w": 162,
+      "h": 51,
       "aspect": 3.1798,
       "pivot": [
         0.5,
