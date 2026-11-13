@@ -33,8 +33,8 @@ const MID = new Set(["backwaters-view", "temple-stepwell", "palm-1", "palm-2", "
 const isWater = (id: string) => /^(water-strip|leaf-|lotus-|bud-|fdiya-)/.test(id);
 type Side = "left" | "right" | "water";
 const sideOf = (it: CultureItem): Side => (isWater(it.id) ? "water" : it.x < 50 ? "left" : "right");
-/** scenery that melts into the parchment on its inner side (share of its width) */
-const SOFT: Record<string, number> = { "backwaters-view": 0.36, "temple-stepwell": 0.22 };
+/** scenery that would melt into the parchment on its inner side (share of its width) */
+const SOFT: Record<string, number> = {}; // (none: the scenes keep their painted edges, not faded)
 
 /** the idle loop of each piece (CSS): kind, period (s), amplitude, phase */
 type Idle = { k: "sway" | "drift" | "kite" | "breathe" | "bob"; dur: number; amp?: number; delay?: number };
