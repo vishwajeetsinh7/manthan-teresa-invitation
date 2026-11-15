@@ -15,11 +15,13 @@ export const timing = {
   // Scene 2 — envelope video
   video: {
     /**
-     * The reveal starts this many seconds before the video ends, layered on
-     * top of it (the video is pure white from ~4.4s), so they feel continuous. (The video
-     * is 6.75s: the doves flying out of the envelope were cut; this keeps the reveal at ~3.8s.)
+     * The video is 4 s: the seal, the gold bloom, the burst of light, the flaps parting, then
+     * a fade to white (no doves). The reveal starts this many seconds before it ends (~3.8 s),
+     * layered on top of it, and the white last frame is held this long after the end while
+     * the card's paper fades in over it (so nothing shows through), then the video goes.
      */
-    revealBeforeEnd: 2.95,
+    revealBeforeEnd: 0.2,
+    holdAfterEnd: 2.4,
     audioFade: 2.5,
     /** safety nets: open the invitation anyway if the video hasn't started
      *  this long after the tap, or freezes for this long */

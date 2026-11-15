@@ -204,12 +204,15 @@ export function VideoScene({ videoRef, veilRef, playing, onStarted, onReveal, on
       return;
     }
     let raf = 0;
-    /** returns true once the video is over */
+    let holdTimer = 0;
+    /** returns true once the video is over (its white last frame stays a moment under the
+     *  card's paper as that fades in, then it goes) */
     const check = () => {
       const dur = Number.isFinite(v.duration) && v.duration > 0 ? v.duration : 0;
       if (dur && v.currentTime >= Math.max(0, dur - timing.video.revealBeforeEnd)) reveal();
       if (v.ended || (dur && v.currentTime >= dur - 0.04)) {
-        finish();
+        reveal();
+        if (!holdTimer) holdTimer = window.setTimeout(finish, timing.video.holdAfterEnd * 1000);
         return true;
       }
       return false;
@@ -252,6 +255,7 @@ export function VideoScene({ videoRef, veilRef, playing, onStarted, onReveal, on
 
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(holdTimer);
       window.clearTimeout(startTimer);
       window.clearInterval(stallTimer);
       v.removeEventListener("timeupdate", onTime);
