@@ -16,9 +16,10 @@ export const timing = {
   video: {
     /**
      * The reveal starts this many seconds before the video ends, layered on
-     * top of it (the video is pure white from ~6.0s), so they feel continuous.
+     * top of it (the video is pure white from ~4.4s), so they feel continuous. (The video
+     * is 6.75s: the doves flying out of the envelope were cut; this keeps the reveal at ~3.8s.)
      */
-    revealBeforeEnd: 5,
+    revealBeforeEnd: 2.95,
     audioFade: 2.5,
     /** safety nets: open the invitation anyway if the video hasn't started
      *  this long after the tap, or freezes for this long */
@@ -170,7 +171,8 @@ export const timing = {
     cooHold: 0.6,
     /** on the seal: each bird's length (× the seal's width), how far each side of its middle
      *  its feet stand, the seal's radius and how far the feet sink into its rim (× its width) */
-    perch: { size: 0.56, spread: 0.3, radius: 0.47, sink: 0.02 },
+    // (small and apart: their beaks never meet)
+    perch: { size: 0.46, spread: 0.36, radius: 0.47, sink: 0.02 },
   },
 
   // Scene 4
