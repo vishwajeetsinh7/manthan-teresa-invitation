@@ -66,10 +66,10 @@ export const invitation = {
       day: "23",
       month: "May",
       weekday: "Sunday",
-      title: "Mehndi",
+      title: "Mehendi",
       time: "9:00 AM – 11:00 AM",
       place: "",
-      note: "Festive colours", // PLACEHOLDER
+      note: "",
       icons: ["mehndi"],
       pattern: "mehndi", // the henna mandala beside the details (it draws itself, then turns slowly)
       scene: "mehndi", // the assembled Mehndi scene
@@ -92,11 +92,11 @@ export const invitation = {
       day: "23",
       month: "May",
       weekday: "Sunday",
-      title: "Sangeet & Garba",
+      title: "Dance Night / Sangeet & Garba",
       scene: "garba-dance", // "Raas to Remix"
       time: "4:00 PM – 7:30 PM",
       place: "",
-      note: "Dance Night · Dandiya & dancing shoes",
+      note: "",
       icons: ["dandiya", "music"], // the dandiya in the garba, music notes on the dance floor
       flower: { kind: 1 }, // blush
     },
@@ -109,7 +109,7 @@ export const invitation = {
       scene: "hindu-lotus",
       time: "10:30 AM", // (for now: it may change)
       place: "",
-      note: "Traditional Indian", // PLACEHOLDER
+      note: "",
       icons: ["mandap"],
       flower: { kind: 0 }, // deep red bridal rose
     },
@@ -117,13 +117,13 @@ export const invitation = {
       day: "25",
       month: "May",
       weekday: "Tuesday",
-      title: "Church Wedding", // (the reception follows: `after`)
+      title: "Church Wedding",
       scene: "church-wedding", // "The Aisle"
       time: "10:30 AM – 12:00 PM",
       place: "Holy Spirit Church, New Farm",
       address: "16 Villiers St, New Farm QLD 4005",
-      after: { label: "Reception afterwards at Barrel N Basket", address: "Unit 6/547 Kessels Rd, MacGregor QLD 4109" },
-      note: "", // (no room under the reception; a dress code could go here if the lines are shortened)
+      after: { label: "Reception afterwards at Barrel N Basket.", address: "Unit 6/547 Kessels Rd, MacGregor QLD 4109" },
+      note: "",
       icons: ["church"],
       flower: { kind: 2 }, // ivory — white wedding
     },
