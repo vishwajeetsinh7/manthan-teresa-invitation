@@ -1519,6 +1519,20 @@ body {
 .t-map:active {
   background: rgb(176 138 74 / 0.12);
 }
+/* a street address under a place (smaller, softer) */
+.t-addr {
+  font-family: var(--font-serif);
+  font-size: calc(var(--u) * 12.5);
+  color: var(--ink);
+  opacity: 0.78;
+  white-space: nowrap; /* (one line each: it may run into the margin on the right) */
+}
+/* what follows elsewhere (the reception): a little gap above it, on one line */
+.t-after {
+  margin-top: calc(var(--u) * 5);
+  font-size: calc(var(--u) * 13.5);
+  white-space: nowrap;
+}
 .t-note {
   font-family: var(--font-serif);
   font-style: italic;

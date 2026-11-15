@@ -746,6 +746,13 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                   </h3>
                   <p className="t-line t-time">{e.time}</p>
                   {e.place && <p className="t-line t-place">{e.place}</p>}
+                  {"address" in e && e.address && <p className="t-line t-addr">{e.address}</p>}
+                  {"after" in e && e.after && (
+                    <>
+                      <p className="t-line t-place t-after">{e.after.label}</p>
+                      <p className="t-line t-addr">{e.after.address}</p>
+                    </>
+                  )}
                   {e.note && <p className="t-line t-note">{e.note}</p>}
                 </div>
                 {mehndi && (
