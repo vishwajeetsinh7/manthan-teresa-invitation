@@ -163,40 +163,9 @@ export const timing = {
     padBottom: 24,
   },
 
-  /** Two doves beside the names (start once the names have been written) */
+  /** Two doves seated on the wax seal (they come down with it and never fly) */
   doves: {
-    /** fly-in from outside the card: seconds, and the right dove's delay */
-    enter: 2.2,
-    rightDelay: 0.25,
-    /** seconds per wingbeat (different, so they never flap in sync) */
-    beat: [0.4, 0.44] as [number, number],
-    /** body lift on each downstroke, and a slow drift (px, amplitude) */
-    bob: 2.5,
-    driftX: 2.5,
-    driftY: 2,
-    driftPeriod: [
-      [3.4, 3.1],
-      [3.9, 3.6],
-    ] as [[number, number], [number, number]],
-    /** glide: wings held level every 4–7 s for 0.6–0.9 s, sinking this much */
-    glideEvery: [4, 7] as [number, number],
-    glideHold: [0.6, 0.9] as [number, number],
-    glideSink: 3,
-    /** leaving the first page: they fly up and away (s); coming back: they fly in again */
-    exit: 1.3,
-    /** size limits (px) and the gap kept from any text */
-    minWidth: 64,
-    maxWidth: 110,
-    clearance: 8,
-    /** how far (px) a dove may rise above the "with" line to find room beside the names */
-    lift: 48,
-    /** then they fly to the wax seal and sit on it: hover this long after flying in (s; when
-     *  they come back to the page: perchAgain), the flight there (s), the landing pose and the
-     *  settling (s), a coo or a wing-lift every … s (held cooHold s) */
-    perchAfter: 2.4,
-    perchAgain: 0.5,
-    toSeal: 1.8,
-    landHold: [0.26, 0.34] as [number, number],
+    /** a coo, a wing-lift or a little shuffle every … s (a coo held cooHold s) */
     cooEvery: [3.5, 7] as [number, number],
     cooHold: 0.6,
     /** on the seal: each bird's length (× the seal's width), how far each side of its middle

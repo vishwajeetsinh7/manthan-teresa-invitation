@@ -19,7 +19,7 @@ import { GoldDust } from "./GoldDust";
 import { SOFT_BLUR, isTouchDevice } from "@/src/lib/device";
 import { PetalBlast, type BlastSource } from "@/src/lib/petalBlast";
 import { imagesReady } from "@/src/lib/preload";
-import { FlyingDoves } from "./FlyingDoves";
+import { SeatedDoves } from "./SeatedDoves";
 import { CultureWings } from "./CultureWings";
 
 const u = (n: number) => `calc(var(--u) * ${n})`;
@@ -745,7 +745,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
       {ambient && !reduced && <GoldDust count={isTouchDevice() ? 24 : timing.ambient.dustParticles} />}
 
       {/* Two doves in the side margins, beside the names */}
-      <FlyingDoves cardRef={card} />
+      <SeatedDoves cardRef={card} />
 
       {/* Corner flowers */}
       {!CULTURE && (

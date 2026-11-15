@@ -1647,9 +1647,8 @@ body {
   }
 }
 
-/* ── Flying doves beside the names ─────────────────────────────────── */
-/* Above the paper and dust, below the wording (they never overlap it) and
-   the replay / music buttons. Moved only with transforms by FlyingDoves. */
+/* ── The doves seated on the wax seal ──────────────────────────────── */
+/* Moved only with transforms (and faded with the seal) by SeatedDoves. */
 .doves {
   position: absolute;
   inset: 0;
@@ -1661,18 +1660,14 @@ body {
 .doves[data-on] {
   visibility: visible;
 }
-.doves[data-fit="none"] .dove {
-  display: none;
-}
-/* a dove sitting on the seal (the perched sprite: landing, landed, sitting, cooing). */
+/* a dove sitting on the seal (the perched sprite: landing, landed, sitting, cooing) */
 .dove-sit {
   position: absolute;
   left: 0;
   top: 0;
   width: var(--sit-w, 60px);
   height: var(--sit-h, 70px);
-  visibility: hidden;
-  will-change: transform;
+  will-change: transform, opacity;
 }
 .dove-sit-strip {
   display: block;
@@ -1682,27 +1677,10 @@ body {
   will-change: transform;
   user-select: none;
 }
-.dove {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: var(--dove-w, 100px);
-  height: var(--dove-h, 100px);
-  transform: translate3d(-200vw, 0, 0);
-  will-change: transform;
-}
 .dove-clip {
   width: 100%;
   height: 100%;
   overflow: hidden;
-}
-.dove-strip {
-  display: block;
-  height: 100%;
-  width: calc(100% * var(--dove-n, 12));
-  max-width: none;
-  will-change: transform;
-  user-select: none;
 }
 
 /* ── Mehndi scene (src/components/scenes/MehndiScene.tsx) ──────────── */
