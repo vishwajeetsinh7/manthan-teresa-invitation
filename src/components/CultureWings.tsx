@@ -87,7 +87,10 @@ const SWAPS = [
 /* ── geometry ─────────────────────────────────────────────────────────── */
 type Rect = { left: number; right: number; top: number; bottom: number };
 type Placed = { it: CultureItem; side: Side; left: number; top: number; w: number; h: number; ox: number; oy: number };
-type Fit = { scale: Record<Side, number>; nudge: Record<string, number>; dy: Record<string, number>; gs: Record<string, number> };
+/** fs: a side figure's own scale (about its feet), so it stays whole on the card */
+type Fit = { scale: Record<Side, number>; nudge: Record<string, number>; dy: Record<string, number>; gs: Record<string, number>; fs: Record<string, number> };
+/** the dancers at the foot of each side: never cut by the card's edge */
+const FIGURES = ["kathakali", "garba-couple"];
 /** scenes: an anchor and what rides with it (the houseboat on the backwaters' water); a scene
  *  shrinks about its anchor's pivot, slides and moves as one (the flag goes with its temple) */
 const GROUPS: Record<string, string[]> = { "backwaters-view": ["backwaters-view", "palm-1", "palm-2"], "temple-stepwell": ["temple-stepwell"] };
@@ -101,7 +104,7 @@ const HANG = new Set(["jasmine-strand", "brass-lamp", "latkan-short", "latkan-lo
 /** every piece in card px, for a card W × H and a fit (side scales, scene scales, slides, nudges) */
 function placeAll(W: number, H: number, f: Fit) {
   // (a fit saved before a field existed — e.g. across a hot reload — still works)
-  const fit: Fit = { scale: f.scale ?? { left: 1, right: 1, water: 1 }, nudge: f.nudge ?? {}, dy: f.dy ?? {}, gs: f.gs ?? {} };
+  const fit: Fit = { scale: f.scale ?? { left: 1, right: 1, water: 1 }, nudge: f.nudge ?? {}, dy: f.dy ?? {}, gs: f.gs ?? {}, fs: f.fs ?? {} };
   const k = W / 1024;
   const raw: Record<string, { it: CultureItem; side: Side; px: number; py: number; my: number; s: number; w: number; h: number; ox: number; oy: number }> = {};
   for (const it of CITEMS) {
@@ -148,6 +151,13 @@ function placeAll(W: number, H: number, f: Fit) {
       r.w *= gs;
       r.h *= gs;
     }
+  }
+  // a figure kept whole on the card is a little smaller, about its feet
+  for (const [id, f] of Object.entries(fit.fs)) {
+    const r = raw[id];
+    if (!r || f === 1) continue;
+    r.w *= f;
+    r.h *= f;
   }
   const out: Record<string, Placed> = {};
   for (const [id, r] of Object.entries(raw)) {
@@ -205,7 +215,7 @@ const onCard = (left: number, w: number, W: number) => Math.max(0, Math.min(W, l
 
 /** the scales, slides and nudges that keep every piece off the text — and the scenes whole */
 function fitAround(W: number, H: number, obs: Rect[]): Fit {
-  const fit: Fit = { scale: { left: 1, right: 1, water: 1 }, nudge: {}, dy: {}, gs: {} };
+  const fit: Fit = { scale: { left: 1, right: 1, water: 1 }, nudge: {}, dy: {}, gs: {}, fs: {} };
   const u = W / 390;
   const scenic = (id: string) => groupOf(id) in GROUPS;
   // 1. each side shrinks (to minScale) for its figures, props, kites and hanging pieces
@@ -268,6 +278,21 @@ function fitAround(W: number, H: number, obs: Rect[]): Fit {
     const key = nudgeOf(p.it.id);
     if (n && Math.abs(n) > Math.abs(fit.nudge[key] ?? 0)) fit.nudge[key] = n;
   }
+  // 5. the dancers stay whole on the card: rather than lean off its edge to clear the text, each
+  //    shrinks a little (about its feet) until it fits between the two
+  for (const id of FIGURES) {
+    for (let f = 1; f >= 0.7 - 1e-6; f -= 0.02) {
+      fit.fs[id] = +f.toFixed(2);
+      fit.nudge[id] = 0;
+      const p = placeAll(W, H, fit)[id];
+      if (!p) break;
+      const left = Math.min(Math.max(p.left + overlapOf(p, obs, W), 0), W - p.w);
+      if (overlapOf({ ...p, left }, obs, W) === 0 || f <= 0.7 + 1e-6) {
+        fit.nudge[id] = left - p.left;
+        break;
+      }
+    }
+  }
   return fit;
 }
 
@@ -300,7 +325,9 @@ function measureText(card: HTMLElement): Rect[] {
     } else chars.forEach((c) => add(c.getBoundingClientRect(), own(c)));
   });
   // (the venue line is a pill: its whole box counts)
-  card.querySelectorAll(".content .venue, .content .date-block, .content .divider, .content .scroll-hint, .content .seal-wrap, .content .joiner .flourish, .content .name-flourish, .seal-cluster .flower").forEach((el) => add(el.getBoundingClientRect()));
+  // (the dates by their parts — the month, its hairline rules, each weekday, day and gem — not
+  //  the padded block round them, which reaches out over the figures below)
+  card.querySelectorAll(".content .venue, .content .date-month, .content .date-rule, .content .date-wk, .content .date-num-mask, .content .date-gem, .content .divider, .content .scroll-hint, .content .seal-wrap, .content .joiner .flourish, .content .name-flourish, .seal-cluster .flower").forEach((el) => add(el.getBoundingClientRect()));
   // the replay and music buttons (only while the card is at the top of the page)
   if (Math.abs(cr.top) < 4) document.querySelectorAll(".controls .ctrl").forEach((el) => add(el.getBoundingClientRect()));
   return out;
