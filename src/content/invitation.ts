@@ -123,7 +123,7 @@ export const invitation = {
       time: "10:30 AM – 12:00 PM",
       place: "Holy Spirit Church, New Farm",
       mapsUrl: "https://maps.app.goo.gl/tS7JUhbfyfSPuu6GA",
-      after: { label: "Reception afterwards at Barrel N Basket.", address: "Unit 6/547 Kessels Rd, MacGregor QLD 4109" },
+      after: { label: "Reception afterwards at Barrel N Basket." },
       note: "",
       icons: ["church"],
       flower: { kind: 2 }, // ivory — white wedding
