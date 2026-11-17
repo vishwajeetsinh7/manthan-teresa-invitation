@@ -746,7 +746,18 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
                   </h3>
                   <p className="t-line t-time">{e.time}</p>
                   {e.place && <p className="t-line t-place">{e.place}</p>}
-                  {"address" in e && e.address && <p className="t-line t-addr">{e.address}</p>}
+                  {"address" in e && typeof e.address === "string" && e.address && <p className="t-line t-addr">{e.address}</p>}
+                  {"mapsUrl" in e && e.mapsUrl && (
+                    <p className="t-line t-mapline">
+                      <a className="btn-gold btn-gold-sm" href={e.mapsUrl} target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+                          <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z" />
+                          <circle cx="12" cy="9.5" r="2.5" />
+                        </svg>
+                        {C.venue.mapsLabel}
+                      </a>
+                    </p>
+                  )}
                   {"after" in e && e.after && (
                     <>
                       <p className="t-line t-place t-after">{e.after.label}</p>

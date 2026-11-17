@@ -56,7 +56,8 @@ export const invitation = {
    * `scene`: the illustrated scene under the event — "mehndi" / "haldi" / "garba-dance" / "hindu-wedding" / "hindu-lotus" / "church-wedding" (src/components/scenes/*Scene),
    *   or "soon": a placeholder ("Images coming soon") of the same size, until that event's art is ready.
    * `icons`: gold line icons drawn beside the event (mehndi, haldi, dandiya, mandap, church, cheers).
-   * `address` (optional): a smaller line under the place; `after` (optional): what follows the
+   * `address` (optional): a smaller line under the place; `mapsUrl` (optional): a small gold
+   *   "Open in Google Maps" button under the place (like the venue page's); `after` (optional): what follows the
    *   event elsewhere (the reception), with its own place and address.
    * `flower`: what the travelling rose turns into on this event —
    *   kind 0 burgundy · 1 blush · 2 ivory · 3 raspberry · 4 pale pink; tint "gold" warms it to turmeric.
@@ -92,7 +93,7 @@ export const invitation = {
       day: "23",
       month: "May",
       weekday: "Sunday",
-      title: "Dance Night / Sangeet & Garba",
+      title: "Dance Night / Garba",
       scene: "garba-dance", // "Raas to Remix"
       time: "4:00 PM – 7:30 PM",
       place: "",
@@ -107,7 +108,7 @@ export const invitation = {
       title: "Gujarati Wedding",
       // "Swarg Kamal", the heavenly lotus (the first version, the mandap: "hindu-wedding" — git tag hindu-wedding-mandap)
       scene: "hindu-lotus",
-      time: "10:30 AM", // (for now: it may change)
+      time: "7:30 AM",
       place: "",
       note: "",
       icons: ["mandap"],
@@ -121,7 +122,7 @@ export const invitation = {
       scene: "church-wedding", // "The Aisle"
       time: "10:30 AM – 12:00 PM",
       place: "Holy Spirit Church, New Farm",
-      address: "16 Villiers St, New Farm QLD 4005",
+      mapsUrl: "https://maps.app.goo.gl/tS7JUhbfyfSPuu6GA",
       after: { label: "Reception afterwards at Barrel N Basket.", address: "Unit 6/547 Kessels Rd, MacGregor QLD 4109" },
       note: "",
       icons: ["church"],

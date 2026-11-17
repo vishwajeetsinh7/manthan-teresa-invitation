@@ -1591,6 +1591,26 @@ body {
 .btn-gold:active {
   transform: scale(0.97);
 }
+/* the small one on an event (under its place) */
+.btn-gold-sm {
+  gap: calc(var(--u) * 5);
+  padding: calc(var(--u) * 5) calc(var(--u) * 12);
+  font-size: calc(var(--u) * 10);
+  letter-spacing: 0.12em;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.15),
+    0 5px 14px -8px rgb(74 10 18 / 0.7);
+}
+.btn-gold-sm svg {
+  width: calc(var(--u) * 11);
+  height: calc(var(--u) * 11);
+}
+.t-mapline {
+  margin: calc(var(--u) * 4) 0 calc(var(--u) * 1);
+}
 
 .countdown {
   display: grid;
