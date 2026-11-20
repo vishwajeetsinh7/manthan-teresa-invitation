@@ -3724,6 +3724,9 @@ img.cu-swap {
 
 /* ── RSVP form (src/components/RsvpForm.tsx): over the page, scrolling on its own ── */
 .rsvp-overlay {
+  /* (it sits outside the phone frame, so it needs its own size unit for the gold buttons it
+     shares with the page: without one their padding came out as 0) */
+  --u: calc(min(100vw, 460px) / 390);
   position: fixed;
   inset: 0;
   z-index: 1000;

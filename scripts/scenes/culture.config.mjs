@@ -157,8 +157,13 @@ const config = {
       // the houseboat sails on the water along the bottom of the card, out from behind the left
       // corner flowers, just below the pookalam
       box("houseboat", "houseboat", [150, 0, 342, 1514], 5.62);
-      box("jasmine-strand", "jasmine-strand", [8, -110, 68, 380], 4, { at: "top" });
-      box("brass-lamp", "brass-lamp", [122, -60, 208, 232], 4.1);
+      // the hangings, all down the left (the top right stays clear for the buttons): the jasmine
+      // strand at the edge, the long latkan, the brass lamp, the short latkan and the lantern
+      box("jasmine-strand", "jasmine-strand", [4, -110, 60, 380], 4, { at: "top" });
+      box("latkan-long", "latkan-long", [60, -24, 120, 380], 4.1, { at: "top" });
+      box("brass-lamp", "brass-lamp", [116, -60, 196, 232], 4.1);
+      box("latkan-short", "latkan-short", [194, -40, 258, 300], 4, { at: "top" });
+      box("lantern", "lantern", [258, 6, 322, 180], 4.2, { at: "top" });
       box("kathakali", "kathakali", [-22, 900, 240, 1430], 5, { by: "h" });
       box("pookalam", "pookalam", [168, 1362, 362, 1432], 5.8);
       box("nilavilakku", "nilavilakku", [170, 1118, 262, 1364], 6, { by: "h" });
@@ -170,9 +175,6 @@ const config = {
       box("kite-1", "kite-1", [846, 470, 934, 580], 2);
       box("kite-2", "kite-2", [934, 534, 1012, 634], 2);
       box("kite-3", "kite-3", [866, 616, 938, 706], 2);
-      box("latkan-short", "latkan-short", [894, -40, 970, 300], 4, { at: "top" });
-      box("latkan-long", "latkan-long", [958, -24, 1022, 380], 4.1, { at: "top" });
-      box("lantern", "lantern", [818, 116, 896, 290], 4.2, { at: "top" });
       box("garba-couple", "garba-couple", [662, 1000, 1030, 1378], 5, { right: true });
       box("garbo", "garbo", [682, 1282, 774, 1392], 6);
       box("flowers-right", "flowers-right", [738, 1330, 1030, 1540], 7, { right: true });

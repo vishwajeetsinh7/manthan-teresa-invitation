@@ -317,8 +317,8 @@
     },
     "jasmine-strand": {
       "src": "jasmine-strand.webp",
-      "w": 51,
-      "h": 392,
+      "w": 48,
+      "h": 369,
       "aspect": 0.1299,
       "pivot": [
         0.5313,
@@ -393,8 +393,8 @@
     },
     "brass-lamp": {
       "src": "brass-lamp.webp",
-      "w": 73,
-      "h": 235,
+      "w": 68,
+      "h": 219,
       "aspect": 0.3112,
       "pivot": [
         0.4869,
@@ -1347,8 +1347,8 @@
     },
     "latkan-long": {
       "src": "latkan-long.webp",
-      "w": 54,
-      "h": 307,
+      "w": 51,
+      "h": 290,
       "aspect": 0.1761,
       "pivot": [
         0.4943,
@@ -1423,8 +1423,8 @@
     },
     "latkan-short": {
       "src": "latkan-short.webp",
-      "w": 64,
-      "h": 257,
+      "w": 54,
+      "h": 217,
       "aspect": 0.2487,
       "pivot": [
         0.505,
@@ -1499,8 +1499,8 @@
     },
     "lantern": {
       "src": "lantern.webp",
-      "w": 66,
-      "h": 141,
+      "w": 54,
+      "h": 116,
       "aspect": 0.4668,
       "pivot": [
         0.5053,

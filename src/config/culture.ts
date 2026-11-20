@@ -22,7 +22,9 @@ export type CultureItem = { id: string; piece: string; x: number; y: number; w: 
 
 export const CULTURE_DIR = "/scenes/culture/";
 export const CP = manifest.pieces as unknown as Record<string, CulturePiece>;
-export const CITEMS = (layout as unknown as { items: CultureItem[] }).items;
+/** side scenery left out of the card for now (still built, so it can come back by removing it here) */
+const HIDDEN = new Set(["backwaters-view", "palm-1", "palm-2", "temple-stepwell", "flag", "kite-1", "kite-2", "kite-3"]);
+export const CITEMS = (layout as unknown as { items: CultureItem[] }).items.filter((i) => !HIDDEN.has(i.id));
 export const cultureUrl = (name: string) => CULTURE_DIR + CP[name].src;
 export const CULTURE_MASTER = CULTURE_DIR + ((manifest as unknown as { master?: string }).master ?? "master.webp");
 

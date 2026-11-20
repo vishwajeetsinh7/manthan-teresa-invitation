@@ -154,8 +154,8 @@ export function SeatedDoves({ cardRef }: { cardRef: RefObject<HTMLElement | null
       for (const d of doves) {
         d.mode = "fly";
         d.at = clock + d.i * D.rightDelay;
-        // from below the card, one each side
-        d.from = { x: W * (d.i ? 0.84 : 0.16), y: H + sprite.frameHeight * fs * D.startScale * 0.6 };
+        // from below the middle of the card, side by side, parting as they rise to the seal
+        d.from = { x: W * (d.i ? 0.56 : 0.44), y: H + sprite.frameHeight * fs * D.startScale * 0.6 };
         const tl = topLeftFor(d.i, d.from.x, d.from.y, D.startScale);
         setFly(d.i, tl.x, tl.y, D.startScale);
         show(d.i, "fly");

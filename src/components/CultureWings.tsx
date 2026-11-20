@@ -409,7 +409,7 @@ export function CultureWings({ cardRef, reduced }: { cardRef: RefObject<HTMLElem
     /* the flag: thin vertical strips, displaced by a wave from the pole to the tip */
     const flagCv = q(".cu-flag-cv")[0] as HTMLCanvasElement | undefined;
     const flagImg = new Image();
-    flagImg.src = cultureUrl("flag");
+    if (flagCv) flagImg.src = cultureUrl("flag");
     const cloth = CP.flag?.points?.cloth?.[0] ?? 0.03;
     let flagT = 0;
     let flagOn = true;

@@ -15,6 +15,7 @@ import "server-only";
  */
 import { createSign } from "node:crypto";
 import type { EventData } from "@/src/content/types";
+import { BUILT_IN_SA } from "./rsvpCreds";
 
 const DEFAULT_SHEET_ID = "1JntGGJ7Gbfr-JI7HxCjJj62Z1RA28S1a7BazfxTebSI";
 export const MASTER_TAB = "All RSVPs";
@@ -56,9 +57,10 @@ export const EVENT_HEADERS = ["Submitted", "Name", "Phone", "Email", "Attending"
 /* ── access token (a service-account JWT, cached until shortly before it expires) ── */
 let cached: { token: string; until: number } | null = null;
 
+/** the environment's service account, else the built-in one (src/lib/rsvpCreds.ts) */
 function credentials() {
-  const email = process.env.GOOGLE_SA_EMAIL;
-  const key = process.env.GOOGLE_SA_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  const email = process.env.GOOGLE_SA_EMAIL || BUILT_IN_SA.email;
+  const key = (process.env.GOOGLE_SA_PRIVATE_KEY || BUILT_IN_SA.privateKey).replace(/\\n/g, "\n");
   return email && key ? { email, key } : null;
 }
 export const sheetConfigured = () => credentials() !== null;
