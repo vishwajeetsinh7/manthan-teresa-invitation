@@ -7,12 +7,29 @@ type Ev = { id: string; title: string; when: string };
 
 export function AdminLogin() {
   const [state, action, pending] = useActionState(login, null);
+  const [show, setShow] = useState(false);
   return (
     <form action={action} className="admin-form">
       <label className="admin-label" htmlFor="pw">
         Password
       </label>
-      <input id="pw" name="password" type="password" autoComplete="current-password" required className="admin-input" autoFocus />
+      <div className="admin-pw">
+        <input id="pw" name="password" type={show ? "text" : "password"} autoComplete="current-password" required className="admin-input" autoFocus />
+        <button type="button" className="admin-eye" onClick={() => setShow((v) => !v)} aria-label={show ? "Hide password" : "Show password"} aria-pressed={show}>
+          {show ? (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M3 3l18 18" />
+              <path d="M10.6 5.1A10.7 10.7 0 0 1 12 5c5.5 0 9.5 5 9.5 7a9 9 0 0 1-2.3 3.3M6.6 6.6C4 8.1 2.5 10.6 2.5 12c0 2 4 7 9.5 7a10 10 0 0 0 5.4-1.6" />
+              <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M2.5 12c0-2 4-7 9.5-7s9.5 5 9.5 7-4 7-9.5 7-9.5-5-9.5-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          )}
+        </button>
+      </div>
       {state?.error && <p className="admin-error">{state.error}</p>}
       <button type="submit" className="admin-btn" disabled={pending}>
         {pending ? "Checking…" : "Sign in"}
