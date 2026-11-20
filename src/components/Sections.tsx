@@ -8,7 +8,7 @@ import { assets } from "@/src/config/assets";
 import { AssetImage } from "./AssetImage";
 import { Divider, ScheduleThread, buildThread } from "./art/LineArt";
 import { FlowerOpenPlaceholder } from "./art/Placeholders";
-import { EVENT_ICONS, HALDI_RANGOLI, HENNA_CONE, LotusDivider, MEHNDI_MANDALA, SvgArt, type EventIconName } from "./art/svgArt";
+import { EVENT_ICONS, HALDI_RANGOLI, HENNA_CONE, LotusDivider, MEHNDI_MANDALA, SvgArt } from "./art/svgArt";
 import { moods, defaultThemeColor, type MoodName } from "@/src/config/moods";
 import { SOFT_BLUR } from "@/src/lib/device";
 import { MehndiScene } from "./scenes/MehndiScene";
@@ -17,9 +17,10 @@ import { HinduWeddingScene } from "./scenes/HinduWeddingScene";
 import { HinduLotusScene } from "./scenes/HinduLotusScene";
 import { ChurchWeddingScene } from "./scenes/ChurchWeddingScene";
 import { GarbaDanceScene } from "./scenes/GarbaDanceScene";
+import type { EventData, InviteData } from "@/src/content/types";
 
-function Countdown() {
-  const target = new Date(C.countdownTo).getTime();
+function Countdown({ to }: { to: string }) {
+  const target = new Date(to).getTime();
   const [left, setLeft] = useState<number | null>(null);
 
   useEffect(() => {
@@ -63,16 +64,16 @@ function setBrowserChrome(color: string) {
 }
 
 type EventFlower = { kind: number; tint?: string };
-const SCHEDULE = C.events;
 const SC = timing.sections.scene;
-const sceneOf = (i: number) => ("scene" in SCHEDULE[i] ? (SCHEDULE[i] as { scene?: string }).scene : undefined);
+/** each event's page name (the first shares the heading's page) */
+const pageOf = (i: number) => (i === 0 ? "mehndi" : `event-${i}`);
 
 /**
  * The vine: one node per event, a few vine-waves apart, continuous all the way down (under the
  * Haldi event it runs on behind the curtains, which are on top, and comes out below them).
  */
-function layoutThread() {
-  const thread = buildThread(SCHEDULE.length, timing.sections.wavesPerGap, undefined, timing.sections.tailWaves);
+function layoutThread(count: number) {
+  const thread = buildThread(count, timing.sections.wavesPerGap, undefined, timing.sections.tailWaves);
   /** node positions as a share of the vine height */
   const node = thread.nodes.map((n) => n / thread.height);
   /** each event's scene sits in the bottom part of its page, under its details */
@@ -97,12 +98,12 @@ function SceneComingSoon({ page, style }: { page: string; style: CSSProperties }
  * rolling as it goes and turning into that event's flower on arrival.
  * It holds one stacked layer per event; only the focused one is visible.
  */
-function TravellingRose() {
+function TravellingRose({ events }: { events: EventData[] }) {
   return (
     <div className="t-traveler" aria-hidden>
       <div className="t-traveler-pop">
-        {SCHEDULE.map((e, i) => {
-          const f = ("flower" in e ? e.flower : { kind: i % 4 }) as EventFlower;
+        {events.map((e, i) => {
+          const f: EventFlower = e.flower ?? { kind: i % 4 };
           return (
             <div key={i} className="t-flower" data-tint={f.tint}>
               <AssetImage src={assets.flowers[f.kind]} alt="" sizes="80px" fallback={<FlowerOpenPlaceholder kind={f.kind} />} />
@@ -161,11 +162,14 @@ function EventDate({ day, weekday, month }: { day: string; weekday: string; mont
   );
 }
 
-export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTMLDivElement | null>; enabled: boolean }) {
+export function Sections({ scrollerRef, enabled, invite }: { scrollerRef: RefObject<HTMLDivElement | null>; enabled: boolean; invite: InviteData }) {
   const root = useRef<HTMLDivElement>(null);
   // client-only component (mounts after the opening tap), so matchMedia is safe here
   const [reduceMotion] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  const { THREAD, NODE, sceneStyle } = useMemo(() => layoutThread(), []);
+  /** this invitation's own events (only these reach the page) */
+  const SCHEDULE = invite.events;
+  const sceneOf = (i: number) => SCHEDULE[i].scene;
+  const { THREAD, NODE, sceneStyle } = useMemo(() => layoutThread(SCHEDULE.length), [SCHEDULE.length]);
 
   // leaving (e.g. replay intro) always restores the normal top-bar colour
   useEffect(() => () => setBrowserChrome(defaultThemeColor), []);
@@ -718,47 +722,47 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
             straight onto the paper (no boxes). One rose travels between them. */}
         <div className="timeline" style={{ height: `calc(var(--thread-w) * ${(THREAD.height / 120).toFixed(3)})` }}>
           <ScheduleThread thread={THREAD} />
-          <TravellingRose />
+          <TravellingRose events={SCHEDULE} />
           {/* native snap points, used only with reduced motion (the pager
               places pages from their content: data-page) */}
           {NODE.map((n, i) => (i === 0 ? null : <span key={i} className="t-snap" style={{ top: `${n * 100}%` }} aria-hidden />))}
           {SCHEDULE.map((e, i) => {
-            const mehndi = "pattern" in e && e.pattern === "mehndi";
+            const mehndi = e.pattern === "mehndi";
             return (
               <article
-                key={e.title}
+                key={e.id}
                 className="t-event"
-                data-mood={"mood" in e ? e.mood : undefined}
+                data-mood={e.mood}
                 style={{ top: `${NODE[i] * 100}%` }}
               >
                 <div className="t-icons">
-                  {("icons" in e ? (e.icons as readonly EventIconName[]) : []).map((name) => (
+                  {e.icons.map((name) => (
                     <SvgArt key={name} svg={EVENT_ICONS[name]} className="event-icon" data-icon={name} />
                   ))}
                 </div>
-                <div className="t-text" data-page={i === 0 ? "mehndi" : `event-${i}`}>
+                <div className="t-text" data-page={pageOf(i)}>
                   {mehndi && <SvgArt svg={MEHNDI_MANDALA} className="t-pattern" data-page-part="" />}
-                  {"mood" in e && e.mood === "haldi" && <span className="t-halo" aria-hidden />}
-                  {"mood" in e && e.mood === "haldi" && <SvgArt svg={HALDI_RANGOLI} className="t-rangoli" />}
+                  {e.mood === "haldi" && <span className="t-halo" aria-hidden />}
+                  {e.mood === "haldi" && <SvgArt svg={HALDI_RANGOLI} className="t-rangoli" />}
                   <EventDate day={e.day} weekday={e.weekday} month={e.month} />
                   <h3 className="t-title script">
                     <span className="wipe">{e.title}</span>
                   </h3>
                   <p className="t-line t-time">{e.time}</p>
                   {e.place && <p className="t-line t-place">{e.place}</p>}
-                  {"address" in e && typeof e.address === "string" && e.address && <p className="t-line t-addr">{e.address}</p>}
-                  {"mapsUrl" in e && e.mapsUrl && (
+                  {e.address && <p className="t-line t-addr">{e.address}</p>}
+                  {e.mapsUrl && (
                     <p className="t-line t-mapline">
                       <a className="btn-gold btn-gold-sm" href={e.mapsUrl} target="_blank" rel="noopener noreferrer">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
                           <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z" />
                           <circle cx="12" cy="9.5" r="2.5" />
                         </svg>
-                        {C.venue.mapsLabel}
+                        {C.eventMapsLabel}
                       </a>
                     </p>
                   )}
-                  {"after" in e && e.after && (
+                  {e.after && (
                     <>
                       <p className="t-line t-place t-after">{e.after.label}</p>
                     </>
@@ -777,30 +781,31 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
             sceneOf(i) === "mehndi" ? (
               <MehndiScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} />
             ) : sceneOf(i) === "haldi" ? (
-              <HaldiScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
+              <HaldiScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={pageOf(i)} />
             ) : sceneOf(i) === "hindu-wedding" ? (
-              <HinduWeddingScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
+              <HinduWeddingScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={pageOf(i)} />
             ) : sceneOf(i) === "hindu-lotus" ? (
-              <HinduLotusScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
+              <HinduLotusScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={pageOf(i)} />
             ) : sceneOf(i) === "church-wedding" ? (
-              <ChurchWeddingScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
+              <ChurchWeddingScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={pageOf(i)} />
             ) : sceneOf(i) === "garba-dance" ? (
-              <GarbaDanceScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={`event-${i}`} />
+              <GarbaDanceScene key={`scene-${i}`} scrollerRef={scrollerRef} style={sceneStyle(i)} reduce={reduceMotion} page={pageOf(i)} />
             ) : sceneOf(i) === "soon" ? (
-              <SceneComingSoon key={`scene-${i}`} page={i === 0 ? "mehndi" : `event-${i}`} style={sceneStyle(i)} />
+              <SceneComingSoon key={`scene-${i}`} page={pageOf(i)} style={sceneStyle(i)} />
             ) : null,
           )}
         </div>
       </section>
 
+      {invite.venue && (
       <section className="panel reveal-up" data-page="venue" aria-labelledby="venue-title">
         <h2 id="venue-title" className="section-title">
           {C.venue.heading}
         </h2>
         <Divider />
-        {C.venue.name && <p style={{ fontWeight: 600, fontSize: "calc(var(--u) * 19)", color: "var(--burgundy)" }}>{C.venue.name}</p>}
-        <p style={{ fontStyle: "italic" }}>{C.venue.address}</p>
-        <a className="btn-gold" href={C.venue.mapsUrl} target="_blank" rel="noopener noreferrer">
+        {invite.venue.name && <p style={{ fontWeight: 600, fontSize: "calc(var(--u) * 19)", color: "var(--burgundy)" }}>{invite.venue.name}</p>}
+        <p style={{ fontStyle: "italic" }}>{invite.venue.address}</p>
+        <a className="btn-gold" href={invite.venue.mapsUrl} target="_blank" rel="noopener noreferrer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
             <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z" />
             <circle cx="12" cy="9.5" r="2.5" />
@@ -808,14 +813,17 @@ export function Sections({ scrollerRef, enabled }: { scrollerRef: RefObject<HTML
           {C.venue.mapsLabel}
         </a>
       </section>
+      )}
 
+      {invite.countdownTo && (
       <section className="panel reveal-up" data-page="count" aria-labelledby="count-title">
         <h2 id="count-title" className="section-title">
           {C.countdown.heading}
         </h2>
         <Divider />
-        <Countdown />
+        <Countdown to={invite.countdownTo} />
       </section>
+      )}
 
       <section className="panel reveal-up" data-page="rsvp" aria-labelledby="rsvp-title">
         <h2 id="rsvp-title" className="section-title">

@@ -99,12 +99,16 @@ type Props = {
   veilRef: RefObject<HTMLDivElement | null>;
   tiltRef: RefObject<boolean>;
   onScrollHint: () => void;
+  /** the card's days (this invitation's own), the dates in words; no events: no scroll hint */
+  days: { day: string; weekday: string }[];
+  dateLine: string;
+  hasEvents: boolean;
 };
 
 /** the culture side wings replace the velvet corners, their vines and the corner roses */
 const CULTURE = timing.culture.enabled;
 
-export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
+export function RevealCard({ active, veilRef, tiltRef, onScrollHint, days, dateLine, hasEvents }: Props) {
   const card = useRef<HTMLElement>(null);
   const [fontsReady, setFontsReady] = useState(false);
   const [ambient, setAmbient] = useState(false);
@@ -285,6 +289,31 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
         q(".rosebud"),
         { opacity: 1, scale: 1, rotation: rotOf, duration: R.buds.dur, ease: "elastic.out(1, 0.55)", stagger: R.buds.stagger },
         R.buds.at,
+      );
+
+      // 2.8  the wording waits for the doves: they fly up from the bottom and sit on the seal
+      //      first (SeatedDoves says so; never longer than waitMax)
+      tl.call(
+        () => {
+          if (window.__dovesSeated) return;
+          tl.pause();
+          let done = false;
+          const go = () => {
+            if (done) return;
+            done = true;
+            window.removeEventListener("invite:doves-seated", go);
+            window.clearTimeout(timer);
+            tl.resume();
+          };
+          window.addEventListener("invite:doves-seated", go);
+          const timer = window.setTimeout(go, timing.doves.waitMax * 1000);
+          cleanups.push(() => {
+            window.removeEventListener("invite:doves-seated", go);
+            window.clearTimeout(timer);
+          });
+        },
+        undefined,
+        R.together.at - 0.001,
       );
 
       // 2.8  TOGETHER WITH OUR FAMILIES
@@ -704,7 +733,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
   return (
     <section ref={card} className="card" data-page="hero" aria-label="Wedding invitation">
       <h1 className="sr-only">
-        {C.bride.name} &amp; {C.groom.name} — {C.dateLine}
+        {C.bride.name} &amp; {C.groom.name} — {dateLine}
       </h1>
 
       {/* Paper: the same seamless sheet that continues under every section
@@ -829,7 +858,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
 
         <span className="grow" />
         <div className="details">
-          <p className="sr-only">{C.dateLine}</p>
+          <p className="sr-only">{dateLine}</p>
           <div className="date-block" aria-hidden>
             <div className="date-head">
               <span className="date-rule" />
@@ -839,7 +868,7 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
               <span className="date-rule" />
             </div>
             <div className="date-days">
-              {C.dates.days.map((d, i) => (
+              {days.map((d, i) => (
                 <div key={d.day} className="date-day-wrap">
                   {i > 0 && <span className="date-gem" />}
                   <div className="date-day">
@@ -861,10 +890,12 @@ export function RevealCard({ active, veilRef, tiltRef, onScrollHint }: Props) {
           </p>
         </div>
         <span className="grow" />
-        <button type="button" className="scroll-hint" onClick={onScrollHint} aria-label="Scroll to event details">
-          {C.scrollHint}
-          <Chevron />
-        </button>
+        {hasEvents && (
+          <button type="button" className="scroll-hint" onClick={onScrollHint} aria-label="Scroll to event details">
+            {C.scrollHint}
+            <Chevron />
+          </button>
+        )}
       </div>
 
       {ambient && !reduced && <Petals count={isTouchDevice() ? 6 : timing.ambient.petals} />}

@@ -15,6 +15,7 @@ import { DesktopNote } from "./DesktopNote";
 import { moods, type MoodName } from "@/src/config/moods";
 import { revealImages } from "@/src/config/assets";
 import { preloadImages } from "@/src/lib/preload";
+import type { InviteData } from "@/src/content/types";
 
 type Phase = "tap" | "video" | "reveal";
 
@@ -23,7 +24,9 @@ const SKIP_VIDEO = process.env.NEXT_PUBLIC_SKIP_VIDEO === "true";
 
 type DOEWithPermission = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<"granted" | "denied"> };
 
-export function Invitation() {
+/** `invite`: what this invitation shows (its own events only; none: the card alone) */
+export function Invitation({ invite }: { invite: InviteData }) {
+  const hasEvents = invite.events.length > 0;
   const [phase, setPhase] = useState<Phase>("tap");
   const [videoStarted, setVideoStarted] = useState(false);
   const [videoDone, setVideoDone] = useState(false);
@@ -184,8 +187,11 @@ export function Invitation() {
                 veilRef={veilRef}
                 tiltRef={tiltRef}
                 onScrollHint={scrollToDetails}
+                days={invite.days}
+                dateLine={invite.dateLine}
+                hasEvents={hasEvents}
               />
-              <Sections key={`sec-${run}`} scrollerRef={scrollerRef} enabled={phase === "reveal"} />
+              {hasEvents && <Sections key={`sec-${run}`} scrollerRef={scrollerRef} enabled={phase === "reveal"} invite={invite} />}
             </>
           )}
         </div>

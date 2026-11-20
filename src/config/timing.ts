@@ -167,8 +167,21 @@ export const timing = {
     padBottom: 24,
   },
 
-  /** Two doves seated on the wax seal (they come down with it and never fly) */
+  /** Two doves: once the seal has landed they fly up from the bottom of the card and sit on
+   *  it; the card's wording starts when both sit */
   doves: {
+    /** the flights start this long after the seal is fully there (s); each takes `flight` s,
+     *  the right dove `rightDelay` s after the left; seconds per wingbeat (different, so they
+     *  never flap in sync); how much bigger they start (nearer, at the bottom) */
+    afterSeal: 0.3,
+    flight: 2.0,
+    rightDelay: 0.2,
+    beat: [0.36, 0.4] as [number, number],
+    startScale: 1.7,
+    /** the landing pose and the settling (s) */
+    landHold: [0.26, 0.34] as [number, number],
+    /** the card's wording never waits longer than this for them (s) */
+    waitMax: 7,
     /** a coo, a wing-lift or a little shuffle every … s (a coo held cooHold s) */
     cooEvery: [3.5, 7] as [number, number],
     cooHold: 0.6,

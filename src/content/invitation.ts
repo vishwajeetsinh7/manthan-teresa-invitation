@@ -2,11 +2,14 @@
  * All wording on the invitation lives here.
  * Edit text freely — no component changes needed.
  * Items marked PLACEHOLDER are waiting for the real details.
+ * (The events, their dates and the venue are in src/content/events.ts, on the server only:
+ *  each invitation link shows just its own events.)
  */
 
 export const invitation = {
   /** Used for the page title and WhatsApp/social share preview. */
-  shareTitle: "Teresa & Manthan · 23–25 May 2027",
+  // (no days here: an invitation link shows only its own events)
+  shareTitle: "Teresa & Manthan · May 2027",
   shareDescription: "Together with our families, we invite you to celebrate our wedding.",
 
   tapToOpen: "Tap to open",
@@ -30,111 +33,22 @@ export const invitation = {
   inviteLine: "Invite you to celebrate",
   tagline: "Two Traditions, One Journey",
 
-  dateLine: "23 – 25 May 2027",
-  /** The date block on the card */
+  /** The date block on the card (its days are the invitation's own) */
   dates: {
     month: "May",
     year: "2027",
-    days: [
-      { day: "23", weekday: "Sun" },
-      { day: "24", weekday: "Mon" },
-      { day: "25", weekday: "Tue" },
-    ],
   },
   venueLine: "Brisbane QLD",
 
   scrollHint: "Scroll",
 
-  /** Countdown target (local time of the venue). */
-  countdownTo: "2027-05-23T09:00:00+10:00", // the Mehndi, Queensland time (AEST, no daylight saving)
-
   /** Scene 4: events (PLACEHOLDER content). */
   eventsHeading: "Celebrations",
-  /**
-   * `mood` (optional) recolours the whole page while that event is on screen —
-   * see src/config/moods.ts. Only "haldi" exists for now.
-   * `scene`: the illustrated scene under the event — "mehndi" / "haldi" / "garba-dance" / "hindu-wedding" / "hindu-lotus" / "church-wedding" (src/components/scenes/*Scene),
-   *   or "soon": a placeholder ("Images coming soon") of the same size, until that event's art is ready.
-   * `icons`: gold line icons drawn beside the event (mehndi, haldi, dandiya, mandap, church, cheers).
-   * `address` (optional): a smaller line under the place; `mapsUrl` (optional): a small gold
-   *   "Open in Google Maps" button under the place (like the venue page's); `after` (optional): what follows the
-   *   event elsewhere (the reception), with its own place and address.
-   * `flower`: what the travelling rose turns into on this event —
-   *   kind 0 burgundy · 1 blush · 2 ivory · 3 raspberry · 4 pale pink; tint "gold" warms it to turmeric.
-   */
-  events: [
-    {
-      day: "23",
-      month: "May",
-      weekday: "Sunday",
-      title: "Mehendi",
-      time: "9:00 AM – 11:00 AM",
-      place: "",
-      note: "",
-      icons: ["mehndi"],
-      pattern: "mehndi", // the henna mandala beside the details (it draws itself, then turns slowly)
-      scene: "mehndi", // the assembled Mehndi scene
-      flower: { kind: 3 }, // raspberry — henna red
-    },
-    {
-      day: "23",
-      month: "May",
-      weekday: "Sunday",
-      title: "Haldi",
-      scene: "haldi", // "The Golden Swing"
-      time: "12:00 PM – 2:00 PM",
-      place: "",
-      note: "",
-      mood: "haldi",
-      icons: ["haldi"],
-      flower: { kind: 2 }, // flower-3
-    },
-    {
-      day: "23",
-      month: "May",
-      weekday: "Sunday",
-      title: "Dance Night / Garba",
-      scene: "garba-dance", // "Raas to Remix"
-      time: "4:00 PM – 7:30 PM",
-      place: "",
-      note: "",
-      icons: ["dandiya", "music"], // the dandiya in the garba, music notes on the dance floor
-      flower: { kind: 1 }, // blush
-    },
-    {
-      day: "24",
-      month: "May",
-      weekday: "Monday",
-      title: "Gujarati Wedding",
-      // "Swarg Kamal", the heavenly lotus (the first version, the mandap: "hindu-wedding" — git tag hindu-wedding-mandap)
-      scene: "hindu-lotus",
-      time: "7:30 AM",
-      place: "",
-      note: "",
-      icons: ["mandap"],
-      flower: { kind: 0 }, // deep red bridal rose
-    },
-    {
-      day: "25",
-      month: "May",
-      weekday: "Tuesday",
-      title: "Church Wedding",
-      scene: "church-wedding", // "The Aisle"
-      time: "10:30 AM – 12:00 PM",
-      place: "Holy Spirit Church, New Farm",
-      mapsUrl: "https://maps.app.goo.gl/tS7JUhbfyfSPuu6GA",
-      after: { label: "Reception afterwards at Barrel N Basket." },
-      note: "",
-      icons: ["church"],
-      flower: { kind: 2 }, // ivory — white wedding
-    },
-  ],
-
+  /** the small gold button under an event that opens its place in Google Maps */
+  eventMapsLabel: "Get Directions",
+  /** the venue page (its name and address are in src/content/events.ts) */
   venue: {
     heading: "The Venue",
-    name: "",
-    address: "7 Coorparoo Rd, Brisbane QLD 4500, Australia",
-    mapsUrl: "https://maps.app.goo.gl/BbYLqSbYiXJDMwMD8",
     mapsLabel: "Open in Google Maps",
   },
 
