@@ -109,7 +109,7 @@ export const EVENTS: EventData[] = [
 export const EVENT_IDS = EVENTS.map((e) => e.id);
 
 /** What an invitation with these events shows (in the schedule's order). No events: the card alone. */
-export function inviteFor(ids: readonly EventId[]): InviteData {
+export function inviteFor(ids: readonly EventId[], code: string | null = null): InviteData {
   const events = EVENTS.filter((e) => ids.includes(e.id));
   const days: InviteData["days"] = [];
   for (const e of events) if (!days.some((d) => d.day === e.day)) days.push({ day: e.day, weekday: e.weekday.slice(0, 3) });
@@ -128,5 +128,6 @@ export function inviteFor(ids: readonly EventId[]): InviteData {
     dateLine,
     countdownTo: events[0]?.start ?? null,
     venue: events.some((e) => e.atVenue) ? VENUE : null,
+    code: events.length ? code : null,
   };
 }

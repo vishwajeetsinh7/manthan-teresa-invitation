@@ -4,6 +4,7 @@ import { isAdmin, usingDefaultPassword } from "@/src/lib/adminAuth";
 import { usingFallbackSecret } from "@/src/lib/inviteLink";
 import { EVENTS } from "@/src/content/events";
 import { AdminLogin, AdminPanel } from "./AdminUI";
+import { ensureTabs, sheetConfigured, sheetUrl } from "@/src/lib/rsvpSheet";
 
 export const metadata: Metadata = { title: "Invitation links", robots: { index: false, follow: false } };
 
@@ -30,7 +31,30 @@ async function Gate() {
   return (
     <>
       {notes.length > 0 && <p className="admin-note">Using {notes.join(" and ")}.</p>}
+      <RsvpSheetStatus />
       <AdminPanel events={EVENTS.map((e) => ({ id: e.id, title: e.title, when: `${e.weekday.slice(0, 3)} ${e.day} ${e.month} · ${e.time}` }))} />
     </>
+  );
+}
+
+/** where the RSVPs go (making sure its tabs exist) */
+async function RsvpSheetStatus() {
+  if (!sheetConfigured()) return <p className="admin-note">RSVPs: the Google Sheet isn&apos;t connected (set GOOGLE_SA_EMAIL and GOOGLE_SA_PRIVATE_KEY).</p>;
+  let title = "";
+  let problem = "";
+  try {
+    title = await ensureTabs(EVENTS);
+  } catch (err) {
+    problem = err instanceof Error ? err.message.slice(0, 120) : "error";
+  }
+  if (problem) return <p className="admin-note">RSVPs: couldn&apos;t reach the Google Sheet ({problem}). Is it shared with the service account as an Editor?</p>;
+  return (
+    <p className="admin-sheet">
+      RSVPs go to{" "}
+      <a href={sheetUrl()} target="_blank" rel="noopener noreferrer">
+        {title}
+      </a>{" "}
+      (an &ldquo;All RSVPs&rdquo; tab and one per event).
+    </p>
   );
 }

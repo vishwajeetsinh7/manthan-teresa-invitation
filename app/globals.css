@@ -3713,3 +3713,204 @@ img.cu-swap {
   width: 22px;
   height: 22px;
 }
+.admin-sheet {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+.admin-sheet a {
+  color: var(--burgundy);
+  font-weight: 600;
+}
+
+/* ── RSVP form (src/components/RsvpForm.tsx): over the page, scrolling on its own ── */
+.rsvp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: end center;
+  background: rgb(40 6 12 / 0.55);
+  backdrop-filter: blur(3px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.rsvp-sheet {
+  position: relative;
+  width: min(100%, 460px);
+  box-sizing: border-box;
+  margin-top: 40px;
+  padding: 26px 18px calc(28px + env(safe-area-inset-bottom));
+  background: var(--cream);
+  color: var(--ink);
+  border-radius: 22px 22px 0 0;
+  border: 1px solid rgb(176 138 74 / 0.6);
+  border-bottom: 0;
+  box-shadow: 0 -18px 40px -20px rgb(0 0 0 / 0.6);
+  font-family: var(--font-serif);
+}
+@media (min-width: 500px) {
+  .rsvp-overlay {
+    place-items: center;
+    padding: 24px 0;
+  }
+  .rsvp-sheet {
+    margin: 0;
+    border-radius: 22px;
+    border-bottom: 1px solid rgb(176 138 74 / 0.6);
+  }
+}
+.rsvp-x {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gold-dark);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+.rsvp-title {
+  margin: 0 0 14px;
+  text-align: center;
+  font-family: var(--font-script);
+  font-weight: 400;
+  font-size: 38px;
+  color: var(--burgundy);
+}
+.rsvp-form {
+  display: grid;
+  gap: 12px;
+}
+.rsvp-field {
+  display: grid;
+  gap: 5px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.rsvp-field input,
+.rsvp-field select,
+.rsvp-field textarea {
+  font: inherit;
+  font-weight: 400;
+  font-size: 16px;
+  padding: 10px 12px;
+  border: 1px solid rgb(176 138 74 / 0.7);
+  border-radius: 10px;
+  background: #fffaf3;
+  color: var(--ink);
+  width: 100%;
+  box-sizing: border-box;
+}
+.rsvp-h {
+  margin: 8px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+}
+.rsvp-event {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgb(176 138 74 / 0.45);
+  border-radius: 14px;
+  background: #fffaf3;
+  display: grid;
+  gap: 10px;
+}
+.rsvp-event legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+  display: grid;
+}
+.rsvp-event legend strong {
+  font-size: 18px;
+  color: var(--burgundy);
+}
+.rsvp-event legend small {
+  font-size: 14px;
+  opacity: 0.75;
+}
+.rsvp-choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.rsvp-choice button {
+  font: inherit;
+  font-size: 15px;
+  padding: 9px 6px;
+  border-radius: 999px;
+  border: 1px solid rgb(176 138 74 / 0.8);
+  background: transparent;
+  color: var(--burgundy);
+  cursor: pointer;
+}
+.rsvp-choice button.on {
+  background: linear-gradient(180deg, #7a1420, var(--burgundy) 60%, #560b15);
+  color: var(--cream);
+  border-color: rgb(220 192 138 / 0.8);
+}
+.rsvp-guests {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 15px;
+}
+.rsvp-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.rsvp-stepper button {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgb(176 138 74 / 0.8);
+  background: transparent;
+  color: var(--burgundy);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.rsvp-stepper output {
+  min-width: 28px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+}
+.rsvp-error {
+  margin: 0;
+  color: #a1121f;
+  font-weight: 600;
+}
+.rsvp-send {
+  justify-self: center;
+  margin-top: 6px;
+}
+.rsvp-send:disabled {
+  opacity: 0.6;
+}
+.rsvp-done {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 10px 0 6px;
+}
+.rsvp-thanks {
+  margin: 0;
+  font-size: 20px;
+  color: var(--burgundy);
+  font-weight: 600;
+}
+.rsvp-sub {
+  margin: 0 0 10px;
+  opacity: 0.8;
+}

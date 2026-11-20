@@ -20,5 +20,6 @@ export default function InvitePage({ params }: { params: Promise<{ code: string 
 
 async function Invite({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
-  return <Invitation invite={inviteFor(eventsOf(code) ?? [])} />;
+  const ids = eventsOf(code);
+  return <Invitation invite={ids ? inviteFor(ids, code) : inviteFor([])} />;
 }

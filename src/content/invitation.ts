@@ -61,9 +61,27 @@ export const invitation = {
   rsvp: {
     heading: "Kindly respond",
     body: "Your presence would make our celebration complete. Please let us know by 1 April 2027.", // PLACEHOLDER
-    buttonLabel: "RSVP on WhatsApp",
-    // PLACEHOLDER — replace with wa.me/<number>?text=... or a Google Form link
-    url: "https://wa.me/?text=Hi!%20We%20would%20love%20to%20attend%20Teresa%20%26%20Manthan's%20wedding.",
+    buttonLabel: "RSVP",
+    /** the RSVP form (its answers go to the Google Sheet: src/lib/rsvpSheet.ts) */
+    form: {
+      title: "Kindly respond",
+      name: "Your full name",
+      phone: "Phone (WhatsApp)",
+      email: "Email (optional)",
+      eventsHeading: "Will you join us?",
+      accept: "Joyfully accepts",
+      decline: "Regretfully declines",
+      guests: "Guests (including you)",
+      dietary: "Food preference",
+      dietaryOptions: ["Vegetarian", "Non-vegetarian", "Vegan", "Jain", "Other"],
+      needs: "Allergies or anything we should know (optional)",
+      message: "A message for Teresa & Manthan (optional)",
+      send: "Send RSVP",
+      sending: "Sending…",
+      thanks: "Thank you! Your RSVP has reached us.",
+      thanksSub: "Need to change anything? Just send the form again.",
+      close: "Close",
+    },
   },
 
   footer: "With love, Teresa & Manthan",

@@ -52,4 +52,6 @@ export type InviteData = {
   countdownTo: string | null;
   /** the venue page (only when an event there is on this invitation) */
   venue: Venue | null;
+  /** the invitation link's code (the RSVP sends it back, so the answer is for these events only) */
+  code: string | null;
 };

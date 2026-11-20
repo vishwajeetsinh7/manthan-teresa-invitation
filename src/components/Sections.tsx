@@ -18,6 +18,7 @@ import { HinduLotusScene } from "./scenes/HinduLotusScene";
 import { ChurchWeddingScene } from "./scenes/ChurchWeddingScene";
 import { GarbaDanceScene } from "./scenes/GarbaDanceScene";
 import type { EventData, InviteData } from "@/src/content/types";
+import { RsvpButton } from "./RsvpForm";
 
 function Countdown({ to }: { to: string }) {
   const target = new Date(to).getTime();
@@ -831,9 +832,7 @@ export function Sections({ scrollerRef, enabled, invite }: { scrollerRef: RefObj
         </h2>
         <Divider />
         <p style={{ maxWidth: "calc(var(--u) * 300)" }}>{C.rsvp.body}</p>
-        <a className="btn-gold" href={C.rsvp.url} target="_blank" rel="noopener noreferrer">
-          {C.rsvp.buttonLabel}
-        </a>
+        {invite.code && <RsvpButton code={invite.code} events={SCHEDULE} />}
       </section>
 
       <p className="footer-line reveal-up" data-page="rsvp">{C.footer}</p>
