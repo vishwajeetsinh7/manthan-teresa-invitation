@@ -12,11 +12,17 @@ const F = C.rsvp.form;
  * The RSVP button, and the form it opens over the page (outside the paged scroller, so
  * swiping and typing in it never turn the page). The answers go to the Google Sheet.
  */
-export function RsvpButton({ code, events }: { code: string; events: EventData[] }) {
+export function RsvpButton({ code, events, small = false }: { code: string; events: EventData[]; small?: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" className="btn-gold" onClick={() => setOpen(true)}>
+      <button type="button" className={small ? "btn-gold btn-gold-sm btn-rsvp-sm" : "btn-gold"} onClick={() => setOpen(true)}>
+        {small && (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M4 6h16v12H4z" />
+            <path d="M4 7l8 6 8-6" />
+          </svg>
+        )}
         {C.rsvp.buttonLabel}
       </button>
       {open && createPortal(<RsvpForm code={code} events={events} onClose={() => setOpen(false)} />, document.body)}

@@ -3914,3 +3914,16 @@ img.cu-swap {
   margin: 0 0 10px;
   opacity: 0.8;
 }
+/* an event's directions and its own RSVP, side by side (on one line: it may reach into the
+   margin on the right) */
+.t-mapline {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  gap: calc(var(--u) * 6);
+}
+/* (an event's own RSVP button) */
+.btn-rsvp-sm {
+  font-family: var(--font-serif);
+  cursor: pointer;
+}

@@ -24,8 +24,9 @@ const clip = (v: unknown, n: number) =>
     .slice(0, n);
 
 /**
- * A guest's RSVP. Only the events their (signed) invitation link opens count: anything
- * else sent along is ignored.
+ * A guest's RSVP, for one of their events (an event's own RSVP button) or all of them (the
+ * one at the end). Only events their (signed) invitation link opens count: anything else
+ * sent along is ignored.
  */
 export async function submitRsvp(code: string, input: RsvpInput): Promise<{ ok: true } | { error: string }> {
   const ids = eventsOf(code);
@@ -34,12 +35,13 @@ export async function submitRsvp(code: string, input: RsvpInput): Promise<{ ok: 
   const phone = clip(input?.phone, 30);
   if (!name) return { error: "Please tell us your name." };
   if (!phone) return { error: "Please add a phone number." };
-  const events = EVENTS.filter((e) => ids.includes(e.id)).map((event) => {
+  const events = EVENTS.filter((e) => ids.includes(e.id) && input?.answers?.[e.id]).map((event) => {
     const a = input?.answers?.[event.id];
     const attending = !!a?.attending;
     const guests = attending ? Math.min(20, Math.max(1, Math.round(Number(a?.guests) || 1))) : 0;
     return { event, attending, guests };
   });
+  if (!events.length) return { error: "Please let us know if you can come." };
   if (!sheetConfigured()) return { error: "RSVPs can't be received just now. Please try again later." };
   try {
     await appendRsvp(

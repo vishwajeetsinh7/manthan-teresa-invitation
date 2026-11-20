@@ -752,15 +752,19 @@ export function Sections({ scrollerRef, enabled, invite }: { scrollerRef: RefObj
                   <p className="t-line t-time">{e.time}</p>
                   {e.place && <p className="t-line t-place">{e.place}</p>}
                   {e.address && <p className="t-line t-addr">{e.address}</p>}
-                  {e.mapsUrl && (
+                  {(e.mapsUrl || invite.code) && (
                     <p className="t-line t-mapline">
-                      <a className="btn-gold btn-gold-sm" href={e.mapsUrl} target="_blank" rel="noopener noreferrer">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
-                          <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z" />
-                          <circle cx="12" cy="9.5" r="2.5" />
-                        </svg>
-                        {C.eventMapsLabel}
-                      </a>
+                      {e.mapsUrl && (
+                        <a className="btn-gold btn-gold-sm" href={e.mapsUrl} target="_blank" rel="noopener noreferrer">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+                            <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z" />
+                            <circle cx="12" cy="9.5" r="2.5" />
+                          </svg>
+                          {C.eventMapsLabel}
+                        </a>
+                      )}
+                      {/* this event's own RSVP (the one at the end covers all of them) */}
+                      {invite.code && <RsvpButton code={invite.code} events={[e]} small />}
                     </p>
                   )}
                   {e.after && (
