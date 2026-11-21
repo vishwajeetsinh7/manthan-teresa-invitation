@@ -2,11 +2,13 @@
  * All wording on the invitation lives here.
  * Edit text freely — no component changes needed.
  * Items marked PLACEHOLDER are waiting for the real details.
+ *
+ * DEMO BRANCH: every name, place and contact here is made up (no real details).
  */
 
 export const invitation = {
   /** Used for the page title and WhatsApp/social share preview. */
-  shareTitle: "Teresa & Manthan · 23–25 May 2027",
+  shareTitle: "Tessa & Mihir · 23–25 May 2027",
   shareDescription: "Together with our families, we invite you to celebrate our wedding.",
 
   tapToOpen: "Tap to open",
@@ -14,17 +16,17 @@ export const invitation = {
   together: "Together with our families",
 
   bride: {
-    name: "Teresa Joy",
+    name: "Tessa Thomas",
     relation: "Daughter of",
-    parents: "Joy K Mathew & Jaquiline Joy",
+    parents: "Thomas Varghese & Mariam Thomas",
   },
 
   joiner: "with",
 
   groom: {
-    name: "Manthan Patel",
+    name: "Mihir Desai",
     relation: "Son of",
-    parents: "Kiritbhai Patel & Amitaben Patel",
+    parents: "Rajeshbhai Desai & Hetalben Desai",
   },
 
   inviteLine: "Invite you to celebrate",
@@ -41,12 +43,12 @@ export const invitation = {
       { day: "25", weekday: "Tue" },
     ],
   },
-  venueLine: "Element Events, Brisbane QLD",
+  venueLine: "Riverside Lawns, Ahmedabad",
 
   scrollHint: "Scroll",
 
   /** Countdown target (local time of the venue). */
-  countdownTo: "2027-05-23T17:00:00+10:00", // Queensland time (AEST, no daylight saving)
+  countdownTo: "2027-05-23T17:00:00+05:30", // Ahmedabad (India time, IST)
 
   /** "Map" beside each event's place (opens the event's mapsUrl, or the venue's) */
   eventMapLabel: "Map",
@@ -70,7 +72,7 @@ export const invitation = {
       weekday: "Sunday",
       title: "Mehndi",
       time: "9:00 AM – 11:00 AM",
-      place: "Element Events",
+      place: "Riverside Lawns",
       note: "Festive colours", // PLACEHOLDER
       icons: ["mehndi"],
       pattern: "mehndi", // the henna mandala beside the details (it draws itself, then turns slowly)
@@ -84,7 +86,7 @@ export const invitation = {
       title: "Haldi",
       scene: "haldi", // "The Golden Swing"
       time: "10:00 AM onwards", // PLACEHOLDER
-      place: "Element Events",
+      place: "Riverside Lawns",
       note: "",
       mood: "haldi",
       icons: ["haldi"],
@@ -97,7 +99,7 @@ export const invitation = {
       title: "Garba & Dance", // PLACEHOLDER
       scene: "garba-dance", // "Raas to Remix"
       time: "8:00 PM onwards", // PLACEHOLDER
-      place: "Element Events",
+      place: "Riverside Lawns",
       note: "Dandiya & dancing shoes", // PLACEHOLDER
       icons: ["dandiya", "music"], // the dandiya in the garba, music notes on the dance floor
       flower: { kind: 1 }, // blush
@@ -110,7 +112,7 @@ export const invitation = {
       // "Swarg Kamal", the heavenly lotus (the first version, the mandap: "hindu-wedding" — git tag hindu-wedding-mandap)
       scene: "hindu-lotus",
       time: "6:00 PM onwards", // PLACEHOLDER
-      place: "Element Events",
+      place: "Riverside Lawns",
       note: "Traditional Indian", // PLACEHOLDER
       icons: ["mandap"],
       flower: { kind: 0 }, // deep red bridal rose
@@ -122,7 +124,8 @@ export const invitation = {
       title: "Church Wedding & Reception", // PLACEHOLDER
       scene: "church-wedding", // "The Aisle"
       time: "4:00 PM onwards", // PLACEHOLDER
-      place: "Element Events",
+      place: "Lakeview Gardens",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Kankaria+Lake+Ahmedabad",
       note: "Formal / Gowns & Suits", // PLACEHOLDER
       icons: ["church"],
       flower: { kind: 2 }, // ivory — white wedding
@@ -131,9 +134,9 @@ export const invitation = {
 
   venue: {
     heading: "The Venue",
-    name: "Element Events",
-    address: "7 Coorparoo Rd, Brisbane QLD 4500, Australia",
-    mapsUrl: "https://maps.app.goo.gl/BbYLqSbYiXJDMwMD8",
+    name: "Riverside Lawns",
+    address: "Sabarmati Riverfront, Ahmedabad, Gujarat 380009, India",
+    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Sabarmati+Riverfront+Ahmedabad",
     mapsLabel: "Open in Google Maps",
   },
 
@@ -148,10 +151,10 @@ export const invitation = {
     body: "Your presence would make our celebration complete. Please let us know by 1 April 2027.", // PLACEHOLDER
     buttonLabel: "RSVP on WhatsApp",
     // PLACEHOLDER — replace with wa.me/<number>?text=... or a Google Form link
-    url: "https://wa.me/?text=Hi!%20We%20would%20love%20to%20attend%20Teresa%20%26%20Manthan's%20wedding.",
+    url: "https://wa.me/?text=Hi!%20We%20would%20love%20to%20attend%20Tessa%20%26%20Mihir's%20wedding.",
   },
 
-  footer: "With love, Teresa & Manthan",
+  footer: "With love, Tessa & Mihir",
 
   desktopNote: {
     heading: "Best viewed on your phone",

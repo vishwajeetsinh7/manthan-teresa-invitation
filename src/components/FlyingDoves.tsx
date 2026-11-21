@@ -113,7 +113,7 @@ function measure(card: HTMLElement): Layout {
   };
 
   /* The biggest bird (by width, up to maxWidth) that fits. Centred on the
-     "with" line when it can be; the line below ("Manthan Patel") is wide and
+     "with" line when it can be; the line below (the groom's name) is wide and
      close, so the doves may rise up to `lift` px to find room. Not touching
      the text wins over minWidth: in a tight spot they get smaller (or hide
      below 40 px). */

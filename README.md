@@ -1,4 +1,4 @@
-# Teresa & Manthan — wedding invitation
+# Tessa & Mihir — wedding invitation (demo)
 
 Mobile-only cinematic invitation (Next.js 16 + GSAP). On tablet/desktop it shows a centred phone frame.
 
